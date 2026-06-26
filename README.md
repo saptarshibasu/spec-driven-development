@@ -205,9 +205,9 @@ Then, in order:
 - **The constitution is short on purpose.** Only what's *always* true. Conditional rules go in `AGENTS.md`; feature rules go in specs.
 - **Every artifact is a context unit.** Specs aren't auto-loaded — the agent pulls in only the one it needs. ([`context-engineering.md`](docs/context-engineering.md))
 
-## 🆚 Pairs with spec-kit
+## Related: spec-kit
 
-[GitHub spec-kit](https://github.com/github/spec-kit) is the stronger *workflow engine* (installable CLI, upgrade path, 30+ agents, more commands). This kit goes deeper on the *engineering discipline* — the `docs/` knowledge base, the token-budgeted `AGENTS.md`, and the feedback half of the harness. **Best used together:** spec-kit drives the workflow; layer this kit's `AGENTS.md` + `docs/` + harness on top.
+[GitHub spec-kit](https://github.com/github/spec-kit) is GitHub's toolkit for spec-driven development — a `specify` CLI with commands for constitution, specify, clarify, plan, tasks, and implement, plus integrations for many AI coding agents.
 
 ## 📖 Further reading
 
