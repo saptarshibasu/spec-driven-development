@@ -75,6 +75,26 @@ one-line note on every *finding* (not on trivial passes). Then:
   missing requirements back to the spec author.
 - State whether the spec is checklist-clean enough to plan.
 
+**Example output** (requirements-quality pass, abbreviated):
+
+```markdown
+## Measurability
+- [x] CHK001 Every success criterion is a number or binary.
+- [ ] CHK002 Latency target is quantified.
+      ✖ SC-002 says "responses feel fast" — no number. → clarify (suggest p95 target).
+
+## Completeness
+- [ ] CHK003 Every user story has acceptance scenarios.
+      ✖ US2 has none. → back to author.
+- [x] CHK004 Out of Scope is filled in, not a placeholder.
+```
+
+> Verdict: 2 of 4 failing — not plan-ready. CHK002 is an ambiguity (route to
+> `clarify`); CHK003 is a missing requirement (route to the author).
+
+Note each item is checkable against the *spec*, and each could genuinely fail —
+no item that trivially passes for any spec.
+
 ## What this skill does not do
 
 - It does not test implementation correctness — that's the test suite.

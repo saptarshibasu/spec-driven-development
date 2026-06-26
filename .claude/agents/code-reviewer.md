@@ -35,6 +35,13 @@ Prefer a different model family than whatever generated the code under review.
 - **Conventions.** Naming, null-safety utility, error handling, logging — per
   AGENTS.md.
 
+## How to reason
+
+Before writing the verdict, think through the change against each checklist
+item above and let the evidence decide the severity — don't pattern-match a
+rating onto a first impression. State the *why* for each finding so the author
+can apply the reasoning, not just the fix.
+
 ## How to report
 
 Group findings by severity: **Blocker** (constitution/boundary violation,
@@ -42,3 +49,13 @@ broken or weakened tests), **Should-fix** (convention, perf, clarity),
 **Nit** (style, optional). For each: file:line, what, why, and the smallest
 correct change. End with a one-line verdict: approve / approve-with-nits /
 request-changes. Do not approve if any Blocker is open.
+
+**Example finding:**
+
+> **Blocker** — `src/orders/service.py:42`
+> Per-row `UPDATE` inside a `for` loop over `order_ids`.
+> *Why:* AGENTS.md mandates the bulk idiom; a per-row loop here caused a prod
+> slowdown before, and there's no query-count test to catch the regression.
+> *Fix:* one `UPDATE ... WHERE id IN (:ids)` (or `bulk_update`).
+>
+> **Verdict:** request-changes (1 Blocker).

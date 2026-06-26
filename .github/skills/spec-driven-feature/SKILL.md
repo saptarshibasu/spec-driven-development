@@ -111,6 +111,12 @@ Only after the user has approved Phase 1.
    implementation begins? Will tests use real services/databases rather
    than mocks where the spec doesn't require otherwise?
 
+   For each gate, **state your reasoning before the verdict** — name the
+   concrete design choice that makes it pass or fail, don't just assert
+   pass/fail. (E.g. "Anti-abstraction: PASS — entities map to single domain
+   models; no DTO layer added." / "Simplicity: FAIL — needs a 4th module
+   because X; justified below.")
+
    If any gate fails, fill in the Complexity Tracking section with a
    concrete justification rather than skipping it. Flag it clearly for the
    user.

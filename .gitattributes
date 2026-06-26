@@ -1,0 +1,24 @@
+# Enforce consistent LF line endings across the repo (the kit ships a mix of
+# CRLF originals and LF additions; this normalizes them). After adding this
+# file, run once to apply to existing files:  git add --renormalize .
+
+* text=auto eol=lf
+
+# Scripts MUST be LF — CRLF breaks the shebang/parse on Unix shells.
+*.sh    text eol=lf
+*.bash  text eol=lf
+
+# Markdown, config, and code: text, normalized to LF.
+*.md    text eol=lf
+*.json  text eol=lf
+*.yml   text eol=lf
+*.yaml  text eol=lf
+*.toml  text eol=lf
+
+# Don't touch binaries.
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.pdf   binary
+*.ico   binary

@@ -45,3 +45,16 @@ Return: (1) the reproduction and exact error, (2) the root cause in plain terms,
 (3) the minimal fix (diff or precise description), (4) whether the fix is
 applied or proposed, and (5) any related risk you noticed but did not change.
 Keep it tight — the caller wants the conclusion, not the whole search.
+
+**Example report:**
+
+> **Repro:** `pytest test_checkout.py::test_apply_discount` →
+> `TypeError: unsupported operand 'NoneType' and 'Decimal'`.
+> **Root cause:** `Cart.discount` defaults to `None`; `apply_discount` assumes a
+> `Decimal`. Hypothesis "discount unset for guest carts" confirmed — the guest
+> path never initializes it, so the multiply fails only for guests.
+> **Minimal fix:** default `discount` to `Decimal("0")` in `Cart.__init__`
+> (not: guard the multiply — that hides the missing initialization).
+> **Status:** proposed, not applied.
+> **Related risk:** `apply_tax` makes the same assumption; likely fails the same
+> way for guests — flagged, not changed.

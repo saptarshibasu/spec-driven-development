@@ -94,6 +94,14 @@ For each answer:
   AGENTS.md or spec.md instead, and explain why
 - If it's unspecified → mark `[NEEDS CLARIFICATION: question]`
 
+**Example of applying the test:**
+- *"No secrets in version control"* → always true, every feature, every
+  session → **constitution.**
+- *"Use Testcontainers for DB integration tests"* → a tooling choice, not a
+  universal principle → **AGENTS.md**, not here.
+- *"The checkout flow must support Apple Pay"* → one feature's requirement →
+  **spec.md**, not here.
+
 ### Additional Constraints
 
 Prompt the user specifically for:

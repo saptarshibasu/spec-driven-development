@@ -51,3 +51,16 @@ List each test written, its tier and file path, and its confirmed-failing
 output. End with: which acceptance criteria are now covered, which are not yet,
 and any case you had to skip because the spec was ambiguous. Hand off to the
 implementer — do not proceed to make them pass.
+
+**Example report:**
+
+> Wrote 3 tests for US1 (acceptance scenarios 1–3):
+> - `tests/contract/test_orders_api.py::test_create_order_201` — **fails** as
+>   expected: `ModuleNotFoundError: orders.api` (endpoint not implemented).
+> - `tests/contract/test_orders_api.py::test_duplicate_order_409` — **fails**:
+>   `AssertionError: expected 409, got 404`.
+> - `tests/unit/test_order_total.py::test_total_sums_line_items` — **fails**:
+>   `AssertionError` (Order.total not implemented).
+>
+> Covered: FR-001, FR-004. Not yet covered: FR-005 (refunds) — skipped, spec
+> ambiguous on partial refunds; flagged for `clarify`. Handing off to implement.

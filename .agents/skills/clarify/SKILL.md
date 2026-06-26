@@ -49,6 +49,11 @@ corrupt). Look specifically for:
 Reduce the list to the highest-impact ~5. Discard anything you can resolve
 yourself by reading — those are not questions.
 
+**Reason explicitly before you ask.** For each candidate, think through *what
+would break downstream if you guessed wrong* — that reasoning is how you rank by
+blast radius and how you decide whether it's a real question or something you
+should just go read. Do this thinking before writing any question.
+
 ## Step 2 — Ask, one or two at a time
 
 For each, ask a concrete, decision-shaped question with options where natural:
@@ -72,6 +77,18 @@ Once answered:
 3. Do not invent detail beyond what the user decided — if an answer raises a new
    question, surface it rather than guessing.
 4. Re-run the spec's own Spec Completeness Checklist.
+
+**Example write-back** — user answered "reject duplicates with a 409":
+
+```diff
+- **FR-004**: System MUST handle duplicate order submissions
+-   [NEEDS CLARIFICATION: reject, dedupe, or accept both?]
++ **FR-004**: System MUST reject a duplicate order submission with HTTP 409
++   and a machine-readable error code; no second order is created.
+```
+
+Resolve into the right section — a behaviour decision becomes an FR (as above),
+a default you chose goes under Assumptions, an excluded case goes to Out of Scope.
 
 ## Step 4 — Report
 
