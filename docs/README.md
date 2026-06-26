@@ -13,6 +13,8 @@ context stays small (see `context-engineering.md` for why).
 | [`token-efficiency.md`](token-efficiency.md) | Practical tactics for the most correct work per token — scoped reads, subagents, closing feedback loops early. |
 | [`model-selection-and-token-optimization-in-sdd.md`](model-selection-and-token-optimization-in-sdd.md) | Routing each SDD phase to the right model; the two-way cost asymmetry. The reasoning behind AGENTS.md's Model Routing section. |
 | [`efficient-code-generation-and-performance-pitfalls.md`](efficient-code-generation-and-performance-pitfalls.md) | Why agents default to slow code (per-row loops, N+1) and what to put in AGENTS.md to stop it. Reasoning behind the Performance & Efficiency section. |
+| [`mcp.md`](mcp.md) | Which MCP servers to connect (and the 5–7 cap), when to build your own, and security. Companion to `.mcp.json.example`. |
+| [`hooks.md`](hooks.md) | Git hooks + agent-runtime hooks: turning prose rules into enforced, zero-token controls. Companion to `.githooks/pre-commit`. |
 
 ## Project reference
 

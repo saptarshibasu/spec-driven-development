@@ -16,6 +16,9 @@ Thumbs.db
 /.agent-scratch/
 SCRATCH.md
 
+# Active MCP config may hold tokens/paths — commit only .mcp.json.example
+.mcp.json
+
 # Dependency-source resolution artifacts referenced in AGENTS.md
 # (decompiled / extracted upstream sources are never committed)
 /target/dependency-sources/

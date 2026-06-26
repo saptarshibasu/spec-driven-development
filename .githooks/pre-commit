@@ -1,0 +1,74 @@
+#!/usr/bin/env bash
+# pre-commit — computational controls that run before every commit.
+#
+# This is the cheapest, most reliable layer of the harness: deterministic
+# checks that cost zero tokens and never hallucinate (see docs/harness-
+# engineering.md). It moves rules out of always-loaded prose and into an
+# enforcement that actually fails.
+#
+# Enable once per clone:   git config core.hooksPath .githooks
+# Skip in an emergency:    git commit --no-verify   (use sparingly, on purpose)
+#
+# Adapt the stack-specific section to YOUR project. The generic checks above it
+# are safe to keep on as-is.
+
+set -uo pipefail
+
+fail=0
+staged=$(git diff --cached --name-only --diff-filter=ACM)
+
+# ── 1. Block committed secrets ───────────────────────────────────────────────
+# Coarse, high-signal patterns. Tune to your stack; a dedicated scanner
+# (gitleaks, trufflehog) is stronger — wire it in here if you have one.
+secret_re='(AKIA[0-9A-Z]{16}|-----BEGIN [A-Z ]*PRIVATE KEY-----|xox[baprs]-[0-9A-Za-z-]+|ghp_[0-9A-Za-z]{36}|(api[_-]?key|secret|password|token)["'"'"' ]*[:=]["'"'"' ]*[0-9A-Za-z/+]{16,})'
+for f in $staged; do
+  [ -f "$f" ] || continue
+  case "$f" in
+    *.example|*.md|.githooks/*) continue ;;  # examples/docs may show placeholder patterns
+  esac
+  if git show ":$f" | grep -nEi "$secret_re" >/dev/null 2>&1; then
+    echo "✖ Possible secret in $f — remove it or use an env var (constitution: no secrets in VCS)."
+    fail=1
+  fi
+done
+
+# ── 2. Block unresolved spec ambiguity markers ───────────────────────────────
+# A spec with an open [NEEDS CLARIFICATION] is not ready to be committed as done.
+for f in $staged; do
+  case "$f" in
+    specs/*.md)
+      if git show ":$f" | grep -n 'NEEDS CLARIFICATION' >/dev/null 2>&1; then
+        echo "✖ $f still has a [NEEDS CLARIFICATION] marker — resolve it (run the clarify skill) before committing."
+        fail=1
+      fi
+      ;;
+  esac
+done
+
+# ── 3. Keep tool instruction files thin (see ADR-0001) ───────────────────────
+for f in CLAUDE.md .github/copilot-instructions.md; do
+  case " $staged " in
+    *" $f "*)
+      lines=$(git show ":$f" | grep -cvE '^\s*(<!--.*-->)?\s*$' || true)
+      if [ "${lines:-0}" -gt 2 ]; then
+        echo "✖ $f has grown beyond a pointer — conventions belong in AGENTS.md (ADR-0001)."
+        fail=1
+      fi
+      ;;
+  esac
+done
+
+# ── 4. Your stack's lint + fast tests — UNCOMMENT and match AGENTS.md ─────────
+# Use the SAME commands named in AGENTS.md's Commands section so local, hook,
+# and CI enforcement are identical. Keep these fast; slow suites belong in CI.
+#
+# echo "Running lint…"; <exact lint command from AGENTS.md> || fail=1
+# echo "Running fast tests…"; <exact fast-test command from AGENTS.md> || fail=1
+
+if [ "$fail" -ne 0 ]; then
+  echo ""
+  echo "Commit blocked by pre-commit checks. Fix the above, or override with"
+  echo "  git commit --no-verify   (only if you know what you're doing)."
+  exit 1
+fi
+exit 0
