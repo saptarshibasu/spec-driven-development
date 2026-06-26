@@ -1,6 +1,6 @@
 ---
 name: code-reviewer
-description: Use to review a diff or a set of changed files before they are committed or opened as a PR. Acts as an inferential feedback control in the harness — it judges what a linter cannot: spec/constitution conformance, naming, abstraction creep, and test integrity. Invoke after a feature increment is implemented, or on request ("review my changes").
+description: Use to review a diff or a set of changed files before they are committed or opened as a PR. Acts as an inferential feedback control in the harness — it judges what a linter cannot: spec/constitution conformance, naming, abstraction creep, test integrity, and common security vulnerabilities. Invoke after a feature increment is implemented, or on request ("review my changes").
 tools: Read, Grep, Glob, Bash
 model: opus
 ---
@@ -37,6 +37,15 @@ Prefer a different model family than whatever generated the code under review.
   queries; missing an existing cache. See `docs/efficient-code-generation-and-performance-pitfalls.md`.
 - **Conventions.** Naming, null-safety utility, error handling, logging — per
   AGENTS.md.
+- **Security (always — baseline, even if the security extension isn't opted
+  in).** Scan the diff for the common vulnerability classes: untrusted input /
+  injection (SQL, command, path, template), missing or object-level-broken
+  authorization on protected paths, hard-coded or logged secrets, sensitive data
+  transmitted or stored unprotected, unescaped output (XSS), and error paths
+  that leak internals or fail open. A plausible exploit is a **Blocker**. This is
+  an inferential backstop — it does not replace SAST/SCA scanners, which are the
+  computational primary defense (run in CI per AGENTS.md). When the
+  `security/baseline` extension is opted in, also verify its `SEC-*` rules by ID.
 - **Opted-in extension rules.** For every pack the decision log records as
   opted in, check each rule's **Verification** conditions against the diff and
   cite the rule ID in any finding (e.g. "SEC-01: raw SQL built from request

@@ -83,29 +83,35 @@ Steps 2–6 repeat per feature; step 1 is one-time (re-run `sync-agents-md` when
 The kit is built as a **harness** ([Martin Fowler's term](https://martinfowler.com/articles/harness-engineering.html)): *guides* that steer the agent before it acts, and *sensors* that catch it after. Both halves ship — you wire the sensors to your stack.
 
 ```mermaid
+%%{init: {'flowchart': {'nodeSpacing': 15, 'rankSpacing': 18}}}%%
 flowchart TB
     subgraph FF["🧭 Feedforward · guides (before)"]
         direction LR
         A["AGENTS.md + constitution"]
-        SK["skills: spec-driven-feature,<br/>clarify, checklist"]
+        SK["skills: spec-driven-feature (tracks),<br/>clarify, checklist"]
         TPL["templates/"]
     end
     subgraph FB["🛰️ Feedback · sensors (after)"]
         direction LR
-        TS["✅ tests · contract tests<br/><i>your stack — out of scope here</i>"]:::byo
-        SA["🔎 linters · type-checkers<br/>SAST · dependency/SCA (vuln) scan<br/><i>your stack — out of scope here</i>"]:::byo
+        TS["✅ tests · unit · integration · contract<br/><i>your stack — you provide</i>"]:::byo
+        SA["🔎 linters · type-checkers<br/>SAST · dependency/SCA (vuln) scan<br/><i>your stack — you provide</i>"]:::byo
         HK[".githooks/pre-commit<br/><i>secret scan (shipped) + your lint/tests · local</i>"]
         CI["CI · agent-harness.yml<br/><i>runs them on every PR · slot provided</i>"]
-        AG["🧠 code-reviewer agent<br/><i>inferential backstop</i>"]
+        AG["🧠 code-reviewer agent<br/><i>inferential backstop · + security</i>"]
+        EX["🧩 opt-in extensions<br/><i>blocking rule packs · e.g. SEC-*</i>"]
     end
-    FF ==> AGENT(("🤖 coding<br/>agent")) ==> FB
+    FF ==> AGENT(("🤖 coding<br/>agent"))
+    AGENT ==> FB
+    AGENT ==>|produces| CODE["💻 code · diff"]:::out
     FB -. self-correct .-> AGENT
     AGENT -. writes / reads breadcrumb .-> SC["📝 SCRATCH.md<br/><i>resume state · gitignored</i>"]:::cont
+    AGENT -. logs decisions / approvals .-> DL2["📒 decision-log.md<br/><i>committed audit trail</i>"]:::cont
 
     classDef ff fill:#ddf4ff,stroke:#0969da,color:#0a3069
     classDef fb fill:#ffebe9,stroke:#cf222e,color:#6e0a1e
     classDef cont fill:#eaeef2,stroke:#6e7781,color:#24292f
     classDef byo fill:#fff8e6,stroke:#bf8700,color:#5c4400,stroke-dasharray:4 3
+    classDef out fill:#dafbe1,stroke:#1a7f37,color:#0f5323
     class FF ff
     class FB fb
 ```
@@ -153,7 +159,7 @@ native format — Claude `.md`, Copilot `.agent.md`, Codex `.toml` (ADR-0001).
 
 | Agent | Role |
 |---|---|
-| `code-reviewer` | Inferential review vs. spec, constitution, conventions. Read-only. |
+| `code-reviewer` | Inferential review vs. spec, constitution, conventions, and baseline security. Read-only. |
 | `test-writer` | Red-first tests from a spec/task; stops at red. |
 | `debugger` | Root-cause in its own discardable context; returns cause + minimal fix. |
 | `docs-agent` | Keeps docs truthful and in sync with the code. |
