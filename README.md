@@ -27,24 +27,47 @@ Each feature flows through gated phases. **An agent never advances a gate withou
 flowchart TD
     K["📜 Constitution<br/><i>always-true principles</i>"]:::gov
     S["1 · Specify · spec.md<br/><b>WHAT & WHY</b> — no tech"]:::phase
-    CL["Clarify<br/><i>resolve ambiguity</i>"]:::gate
-    CK["Checklist<br/><i>requirements quality</i>"]:::gate
+    CL["Clarify<br/><i>optional</i>"]:::gate
+    CK["Checklist<br/><i>optional</i>"]:::gate
     P["2 · Plan · plan.md<br/><b>HOW</b> — stack & design"]:::phase
     T["3 · Tasks · tasks.md<br/><b>ordered, tests-first</b>"]:::phase
     I["Implement<br/><i>red → green → refactor</i>"]:::impl
     R["🔍 Review<br/><i>code-reviewer agent</i>"]:::sensor
+    B["📝 SCRATCH.md<br/><i>resume breadcrumb · gitignored</i>"]:::scratch
 
     K -. governs every phase .-> S
-    S --> CL --> CK -->|✋ approve| P -->|✋ approve| T -->|✋ approve| I --> R
+    S -->|✋ approve| P -->|✋ approve| T -->|✋ approve| I --> R
+    S -. optional sharpen .-> CL
+    CL -.-> CK
+    CK -.-> S
+    S -. writes at each gate .-> B
+    P -.-> B
+    T -.-> B
+    B -. read on resume .-> S
 
     classDef gov fill:#6f42c1,color:#fff,stroke:#4c2889
     classDef phase fill:#0969da,color:#fff,stroke:#0a4b8c
     classDef gate fill:#bf8700,color:#fff,stroke:#7d5800
     classDef impl fill:#1a7f37,color:#fff,stroke:#0f5323
     classDef sensor fill:#cf222e,color:#fff,stroke:#8b1a22
+    classDef scratch fill:#6e7781,color:#fff,stroke:#424a53
 ```
 
 A spec that survives a framework swap unchanged was written correctly. Specs are pure **what/why**; the **how** lives in the plan; tasks are *generated* from both.
+
+**What you actually run, and when:**
+
+1. **Setup (once per project)** — run `create-constitution` to ratify principles, `sync-agents-md` to fill `AGENTS.md` from your repo, then `git config core.hooksPath .githooks` to arm the pre-commit sensor.
+2. **Start a feature** — run `spec-driven-feature`. It scaffolds `specs/<NNN>/` (calling `start-feature.sh` on macOS/Linux or `start-feature.ps1` on Windows) and drafts `spec.md` (Specify), marking open questions as `[NEEDS CLARIFICATION]`.
+3. **(Optional) Sharpen the spec at the approval gate** — `spec-driven-feature` pauses after the draft and waits for you. If it left `[NEEDS CLARIFICATION]` markers or the spec needs tightening, run `clarify` and/or `checklist` *here*; otherwise just answer any open questions inline. Neither is a required step. **You approve the spec.**
+4. **Plan, then tasks — same run** — once you approve, the skill continues *on its own* to `plan.md`, pauses for approval, then generates `tasks.md`. You don't relaunch it; each "stop" is a pause-for-approval, not an exit.
+5. **Implement** — red → green → refactor, one story at a time; lean on the `test-writer` and `debugger` agents as needed.
+6. **Review & commit** — the `code-reviewer` agent checks the diff against spec + constitution; on commit, `.githooks/pre-commit` blocks secrets, unresolved markers, and runs your lint/tests.
+
+Steps 2–6 repeat per feature; step 1 is one-time (re-run `sync-agents-md` whenever the project drifts).
+
+> [!NOTE]
+> **Interrupted mid-feature?** Nothing is lost — your progress lives in that feature's `specs/<NNN>/spec.md`, `plan.md`, and `tasks.md`, and the skill keeps a gitignored `SCRATCH.md` breadcrumb updated **at each gate** (current phase, what's next, open questions). To resume, just re-invoke `spec-driven-feature` for the same feature (don't re-run `start-feature` — it won't overwrite an existing feature): it reads the breadcrumb plus the filled-in documents and picks up at the next unapproved gate. Even an abrupt kill mid-phase is covered, because the breadcrumb is written as it goes — not only on a graceful stop.
 
 ## 🛰️ The harness model
 
@@ -60,15 +83,20 @@ flowchart LR
     end
     subgraph FB["🛰️ Feedback · sensors (after)"]
         direction TB
-        HK[".githooks/pre-commit"]
-        CI["CI · agent-harness.yml"]
-        AG["agents: code-reviewer,<br/>test-writer, debugger"]
+        TS["✅ tests · contract tests<br/><i>your stack — out of scope here</i>"]:::byo
+        SA["🔎 linters · type-checkers<br/>SAST · dependency/SCA (vuln) scan<br/><i>your stack — out of scope here</i>"]:::byo
+        HK[".githooks/pre-commit<br/><i>secret scan (shipped) + your lint/tests · local</i>"]
+        CI["CI · agent-harness.yml<br/><i>runs them on every PR · slot provided</i>"]
+        AG["🧠 code-reviewer agent<br/><i>inferential backstop</i>"]
     end
     FF ==> AGENT(("🤖 coding<br/>agent")) ==> FB
     FB -. self-correct .-> AGENT
+    AGENT -. writes / reads breadcrumb .-> SC["📝 SCRATCH.md<br/><i>resume state · gitignored</i>"]:::cont
 
     classDef ff fill:#ddf4ff,stroke:#0969da,color:#0a3069
     classDef fb fill:#ffebe9,stroke:#cf222e,color:#6e0a1e
+    classDef cont fill:#eaeef2,stroke:#6e7781,color:#24292f
+    classDef byo fill:#fff8e6,stroke:#bf8700,color:#5c4400,stroke-dasharray:4 3
     class FF ff
     class FB fb
 ```
@@ -81,27 +109,32 @@ flowchart LR
 ```bash
 git clone https://github.com/saptarshibasu/spec-driven-development.git my-project-sdd
 cd my-project-sdd
-bash setup.sh        # scaffolds dirs, mirrors skills, seeds stubs (idempotent)
 ```
+
+A fresh clone already carries every directory, pointer, stub, and skill mirror —
+there is no scaffolding step to run. (If you later edit or add a skill under
+`.agents/skills/`, re-mirror it into the tool dirs with `bash mirror-skills.sh`,
+or `pwsh ./mirror-skills.ps1` on Windows.)
 
 Then, in order:
 
-1. **Fill in `AGENTS.md`** — replace every `[placeholder]` with a fact specific to your repo; delete anything an agent could infer from training.
+1. **Fill in `AGENTS.md`** — replace every `[placeholder]` with a fact specific to your repo; delete anything an agent could infer from training. (The `sync-agents-md` skill can draft this from your codebase.)
 2. **Ratify the constitution** — run the `create-constitution` skill (or edit `memory/constitution.md`).
 3. **Add domain terms** to `docs/glossary.md`.
-4. **Enable the hook** — `git config core.hooksPath .githooks`.
+4. **Enable the hook** — `git config core.hooksPath .githooks`. (On Windows, Git runs the POSIX `pre-commit` via Git Bash; a native `pre-commit.ps1` is also provided.)
 5. **Start a feature** — *"start a new feature: &lt;description&gt;"* (the `spec-driven-feature` skill).
 
 ## 📦 What's inside
 
 ### 🛠️ Skills — workflow commands *(canonical in `.agents/skills/`, mirrored to every tool)*
 
-| Skill | Does |
-|---|---|
-| `spec-driven-feature` | Scaffolds a feature and walks Specify → Plan → Tasks with approval gates. |
-| `clarify` | Surfaces spec ambiguities, asks a few targeted questions, writes answers back. |
-| `checklist` | "Unit tests for the requirements" — complete, clear, consistent, measurable? |
-| `create-constitution` | Builds/ratifies `memory/constitution.md` from the template. |
+| Skill | When you run it | What it does |
+|---|---|---|
+| `create-constitution` | Once, at setup | Builds/ratifies `memory/constitution.md` from the template. |
+| `sync-agents-md` | At setup, then to re-sync | Fills in `AGENTS.md` + `docs/glossary.md` from the actual repo, and later flags drift — evidence-based, never guessed. |
+| `spec-driven-feature` | Start of every feature | Scaffolds `specs/<NNN>/` (via `start-feature.sh` / `.ps1`) and walks Specify → Plan → Tasks with approval gates. |
+| `clarify` | After the spec draft | Surfaces spec ambiguities, asks a few targeted questions, writes answers back. |
+| `checklist` | Before approving the spec | "Unit tests for the requirements" — complete, clear, consistent, measurable? |
 
 ### 🤖 Agents — the sensor half *(examples in `.claude/agents/`; adapt per runtime)*
 
@@ -111,6 +144,7 @@ Then, in order:
 | `test-writer` | Red-first tests from a spec/task; stops at red. |
 | `debugger` | Root-cause in its own discardable context; returns cause + minimal fix. |
 | `docs-agent` | (Copilot) keeps docs truthful and in sync with the code. |
+| `reviewer` | (Codex) the `code-reviewer` equivalent for the Codex runtime — `.codex/agents/reviewer.toml`. |
 
 ### 📚 Engineering reference — `docs/` *(read on demand, never auto-loaded)*
 
@@ -132,12 +166,13 @@ Then, in order:
 ├── AGENTS.md                      # Always-loaded canonical instructions — keep short & specific
 ├── CLAUDE.md                      # Thin pointer → AGENTS.md
 ├── .mcp.json.example              # Curated MCP config — copy to .mcp.json, trim (docs/mcp.md)
+├── mirror-skills.sh / .ps1        # Re-mirror canonical skills → .claude/.github/.codex after edits
 │
-├── .agents/skills/                # CANONICAL skills — setup.sh mirrors → .claude/.github/.codex
+├── .agents/skills/                # CANONICAL skills — mirror-skills mirrors → .claude/.github/.codex
 │   ├── spec-driven-feature/       #   (edit here only; never hand-edit a mirror — ADR-0001)
-│   ├── clarify/  ·  checklist/  ·  create-constitution/
+│   ├── clarify/  ·  checklist/  ·  create-constitution/  ·  sync-agents-md/
 │
-├── .githooks/pre-commit           # Secret scan · spec-ambiguity block · lint/test slot
+├── .githooks/pre-commit / .ps1    # Secret scan · spec-ambiguity block · lint/test slot
 │
 ├── .github/                       # Copilot: copilot-instructions.md, instructions/, skills/,
 │   │                              #   agents/docs-agent.agent.md

@@ -42,21 +42,67 @@ of these templates — there is exactly one source of truth for what these
 documents look like, and it lives at the project root, not inside this
 skill.
 
+## Resuming an in-progress feature
+
+If a `specs/<NNN>-<slug>/` directory for this feature already exists, you are
+**resuming, not starting** — do not run the scaffold script (Step 0 refuses to
+overwrite an existing feature, by design). Instead:
+
+1. Read the existing `spec.md`, `plan.md`, and `tasks.md`. A document still
+   full of `[bracketed placeholders]` (or effectively empty) is not yet done;
+   a filled-in one is complete.
+2. Resume at the first incomplete phase — Specify, Plan, or Tasks — and honour
+   the same approval gate at the end of it before moving to the next.
+3. If a scratch progress file (e.g. `SCRATCH.md`, gitignored) exists from an
+   earlier session, read it first: it records what was done, what's next, and
+   any open decisions.
+
+The on-disk documents are the source of truth for progress, so an interrupted
+feature loses nothing — it picks up wherever the files left off.
+
+## Progress breadcrumb (keep it current)
+
+So that even an abrupt interruption (closed app, killed session) resumes
+cleanly, maintain a lightweight `specs/<NNN>-<slug>/SCRATCH.md` as you go. It is
+gitignored — a breadcrumb, not a deliverable, and it points at the real
+documents rather than duplicating them.
+
+- **At the end of each phase, immediately before you stop for approval**, write
+  or overwrite `SCRATCH.md` with a few lines: the current phase and its status
+  (drafted / approved), what the next phase is, and any open decisions or
+  `[NEEDS CLARIFICATION]` still outstanding.
+- **On resume**, read it first (see "Resuming an in-progress feature" above),
+  then trust the on-disk documents where they disagree.
+- **When the feature is complete** (`tasks.md` approved), delete `SCRATCH.md` —
+  the committed documents are now the full record.
+
 ## Step 0 — Scaffold (mechanical — don't use judgment here)
 
-Run the bundled script from this skill's own directory, passing the
-feature description as a single argument:
+Run the bundled scaffolding script from this skill's own directory, passing
+the feature description as a single argument. Two byte-equivalent versions
+ship side by side — run the one that matches the current OS:
 
 ```bash
-scripts/start-feature.sh "<feature description>"
+# macOS / Linux (bash):
+bash scripts/start-feature.sh "<feature description>"
 ```
 
-(Claude Code exposes this skill's own folder as `${CLAUDE_SKILL_DIR}`, so
-the full invocation there is `${CLAUDE_SKILL_DIR}/scripts/start-feature.sh
-"<description>"`. Other tools resolve a skill's own directory differently —
-use whatever path your tool gives you to this skill's folder.)
+```powershell
+# Windows (PowerShell):
+pwsh scripts/start-feature.ps1 "<feature description>"
+# (on Windows PowerShell, equivalently: powershell -File scripts/start-feature.ps1 "<feature description>")
+```
 
-If the environment can't execute bash scripts at all, do the equivalent by
+Detect the platform and pick accordingly: prefer the `.ps1` on Windows and the
+`.sh` on macOS/Linux. If you can't tell, try one and fall back to the other —
+they produce identical results.
+
+(Claude Code exposes this skill's own folder as `${CLAUDE_SKILL_DIR}`, so the
+full path is `${CLAUDE_SKILL_DIR}/scripts/start-feature.{sh,ps1}`. Other tools
+resolve a skill's own directory differently — use whatever path your tool gives
+you to this skill's folder.)
+
+If the environment can't execute either script, do the equivalent by
 hand: find the highest existing `NNN-` prefix under `specs/`, increment it,
 slugify the description into kebab-case, create `specs/<NNN>-<slug>/`, and
 copy the three templates into it as `spec.md`, `plan.md`, `tasks.md`.
@@ -73,9 +119,8 @@ reasoning occasionally won't (off-by-one on the number, wrong slug, etc.).
    Acceptance Scenarios, Edge Cases, Functional Requirements, Non-Functional
    Requirements, Success Criteria, and Out of Scope — based on the user's
    description and a read-only look at the existing codebase if relevant.
-3. Anywhere the description didn't specify something you'd otherwise have
-   to guess, write `[NEEDS CLARIFICATION: specific question]` instead of
-   guessing. Do not silently invent an assumption.
+3. Apply the No-guessing guardrail: wherever the description leaves something
+   you'd otherwise assume, write `[NEEDS CLARIFICATION: specific question]`.
 4. Run through the Spec Completeness Checklist at the bottom of the
    template yourself before presenting the draft.
 5. Strip every instructional HTML comment (`<!-- ... -->`) out of the
@@ -186,13 +231,8 @@ session) applies them:
   `tasks.md`. Phase 4 is guidance for whoever runs implementation, not an
   instruction for this skill to start coding.
 - It does not skip a gate just because the user seems impatient — say so,
-  don't silently comply. If the user explicitly says "skip review, just
-  generate all three," that's their call to make, but make sure they're
-  making it knowingly rather than you deciding it for them.
-- It does not invent the templates if they're missing — see "Before
-  starting" above.
-- It does not guess at ambiguous requirements anywhere in the three phases —
-  it uses `[NEEDS CLARIFICATION]` and surfaces the question to the user.
-- It does not add features, abstractions, or complexity beyond what the
-  spec explicitly requires — the behavioral guardrails at the top apply
-  for the entire session.
+  don't silently comply. "Skip review, just generate all three" is the user's
+  call to make knowingly, not yours to make for them.
+
+(No-guessing, no-over-engineering, and the template requirement are covered by
+the behavioral guardrails and "Before starting" above; they apply throughout.)

@@ -92,12 +92,8 @@ one-line note on every *finding* (not on trivial passes). Then:
 > Verdict: 2 of 4 failing — not plan-ready. CHK002 is an ambiguity (route to
 > `clarify`); CHK003 is a missing requirement (route to the author).
 
-Note each item is checkable against the *spec*, and each could genuinely fail —
-no item that trivially passes for any spec.
-
 ## What this skill does not do
 
 - It does not test implementation correctness — that's the test suite.
 - It does not resolve the gaps it finds — it routes them to `clarify` or the
   author.
-- It does not pad the list with items every spec passes by default.

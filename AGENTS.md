@@ -107,20 +107,14 @@ formatting, and the idioms you actually want repeated.]
 
 ## Performance & Efficiency
 
-<!-- Worth keeping deliberately, not skipping as "obvious": an empirical study of
-     2,303 real agent context files found Performance specified in only 14.5% of
-     them, versus 62-70% for build/architecture sections — this is the single
-     most commonly-skipped section despite measurably changing agent output when
-     present. Models default to whatever shape of code is most common in their
-     training distribution for a given task, which for "do X to each item" is
-     usually a naive per-item loop — not because the model doesn't know better
-     in the abstract, but because nothing in a typical prompt or spec signals
-     that the operation's grain is a design decision. State your project's
-     actual idioms below; "be efficient" alone doesn't change the default.
-     A real code snippet beats a prose rule here even more than elsewhere — see
-     `docs/efficient-code-generation-and-performance-pitfalls.md` for the full
-     reasoning and the concrete cost numbers (typically 3-100x depending on the
-     operation). -->
+<!-- Don't skip as "obvious": a study of 2,303 agent context files found a
+     Performance section in only 14.5% (vs 62-70% for build/architecture), yet
+     it measurably changes output. Models default to the most common shape in
+     training — for "do X to each item" that's usually a naive per-item loop —
+     unless something signals the operation's grain is a design decision. State
+     your real idioms; "be efficient" alone won't. A real before/after snippet
+     beats prose here. Full reasoning + cost numbers (3-100x):
+     `docs/efficient-code-generation-and-performance-pitfalls.md`. -->
 
 - **Batch/bulk over row-by-row — this is the highest-frequency, highest-cost
   pattern to call out explicitly.** [Name your stack's actual bulk idiom, e.g.

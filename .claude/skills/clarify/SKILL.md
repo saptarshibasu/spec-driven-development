@@ -87,9 +87,6 @@ Once answered:
 +   and a machine-readable error code; no second order is created.
 ```
 
-Resolve into the right section — a behaviour decision becomes an FR (as above),
-a default you chose goes under Assumptions, an excluded case goes to Out of Scope.
-
 ## Step 4 — Report
 
 Tell the user what was resolved, what (if anything) remains open, and whether
@@ -99,6 +96,6 @@ when it isn't.
 
 ## What this skill does not do
 
-- It does not write a spec from scratch — that's `spec-driven-feature`.
-- It does not move on to `plan` or `tasks` — clarification is its whole job.
-- It does not invent answers to its own questions to seem efficient.
+- It does not write a spec from scratch (that's `spec-driven-feature`) or move
+  on to `plan`/`tasks` — clarification is its whole job, and it never invents
+  answers to its own questions to seem efficient.

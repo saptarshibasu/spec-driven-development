@@ -8,6 +8,10 @@
 *.sh    text eol=lf
 *.bash  text eol=lf
 
+# PowerShell twins — LF is fine for PowerShell 7+ (pwsh), the cross-platform
+# shell these .ps1 files target; normalized to LF with the rest of the repo.
+*.ps1   text eol=lf
+
 # Markdown, config, and code: text, normalized to LF.
 *.md    text eol=lf
 *.json  text eol=lf

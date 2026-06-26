@@ -33,6 +33,17 @@ best practices"), delete it — it costs tokens every session and trains the
 agent to skim the rest. Move conditional rules to path-scoped instruction files
 or `docs/`; reference the glossary instead of inlining it.
 
+**Keep the always-loaded prefix *stable*, not just small, so it gets cached.**
+Small is only half the lever. Most model APIs (and the agent runtimes built on
+them) serve an unchanged prompt prefix from cache at a steep discount — often
+around 90% off input on the cached span. `AGENTS.md` + constitution are that
+prefix on *every* call, so churn there is doubly expensive: you pay full price
+for the edited tokens *and* invalidate the cache for everything after the edit.
+So hold the stable tier stable within a session, batch instruction changes
+instead of tweaking between turns, and keep fast-changing material out of the
+always-loaded header. The whole game is: *cache the stable stuff, scope the
+changing stuff.*
+
 **Don't guess — but don't over-read either.** Guessing causes re-work (expensive);
 reading the entire repo "to be safe" causes context rot (also expensive). The
 middle path: locate precisely (grep/glob for the symbol), then read only the
@@ -50,6 +61,13 @@ sprawl — a plan that re-derives the spec is paying twice.
 failing test over the whole suite while iterating. A tool that dumps 2,000
 lines when 20 would do is a token leak you pay on every invocation.
 
+**Turn off tools and MCP servers you aren't using on this project.** Every
+connected tool's schema is sent on *every* message, used or not — the same
+per-call tax as `AGENTS.md`, paid in tool definitions. `docs/mcp.md`'s 5–7-
+server cap is the standing version of this rule; the per-session version is
+just as real: if a project never touches the browser, turn the browser server
+off for it rather than shipping its schema on every turn.
+
 **Use subagents to quarantine noisy work.** A broad search or a deep
 investigation can burn enormous context. Delegate it to a subagent with its own
 window; only the conclusion returns to the main thread. The search costs the
@@ -59,6 +77,19 @@ window for the rest of the task.
 **Compact and checkpoint long tasks.** On a long run, summarize and restart, or
 write progress to a file and continue fresh, before the window rots. Re-work
 caused by a confused, overfull window is far more expensive than the summary.
+
+**Reset the session when the task changes.** History rides along on every
+subsequent call, so an old, unrelated thread is pure carry cost — and a
+context-rot risk on top of it. Starting a fresh chat on a task switch is the
+cheap, blunt version of the compaction tactic above: same goal, no summary
+needed when there's nothing worth carrying forward.
+
+**Don't pin reasoning effort to maximum by default.** Reasoning/thinking budget
+is output tokens you pay for. Low or medium effort handles routine, well-scoped
+work; reserve high effort for genuinely ambiguous tasks where the extra
+deliberation actually changes the answer. Maxing it on every turn is the
+output-side twin of reading the whole repo "to be safe" — cost with no payoff
+when the work is already well-constrained.
 
 **Close feedback loops early.** Every error a linter or test catches *before*
 the agent moves on is a re-prompt you don't pay for later. A tight harness (see
@@ -70,6 +101,10 @@ or file renames, and don't let a cheap model make spec/architecture decisions
 whose errors propagate downstream. Phase-appropriate routing is covered in
 `docs/model-selection-and-token-optimization-in-sdd.md`; reported savings from
 disciplined routing run from roughly 40% to over 70% with no quality drop.
+Where your platform offers an auto-router (it picks the best-fit model per
+turn), prefer it for routine work — some apply a token-multiplier discount on
+top of the routing win, so it can be cheaper *and* better-targeted than pinning
+one model.
 
 ## What NOT to do in the name of "efficiency"
 
@@ -96,9 +131,18 @@ disciplined routing run from roughly 40% to over 70% with no quality drop.
   the latter.
 - Is there a fast single-test command in AGENTS.md? If not, the agent is
   burning tokens running the whole suite to check one thing.
+- Is the always-loaded prefix *stable* within a session, or are you editing
+  `AGENTS.md`/constitution mid-session and invalidating the cache on every turn
+  after?
+- Are tools or MCP servers you don't need for this project still enabled? Each
+  one ships its schema on every message.
+- Is reasoning effort pinned high by default? Drop it to low/medium for routine,
+  well-scoped work.
 
 ## References
 
 - [Effective context engineering for AI agents — Anthropic](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents)
 - [Context Engineering: Token Optimization and Agent Performance — FlowHunt](https://www.flowhunt.io/blog/context-engineering/)
 - [LLM Model Routing: Cost-Quality Optimization (2026)](https://www.digitalapplied.com/blog/llm-model-routing-2026-cost-quality-optimization-engineering-guide)
+- [Improving token efficiency in GitHub agentic workflows — GitHub](https://github.blog/ai-and-ml/github-copilot/improving-token-efficiency-in-github-agentic-workflows/)
+- [GitHub Well-Architected — Managing AI credits](https://wellarchitected.github.com/library/governance/recommendations/managing-ai-credits/)

@@ -7,6 +7,7 @@
 # fields pre-filled. Does NOT write any actual spec/plan/task content —
 # that's the agent's job, done after this script returns, per SKILL.md.
 #
+# Cross-platform twin: start-feature.ps1 (Windows/PowerShell).
 # Usage: start-feature.sh "<feature description>"
 
 set -euo pipefail
@@ -66,12 +67,18 @@ mkdir -p "$FEATURE_DIR/contracts"
 # 4. Copy the three templates and fill in only the mechanical header
 #    fields (feature id, title, date) — never the actual content.
 TODAY="$(date +%Y-%m-%d)"
+# Escape sed replacement metacharacters (backslash, ampersand, slash) in the
+# free-text description so a title like "Login & Logout" isn't mangled — sed
+# reads a bare & in the replacement as "the whole matched text." The slug and
+# date are [a-z0-9-]/digits and need no escaping. (The .ps1 twin uses a literal
+# string Replace, so it is exact without this step.)
+DESC_ESC=$(printf '%s' "$DESCRIPTION" | sed -e 's/[\&/]/\\&/g')
 for doc in spec plan tasks; do
   cp "$TEMPLATES_DIR/${doc}.template.md" "$FEATURE_DIR/${doc}.md"
   sed -i.bak \
     -e "s/\[###-feature-name\]/${FEATURE_SLUG}/g" \
-    -e "s/\[FEATURE NAME\]/${DESCRIPTION}/g" \
-    -e "s/\[FEATURE\]/${DESCRIPTION}/g" \
+    -e "s/\[FEATURE NAME\]/${DESC_ESC}/g" \
+    -e "s/\[FEATURE\]/${DESC_ESC}/g" \
     -e "s/\[DATE\]/${TODAY}/g" \
     "$FEATURE_DIR/${doc}.md"
   rm -f "$FEATURE_DIR/${doc}.md.bak"

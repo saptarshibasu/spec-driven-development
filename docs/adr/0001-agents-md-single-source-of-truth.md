@@ -31,8 +31,9 @@ rather than hand-editing each.
 - One file to update for a convention change; pointers never need editing.
 - New tools are onboarded by adding a one-line pointer, not by re-authoring
   rules.
-- The cost: skill copies must be kept in sync mechanically (see `setup.sh`,
-  which mirrors them) rather than edited in place — editing one copy by hand
+- The cost: skill copies must be kept in sync mechanically (see
+  `mirror-skills.sh` / `mirror-skills.ps1`, which mirror them) rather than
+  edited in place — editing one copy by hand
   reintroduces exactly the drift this decision prevents.
 - `AGENTS.md` is loaded on every call, so it must stay short and specific; this
   decision concentrates the token-budget discipline in one place (see

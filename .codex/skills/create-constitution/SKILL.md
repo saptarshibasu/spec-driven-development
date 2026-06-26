@@ -171,13 +171,10 @@ Only after the user has approved Phase 1.
 
 - It does not populate `spec.md`, `plan.md`, or `tasks.md` — those are
   feature-specific documents, not project-wide principles.
-- It does not add principles that are conditional, feature-specific, or
-  only sometimes true — those belong in AGENTS.md or specs.
 - It does not skip the approval gate even if the draft looks complete —
   a constitution that hasn't been read and approved by a human is not
   ratified.
-- It does not guess at organisational policies (who approves PRs, what
-  the compliance requirements are) — it asks, or leaves a
-  `[NEEDS CLARIFICATION]` marker.
-- It does not invent a constitution from scratch without the template —
-  `templates/constitution.template.md` is the canonical starting point.
+
+(No-guessing, no-over-populating, the conditional-vs-universal test, and the
+template requirement are covered by the guardrails, the table, and "Before
+starting" above.)
