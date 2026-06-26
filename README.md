@@ -195,6 +195,16 @@ Then, in order:
 
 </details>
 
+## 🧱 Principles it bakes in
+
+These aren't advice buried in a doc — they're encoded in the constitution and `AGENTS.md` templates, then enforced by the gates, hooks, and CI. You ratify them once and every agent session inherits them.
+
+- **Design-first — spec before code.** Every feature starts as `spec.md` (*what & why*), then `plan.md` (*how*), then a generated `tasks.md`; no implementation until the requirements are stable. A spec that survives a framework swap unchanged was written correctly.
+- **Test-Driven Development (non-negotiable).** Write the test, watch it fail for the right reason, then implement — Red → Green → Refactor, every time. Never delete or weaken a failing test to make the suite pass. ([Constitution, Article III](memory/constitution.md))
+- **Characterization tests for brownfield.** Before changing any untested legacy behaviour, first write tests that capture *current* behaviour — so you change it deliberately, not by accident. Brownfield areas are flagged in `AGENTS.md` and planned with the strongest model. ([Testing Discipline](AGENTS.md#testing-discipline))
+- **Multi-repo — resolve, never guess.** When a dependency's source isn't visible in this repo, resolve it before writing code against it (sibling checkout → source jar → decompile → stop and ask) rather than fabricating a class, field, or method signature you can't see. ([Multi-Repo / Cross-Boundary Notes](AGENTS.md#multi-repo--cross-boundary-notes))
+- **Simplicity / anti-abstraction.** No speculative "might need it later" abstraction without a current, concrete requirement; use the framework directly unless a wrapper is justified in writing. ([Constitution, Article V](memory/constitution.md))
+
 ## 💡 Why it's structured this way
 
 > [!IMPORTANT]
