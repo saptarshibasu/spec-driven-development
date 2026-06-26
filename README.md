@@ -74,15 +74,15 @@ Steps 2–6 repeat per feature; step 1 is one-time (re-run `sync-agents-md` when
 The kit is built as a **harness** ([Martin Fowler's term](https://martinfowler.com/articles/harness-engineering.html)): *guides* that steer the agent before it acts, and *sensors* that catch it after. Both halves ship — you wire the sensors to your stack.
 
 ```mermaid
-flowchart LR
+flowchart TB
     subgraph FF["🧭 Feedforward · guides (before)"]
-        direction TB
+        direction LR
         A["AGENTS.md + constitution"]
         SK["skills: spec-driven-feature,<br/>clarify, checklist"]
         TPL["templates/"]
     end
     subgraph FB["🛰️ Feedback · sensors (after)"]
-        direction TB
+        direction LR
         TS["✅ tests · contract tests<br/><i>your stack — out of scope here</i>"]:::byo
         SA["🔎 linters · type-checkers<br/>SAST · dependency/SCA (vuln) scan<br/><i>your stack — out of scope here</i>"]:::byo
         HK[".githooks/pre-commit<br/><i>secret scan (shipped) + your lint/tests · local</i>"]
