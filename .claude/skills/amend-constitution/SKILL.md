@@ -1,13 +1,13 @@
 ---
-name: create-constitution
-description: Use when creating or updating a project's governing constitution — triggers on phrases like "create a constitution", "set up project principles", "write our constitution", "let's define our architectural principles", "update the constitution", or "ratify the constitution". Produces a filled-in constitution.md from templates/constitution.template.md, asking targeted questions per section and requiring explicit approval before saving. Do not use for per-feature decisions (those go in spec.md) or for repo-specific operational facts (those go in AGENTS.md).
+name: amend-constitution
+description: Use when updating or revisiting a project's governing constitution — triggers on phrases like "amend the constitution", "update our principles", "revisit the constitution", "change our architectural principles", "update the constitution", or "ratify a constitution change". Amends specific sections of an existing memory/constitution.md, asking targeted questions and requiring explicit approval before saving. The initial constitution is created by init-project — use this skill only for subsequent amendments. Do not use for per-feature decisions (those go in spec.md) or for repo-specific operational facts (those go in AGENTS.md).
 ---
 
-# Create Constitution
+# Amend Constitution
 
-Produces a `memory/constitution.md` (or equivalent) for this project by
-walking the user through `templates/constitution.template.md` section by
-section. Two gated phases — gather principles, then ratify — never skip the
+Updates specific sections of an existing `memory/constitution.md` by walking
+the user through the relevant sections of `templates/constitution.template.md`.
+Two gated phases — gather updated principles, then ratify — never skip the
 approval gate.
 
 ## What belongs in a constitution vs. elsewhere
@@ -40,21 +40,15 @@ or areas, it does not belong in the constitution.
 
 ## Before starting
 
-1. Check whether `templates/constitution.template.md` exists. If it doesn't,
-   stop and tell the user — this skill requires that template.
-2. Check whether a constitution already exists (look for `memory/constitution.md`,
-   `docs/constitution.md`, or any path referenced in `AGENTS.md`'s Specs
-   section). If one exists:
-   - Tell the user what you found and show the current version briefly.
-   - Ask: **amend** (update specific sections) or **recreate** (start fresh
-     from the template)?
-   - If amending, skip to the relevant section in Phase 1 rather than
-     walking every section.
-3. Read `AGENTS.md` if it exists — it often contains principles that have
-   already been decided but not yet formalised into a constitution. Note
-   anything there that looks like a universal principle rather than a
-   project-specific fact; surface these to the user during Phase 1 as
-   candidates for the constitution.
+1. Confirm `memory/constitution.md` (or the path referenced in AGENTS.md's
+   Specs section) already exists. If it doesn't, tell the user to run
+   `init-project` first — this skill amends an existing constitution, it does
+   not create one from scratch.
+2. Show the user the current constitution briefly and ask which section(s) they
+   want to amend. Skip to just those sections in Phase 1 rather than walking
+   every section.
+3. Read `AGENTS.md` — note anything there that looks like a universal principle
+   that should be in the constitution instead; surface it as a candidate.
 
 ## Phase 1 — Gather Principles
 
@@ -152,20 +146,10 @@ Once you have answers for all sections:
 Only after the user has approved Phase 1.
 
 1. Apply any changes from the review pass.
-2. Confirm the save location with the user:
-   - Default: `memory/constitution.md`
-   - If AGENTS.md already references a different path, use that path
-   - If neither, ask the user where they want it
-3. Write the final file to the confirmed path.
-4. If `AGENTS.md` exists and its Specs section references the constitution
-   path, verify the path is correct — update it if the save location
-   differs.
-5. Set the **Version** (start at `1.0.0` for a new constitution, increment
-   the minor version for an amendment), **Ratified** date (today, for a new
-   constitution), and **Last Amended** date (today).
-6. **Stop. Confirm to the user** where the file was saved, what version it
-   is, and that implementation can now reference it. Remind them to point
-   `AGENTS.md` to this file if they haven't already.
+2. Write the amended file to the same path it came from.
+3. Increment the **minor version** (e.g. `1.0.0` → `1.1.0`) and set
+   **Last Amended** to today.
+4. **Stop. Confirm to the user** where the file was saved and what version it is.
 
 ## What this skill deliberately does not do
 
