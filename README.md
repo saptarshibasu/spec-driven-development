@@ -83,7 +83,7 @@ Steps 2–6 repeat per feature; step 1 is one-time (re-run `sync-agents-md` when
 The kit is built as a **harness** ([Martin Fowler's term](https://martinfowler.com/articles/harness-engineering.html)): *guides* that steer the agent before it acts, and *sensors* that catch it after. Both halves ship — you wire the sensors to your stack.
 
 ```mermaid
-%%{init: {'flowchart': {'nodeSpacing': 15, 'rankSpacing': 18}}}%%
+%%{init: {'flowchart': {'nodeSpacing': 15, 'rankSpacing': 18, 'subGraphTitleMargin': {'top': 8, 'bottom': 10}}}}%%
 flowchart TB
     subgraph FF["🧭 Feedforward · guides (before)"]
         direction LR
