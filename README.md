@@ -111,10 +111,11 @@ git clone https://github.com/saptarshibasu/spec-driven-development.git my-projec
 cd my-project-sdd
 ```
 
-A fresh clone already carries every directory, pointer, stub, and skill mirror —
-there is no scaffolding step to run. (If you later edit or add a skill under
-`.agents/skills/`, re-mirror it into the tool dirs with `bash mirror-skills.sh`,
-or `pwsh ./mirror-skills.ps1` on Windows.)
+A fresh clone already carries every directory, pointer, stub, and mirror —
+there is no scaffolding step to run. (If you later edit or add a **skill** under
+`.agents/skills/`, re-mirror it with `bash mirror-skills.sh` / `pwsh ./mirror-skills.ps1`;
+if you edit or add an **agent** under `.agents/agents/`, re-generate the per-tool
+copies with `bash mirror-agents.sh` / `pwsh ./mirror-agents.ps1`.)
 
 Then, in order:
 
@@ -136,15 +137,17 @@ Then, in order:
 | `clarify` | After the spec draft | Surfaces spec ambiguities, asks a few targeted questions, writes answers back. |
 | `checklist` | Before approving the spec | "Unit tests for the requirements" — complete, clear, consistent, measurable? |
 
-### 🤖 Agents — the sensor half *(examples in `.claude/agents/`; adapt per runtime)*
+### 🤖 Agents — the sensor half *(canonical in `.agents/agents/`, generated into every tool)*
+
+Defined once as Markdown in `.agents/agents/`; `mirror-agents` emits each tool's
+native format — Claude `.md`, Copilot `.agent.md`, Codex `.toml` (ADR-0001).
 
 | Agent | Role |
 |---|---|
 | `code-reviewer` | Inferential review vs. spec, constitution, conventions. Read-only. |
 | `test-writer` | Red-first tests from a spec/task; stops at red. |
 | `debugger` | Root-cause in its own discardable context; returns cause + minimal fix. |
-| `docs-agent` | (Copilot) keeps docs truthful and in sync with the code. |
-| `reviewer` | (Codex) the `code-reviewer` equivalent for the Codex runtime — `.codex/agents/reviewer.toml`. |
+| `docs-agent` | Keeps docs truthful and in sync with the code. |
 
 ### 📚 Engineering reference — `docs/` *(read on demand, never auto-loaded)*
 
@@ -167,18 +170,21 @@ Then, in order:
 ├── CLAUDE.md                      # Thin pointer → AGENTS.md
 ├── .mcp.json.example              # Curated MCP config — copy to .mcp.json, trim (docs/mcp.md)
 ├── mirror-skills.sh / .ps1        # Re-mirror canonical skills → .claude/.github/.codex after edits
+├── mirror-agents.sh / .ps1        # Re-generate canonical agents → per-tool native formats after edits
 │
-├── .agents/skills/                # CANONICAL skills — mirror-skills mirrors → .claude/.github/.codex
-│   ├── spec-driven-feature/       #   (edit here only; never hand-edit a mirror — ADR-0001)
-│   ├── clarify/  ·  checklist/  ·  create-constitution/  ·  sync-agents-md/
+├── .agents/                       # CANONICAL sources — mirror scripts propagate → .claude/.github/.codex
+│   ├── skills/                    #   skills, mirrored byte-for-byte (edit here only — ADR-0001)
+│   │   ├── spec-driven-feature/  ·  clarify/  ·  checklist/  ·  create-constitution/  ·  sync-agents-md/
+│   └── agents/                    #   agents, GENERATED per tool (edit here only — ADR-0001)
+│       ├── code-reviewer.md  ·  test-writer.md  ·  debugger.md  ·  docs-agent.md
 │
 ├── .githooks/pre-commit / .ps1    # Secret scan · spec-ambiguity block · lint/test slot
 │
 ├── .github/                       # Copilot: copilot-instructions.md, instructions/, skills/,
-│   │                              #   agents/docs-agent.agent.md
+│   │                              #   agents/*.agent.md (generated)
 │   └── workflows/agent-harness.yml#   Example CI feedback harness
-├── .claude/                       # Claude Code: skills/ + agents/{code-reviewer,test-writer,debugger}
-├── .codex/                        # Codex: skills/ + agents/reviewer.toml
+├── .claude/                       # Claude Code: skills/ + agents/*.md (generated)
+├── .codex/                        # Codex: skills/ + agents/*.toml (generated)
 │
 ├── memory/constitution.md         # Project-wide principles (rarely changes)
 │

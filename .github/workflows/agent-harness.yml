@@ -56,6 +56,21 @@ jobs:
             fi
           done
 
+      - name: Skills & agents are in sync with canonical sources
+        run: |
+          # Drift guard for ADR-0001: the .claude/.github/.codex copies must be
+          # exactly what mirror-skills/mirror-agents generate from the canonical
+          # .agents/ sources. Regenerate, then fail if anything changed — i.e. a
+          # generated copy was hand-edited, or a canonical edit wasn't mirrored.
+          bash mirror-skills.sh
+          bash mirror-agents.sh
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "::error::Generated skills/agents drifted from .agents/ canon. Run 'bash mirror-skills.sh && bash mirror-agents.sh' and commit the result."
+            git --no-pager diff
+            git status --porcelain
+            exit 1
+          fi
+
       # ── Your stack's controls — UNCOMMENT and fill in ─────────────────────
       # The commands here MUST match the ones named in AGENTS.md's Commands
       # section, so local and CI enforcement are identical.

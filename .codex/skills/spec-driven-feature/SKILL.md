@@ -227,4 +227,12 @@ session) applies them:
 
 ## What this skill deliberately does not do
 
-- It does not write any source code — only `spec.md`,
+- It does not write any source code — only `spec.md`, `plan.md`, and
+  `tasks.md`. Phase 4 is guidance for whoever runs implementation, not an
+  instruction for this skill to start coding.
+- It does not skip a gate just because the user seems impatient — say so,
+  don't silently comply. "Skip review, just generate all three" is the user's
+  call to make knowingly, not yours to make for them.
+
+(No-guessing, no-over-engineering, and the template requirement are covered by
+the behavioral guardrails and "Before starting" above; they apply throughout.)

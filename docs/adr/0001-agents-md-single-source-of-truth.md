@@ -23,18 +23,27 @@ Every tool-specific instruction file (`CLAUDE.md`,
 pointer** that redirects to `AGENTS.md` and contains no conventions of its own.
 Domain vocabulary lives once in `docs/glossary.md` and is referenced, not
 inlined. Skills are kept byte-identical across `.agents/`, `.claude/`,
-`.github/`, and `.codex/` by mirroring from a single canonical copy (`.agents/`)
-rather than hand-editing each.
+`.github/`, and `.codex/` by mirroring from a single canonical copy
+(`.agents/skills/`) rather than hand-editing each.
+
+Subagents follow the same single-source rule, with one twist: each tool reads
+agent definitions in a different format (Claude `.md` with `tools`/`model`
+front-matter, Copilot `.agent.md`, Codex `.toml`), so a byte-for-byte mirror is
+impossible. Instead the canonical agent is authored once as Markdown in
+`.agents/agents/<name>.md`, and `mirror-agents.sh` / `mirror-agents.ps1`
+**generate** each tool's native file from it. The rule is unchanged — edit the
+canonical copy, never a generated one — only the propagation mechanism differs
+(generate vs. copy).
 
 ## Consequences
 
 - One file to update for a convention change; pointers never need editing.
 - New tools are onboarded by adding a one-line pointer, not by re-authoring
   rules.
-- The cost: skill copies must be kept in sync mechanically (see
-  `mirror-skills.sh` / `mirror-skills.ps1`, which mirror them) rather than
-  edited in place — editing one copy by hand
-  reintroduces exactly the drift this decision prevents.
+- The cost: skill and agent copies must be kept in sync mechanically (skills via
+  `mirror-skills.sh` / `.ps1`, agents via `mirror-agents.sh` / `.ps1`) rather than
+  edited in place — editing a generated copy by hand reintroduces exactly the
+  drift this decision prevents.
 - `AGENTS.md` is loaded on every call, so it must stay short and specific; this
   decision concentrates the token-budget discipline in one place (see
   `docs/context-engineering.md`).

@@ -146,4 +146,4 @@ Add a verification pass after writing:
 
 Resync is worth running on a cadence (e.g. a scheduled task, or wired into CI
 as a warning when AGENTS.md's commands no longer match the build files). Offer
-this to the user after a succe
+this to the user after a successful Bootstrap.

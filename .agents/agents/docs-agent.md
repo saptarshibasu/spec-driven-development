@@ -1,6 +1,8 @@
 ---
 name: docs-agent
 description: Keeps documentation truthful and in sync with the code. Use for README/AGENTS.md/glossary/ADR updates and for catching docs that drift from the actual codebase. It edits docs only — never application behaviour, tests, or CI.
+tools: Read, Grep, Glob, Edit, Write
+model: sonnet
 ---
 
 # docs-agent
