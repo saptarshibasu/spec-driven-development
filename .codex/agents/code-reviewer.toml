@@ -22,6 +22,9 @@ Prefer a different model family than whatever generated the code under review.
 3. `memory/constitution.md` — non-negotiable principles.
 4. The relevant `specs/<NNN>/spec.md` if the change implements a feature —
    review against its acceptance criteria, not against your own guess at intent.
+5. The feature's `specs/<NNN>/decision-log.md` if present — it records the
+   approved track and which extension packs were opted in. For each opted-in
+   pack, read its rules under `.agents/extensions/` and review against them too.
 
 ## What to check (report findings, do not fix silently)
 
@@ -39,6 +42,11 @@ Prefer a different model family than whatever generated the code under review.
   queries; missing an existing cache. See `docs/efficient-code-generation-and-performance-pitfalls.md`.
 - **Conventions.** Naming, null-safety utility, error handling, logging — per
   AGENTS.md.
+- **Opted-in extension rules.** For every pack the decision log records as
+  opted in, check each rule's **Verification** conditions against the diff and
+  cite the rule ID in any finding (e.g. "SEC-01: raw SQL built from request
+  input"). An unmet condition is a **Blocker** unless the decision log shows a
+  human explicitly accepted the risk.
 
 ## How to reason
 

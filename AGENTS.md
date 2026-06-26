@@ -162,6 +162,12 @@ to use isn't in that glossary, ask rather than guessing at its meaning.
 - To start a new feature, use the `spec-driven-feature` skill rather than
   creating `specs/<NNN>/` by hand — it scaffolds the folder and templates
   for you and enforces the Specify → Plan → Tasks approval gates.
+- That skill first proposes a **workflow track** (A direct / B patch / C feature
+  / D architecture) to right-size the pipeline — approve or override it; don't
+  let it pick the depth silently. It also scans `.agents/extensions/` for opt-in
+  rule packs (e.g. `security/baseline`) and records the track, opt-ins, and each
+  approval in the feature's committed `decision-log.md`. See
+  `docs/adaptive-workflow-and-extensions.md`.
 - Read the spec for the feature you're touching before implementing. Specs
   are not auto-loaded into every prompt — pull in the one relevant to your
   current task explicitly.

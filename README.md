@@ -26,6 +26,7 @@ Each feature flows through gated phases. **An agent never advances a gate withou
 ```mermaid
 flowchart TD
     K["📜 Constitution<br/><i>always-true principles</i>"]:::gov
+    RT["🧭 Route<br/><b>pick a track</b> · A/B/C/D<br/>+ opt-in extensions"]:::gate
     S["1 · Specify · spec.md<br/><b>WHAT & WHY</b> — no tech"]:::phase
     CL["Clarify<br/><i>optional</i>"]:::gate
     CK["Checklist<br/><i>optional</i>"]:::gate
@@ -34,8 +35,11 @@ flowchart TD
     I["Implement<br/><i>red → green → refactor</i>"]:::impl
     R["🔍 Review<br/><i>code-reviewer agent</i>"]:::sensor
     B["📝 SCRATCH.md<br/><i>resume breadcrumb · gitignored</i>"]:::scratch
+    DL["📒 decision-log.md<br/><i>committed audit trail</i>"]:::audit
 
     K -. governs every phase .-> S
+    RT -->|✋ approve track| S
+    K -. governs .-> RT
     S -->|✋ approve| P -->|✋ approve| T -->|✋ approve| I --> R
     S -. optional sharpen .-> CL
     CL -.-> CK
@@ -44,6 +48,10 @@ flowchart TD
     P -.-> B
     T -.-> B
     B -. read on resume .-> S
+    RT -. logs track + opt-ins .-> DL
+    S -. logs each approval .-> DL
+    P -.-> DL
+    T -.-> DL
 
     classDef gov fill:#6f42c1,color:#fff,stroke:#4c2889
     classDef phase fill:#0969da,color:#fff,stroke:#0a4b8c
@@ -51,6 +59,7 @@ flowchart TD
     classDef impl fill:#1a7f37,color:#fff,stroke:#0f5323
     classDef sensor fill:#cf222e,color:#fff,stroke:#8b1a22
     classDef scratch fill:#6e7781,color:#fff,stroke:#424a53
+    classDef audit fill:#1a7f37,color:#fff,stroke:#0f5323,stroke-dasharray:3 2
 ```
 
 A spec that survives a framework swap unchanged was written correctly. Specs are pure **what/why**; the **how** lives in the plan; tasks are *generated* from both.
@@ -58,7 +67,7 @@ A spec that survives a framework swap unchanged was written correctly. Specs are
 **What you actually run, and when:**
 
 1. **Setup (once per project)** — run `create-constitution` to ratify principles, `sync-agents-md` to fill `AGENTS.md` from your repo, then `git config core.hooksPath .githooks` to arm the pre-commit sensor.
-2. **Start a feature** — run `spec-driven-feature`. It scaffolds `specs/<NNN>/` (calling `start-feature.sh` on macOS/Linux or `start-feature.ps1` on Windows) and drafts `spec.md` (Specify), marking open questions as `[NEEDS CLARIFICATION]`.
+2. **Start a feature** — run `spec-driven-feature`. It first **right-sizes the work**: it proposes a workflow track (A direct fix / B patch / C feature / D architecture) and scans `.agents/extensions/` for opt-in rule packs (e.g. a security baseline), and waits for you to approve the route. Then it scaffolds `specs/<NNN>/` (calling `start-feature.sh` on macOS/Linux or `start-feature.ps1` on Windows) and drafts `spec.md` (Specify), marking open questions as `[NEEDS CLARIFICATION]`. Trivial changes route to Track A and skip straight to implementation.
 3. **(Optional) Sharpen the spec at the approval gate** — `spec-driven-feature` pauses after the draft and waits for you. If it left `[NEEDS CLARIFICATION]` markers or the spec needs tightening, run `clarify` and/or `checklist` *here*; otherwise just answer any open questions inline. Neither is a required step. **You approve the spec.**
 4. **Plan, then tasks — same run** — once you approve, the skill continues *on its own* to `plan.md`, pauses for approval, then generates `tasks.md`. You don't relaunch it; each "stop" is a pause-for-approval, not an exit.
 5. **Implement** — red → green → refactor, one story at a time; lean on the `test-writer` and `debugger` agents as needed.
@@ -133,7 +142,7 @@ Then, in order:
 |---|---|---|
 | `create-constitution` | Once, at setup | Builds/ratifies `memory/constitution.md` from the template. |
 | `sync-agents-md` | At setup, then to re-sync | Fills in `AGENTS.md` + `docs/glossary.md` from the actual repo, and later flags drift — evidence-based, never guessed. |
-| `spec-driven-feature` | Start of every feature | Scaffolds `specs/<NNN>/` (via `start-feature.sh` / `.ps1`) and walks Specify → Plan → Tasks with approval gates. |
+| `spec-driven-feature` | Start of every feature | Proposes a workflow track (right-sizes depth) + scans opt-in extensions, then scaffolds `specs/<NNN>/` (via `start-feature.sh` / `.ps1`) and walks Specify → Plan → Tasks with approval gates. |
 | `clarify` | After the spec draft | Surfaces spec ambiguities, asks a few targeted questions, writes answers back. |
 | `checklist` | Before approving the spec | "Unit tests for the requirements" — complete, clear, consistent, measurable? |
 
@@ -149,12 +158,28 @@ native format — Claude `.md`, Copilot `.agent.md`, Codex `.toml` (ADR-0001).
 | `debugger` | Root-cause in its own discardable context; returns cause + minimal fix. |
 | `docs-agent` | Keeps docs truthful and in sync with the code. |
 
+### 🧩 Extensions — opt-in rule packs *(canonical in `.agents/extensions/`, loaded on demand)*
+
+Blocking rule packs you layer onto a feature only when it needs them — so
+constraints that don't belong in the always-loaded `AGENTS.md` or constitution
+still get enforced. The `spec-driven-feature` skill scans the packs' tiny
+opt-in prompts at feature start; a pack's full rules load only if you opt in, and
+the `code-reviewer` agent then enforces them by rule ID.
+
+| Pack | Opt in when | What it enforces |
+|---|---|---|
+| `security/baseline` | The feature touches auth, secrets, user data, external input, files, or network | `SEC-01`…`SEC-07`: input validation, authz, secret handling, data protection, output encoding, dependency hygiene, secure failure (directional reference — customise to your threat model). |
+
+Add your own under `.agents/extensions/<category>/<pack>/` — format in
+[`.agents/extensions/README.md`](.agents/extensions/README.md). Adapted from AWS Labs' AI-DLC (MIT-0); see [ADR-0002](docs/adr/0002-adaptive-workflow-and-extensions.md).
+
 ### 📚 Engineering reference — `docs/` *(read on demand, never auto-loaded)*
 
 | Read when you're… | Doc |
 |---|---|
 | Deciding what goes in AGENTS.md vs. a doc vs. a spec | [`context-engineering.md`](docs/context-engineering.md) |
 | Setting up guides + sensors around the agent | [`harness-engineering.md`](docs/harness-engineering.md) |
+| Right-sizing the pipeline (tracks) + opt-in rule packs | [`adaptive-workflow-and-extensions.md`](docs/adaptive-workflow-and-extensions.md) |
 | Cutting cost/latency without cutting the controls | [`token-efficiency.md`](docs/token-efficiency.md) |
 | Choosing a model per phase | [`model-selection-and-token-optimization-in-sdd.md`](docs/model-selection-and-token-optimization-in-sdd.md) |
 | Stopping agents writing slow code (N+1, per-row loops) | [`efficient-code-generation-and-performance-pitfalls.md`](docs/efficient-code-generation-and-performance-pitfalls.md) |
@@ -175,8 +200,9 @@ native format — Claude `.md`, Copilot `.agent.md`, Codex `.toml` (ADR-0001).
 ├── .agents/                       # CANONICAL sources — mirror scripts propagate → .claude/.github/.codex
 │   ├── skills/                    #   skills, mirrored byte-for-byte (edit here only — ADR-0001)
 │   │   ├── spec-driven-feature/  ·  clarify/  ·  checklist/  ·  create-constitution/  ·  sync-agents-md/
-│   └── agents/                    #   agents, GENERATED per tool (edit here only — ADR-0001)
-│       ├── code-reviewer.md  ·  test-writer.md  ·  debugger.md  ·  docs-agent.md
+│   ├── agents/                    #   agents, GENERATED per tool (edit here only — ADR-0001)
+│   │   ├── code-reviewer.md  ·  test-writer.md  ·  debugger.md  ·  docs-agent.md
+│   └── extensions/                #   opt-in rule packs, loaded on demand (e.g. security/baseline)
 │
 ├── .githooks/pre-commit / .ps1    # Secret scan · spec-ambiguity block · lint/test slot
 │
@@ -188,10 +214,10 @@ native format — Claude `.md`, Copilot `.agent.md`, Codex `.toml` (ADR-0001).
 │
 ├── memory/constitution.md         # Project-wide principles (rarely changes)
 │
-├── templates/                     # spec · plan · tasks · constitution · checklist
+├── templates/                     # spec · plan · tasks · decision-log · constitution · checklist
 │   └── research · data-model · quickstart      # optional per-feature artifacts
 │
-├── specs/<NNN-feature>/           # spec.md · plan.md · tasks.md (+ optional research/data-model/…)
+├── specs/<NNN-feature>/           # spec.md · plan.md · tasks.md · decision-log.md (committed audit trail)
 │   └── contracts/                 # this feature's API/event contracts
 │
 ├── docs/                          # 5 engineering guides + mcp.md + hooks.md + glossary.md + adr/
@@ -221,9 +247,11 @@ These aren't advice buried in a doc — they're encoded in the constitution and 
 - **The constitution is short on purpose.** Only what's *always* true. Conditional rules go in `AGENTS.md`; feature rules go in specs.
 - **Every artifact is a context unit.** Specs aren't auto-loaded — the agent pulls in only the one it needs. ([`context-engineering.md`](docs/context-engineering.md))
 
-## Related: spec-kit
+## Related: spec-kit & AI-DLC
 
 [GitHub spec-kit](https://github.com/github/spec-kit) is GitHub's toolkit for spec-driven development — a `specify` CLI with commands for constitution, specify, clarify, plan, tasks, and implement, plus integrations for many AI coding agents.
+
+[AWS Labs AI-DLC](https://github.com/awslabs/aidlc-workflows) (MIT-0) is a methodology shipped as agent steering/rules, built on adaptive workflows, flexible depth, and human-in-the-loop oversight. This kit's [workflow tracks, opt-in extensions, and decision log](docs/adaptive-workflow-and-extensions.md) are adapted from it — see [ADR-0002](docs/adr/0002-adaptive-workflow-and-extensions.md).
 
 ## 📖 Further reading
 

@@ -1,6 +1,6 @@
 ---
 name: spec-driven-feature
-description: Use when starting spec-driven development on a new feature — triggers on phrases like "create a spec for X", "let's spec out Y", "start a new feature: Z", "use SDD for this", or "write a spec before we code". Scaffolds a new specs/<NNN-feature-slug>/ folder from this project's templates/ folder and walks Specify -> Plan -> Tasks, asking for explicit approval before each phase. Do not use for a trivial one-line fix that doesn't warrant a spec — ask the user first if it's unclear whether this task needs one.
+description: Use when starting spec-driven development on a new feature — triggers on phrases like "create a spec for X", "let's spec out Y", "start a new feature: Z", "use SDD for this", or "write a spec before we code". First right-sizes the work by proposing a workflow track (direct fix / patch / feature / architecture) for human approval, then scaffolds specs/<NNN-feature-slug>/ from this project's templates/ folder and walks Specify -> Plan -> Tasks at the chosen depth, asking for explicit approval before each phase. Handles trivial changes too — they route to the lightweight track rather than being turned away.
 ---
 
 # Spec-Driven Feature
@@ -34,13 +34,13 @@ implementation that follows.
 
 ## Before starting
 
-Confirm `templates/spec.template.md`, `templates/plan.template.md`, and
-`templates/tasks.template.md` exist at the project root. If they don't,
-**stop** and tell the user to copy this knowledge base's `templates/`
-folder into the project first. This skill does not bundle its own copies
-of these templates — there is exactly one source of truth for what these
-documents look like, and it lives at the project root, not inside this
-skill.
+Confirm `templates/spec.template.md`, `templates/plan.template.md`,
+`templates/tasks.template.md`, and `templates/decision-log.template.md` exist at
+the project root. If they don't, **stop** and tell the user to copy this
+knowledge base's `templates/` folder into the project first. This skill does not
+bundle its own copies of these templates — there is exactly one source of truth
+for what these documents look like, and it lives at the project root, not inside
+this skill.
 
 ## Resuming an in-progress feature
 
@@ -76,6 +76,60 @@ documents rather than duplicating them.
 - **When the feature is complete** (`tasks.md` approved), delete `SCRATCH.md` —
   the committed documents are now the full record.
 
+`SCRATCH.md` is *not* the audit trail. The durable, committed record of what was
+decided and approved is `decision-log.md` (see Step R and the per-phase steps).
+The breadcrumb is throwaway resume state; the decision log outlives the feature.
+
+## Step R — Route the work (right-size before you scaffold)
+
+Not every change deserves the full three-phase pipeline, and forcing a one-line
+fix through a full spec is exactly the kind of ceremony this kit exists to avoid
+(see `docs/adaptive-workflow-and-extensions.md`). Before scaffolding, **propose a
+track**, then let the human approve or override it. *You recommend the track; the
+human decides it* — never pick the depth silently.
+
+Assess the request (reading the relevant code read-only if needed) and propose
+exactly one track, with a one-line rationale and the precise list of artifacts
+you will produce:
+
+- **Track A — Direct change.** Trivial, localized, no design choices: a typo,
+  copy/comment edit, config value, dependency bump, obvious one-liner. *No
+  feature folder.* Go straight to implement → review. Still test-first if
+  behaviour changes. Capture the rationale in the commit message, not a spec.
+- **Track B — Patch.** A localized bug fix or small enhancement with no new
+  architecture. Scaffold the folder, write a **short `spec.md`** (problem +
+  acceptance + out-of-scope) and `tasks.md`; **skip `plan.md`** unless a design
+  decision surfaces. Tests-first.
+- **Track C — Feature (default).** A normal new capability. Full Specify → Plan →
+  Tasks at standard depth. This is the default when you're unsure between B and C.
+- **Track D — Architecture / brownfield.** A new service, a cross-cutting change,
+  or modifying untested legacy code. Full pipeline at maximum depth: add
+  `research.md` and/or `data-model.md` as needed, use the strongest model
+  (see `AGENTS.md` Model Routing), write **characterization tests first** for any
+  legacy area, and record the cross-cutting decision as an **ADR** under
+  `docs/adr/` (the decision log gets a one-line pointer to it).
+
+Then, in the same turn:
+
+1. **Scan for opt-in extensions.** List every `*.opt-in.md` under
+   `.agents/extensions/` and present each pack's opt-in question to the human
+   (e.g. the Security Baseline question). Do **not** load any pack's full rules
+   yet — only the small opt-in prompts. A pack with no `*.opt-in.md` is always
+   enforced; note it as such.
+2. **Stop for approval of the route.** Present: the proposed track + rationale,
+   the exact artifacts you'll create, and the extension opt-in choices you're
+   recommending. Wait for the human to confirm or change the track and the
+   opt-ins before you scaffold or load any extension rules.
+3. After approval, for each opted-in pack, read its `<pack>.md` rules and treat
+   them as **blocking constraints** for every subsequent gate and for review.
+
+Record the approved track and the extension opt-in/opt-out choices as the first
+entries in `decision-log.md` immediately after scaffolding (Step 0).
+
+For **Track A**, stop here: there is no folder and no further phase — implement
+the change directly under the normal behavioral guardrails, then hand to review.
+For **Tracks B/C/D**, continue to Step 0.
+
 ## Step 0 — Scaffold (mechanical — don't use judgment here)
 
 Run the bundled scaffolding script from this skill's own directory, passing
@@ -105,12 +159,23 @@ you to this skill's folder.)
 If the environment can't execute either script, do the equivalent by
 hand: find the highest existing `NNN-` prefix under `specs/`, increment it,
 slugify the description into kebab-case, create `specs/<NNN>-<slug>/`, and
-copy the three templates into it as `spec.md`, `plan.md`, `tasks.md`.
+copy the four templates into it as `spec.md`, `plan.md`, `tasks.md`, and
+`decision-log.md`.
 
 This step is deterministic on purpose — picking the next feature number and
 copying files is exactly the kind of mechanical work that shouldn't depend
 on model judgment, and a script gets it right every time where free-form
 reasoning occasionally won't (off-by-one on the number, wrong slug, etc.).
+
+**Immediately after scaffolding:**
+
+- Open `decision-log.md` and fill in its first two rows — the **Route** row
+  (approved track + rationale) and the **Extensions** row (opted-in packs by ID,
+  or "none") — from the decisions just approved in Step R. This file is
+  committed; it is the feature's durable audit trail.
+- **Track B** does not use `plan.md`: delete the scaffolded `plan.md` and note
+  "plan skipped (Track B)" in the decision log, unless a design decision later
+  forces a promotion to Track C (record that promotion in the log too).
 
 ## Phase 1 — Specify
 
@@ -129,10 +194,15 @@ reasoning occasionally won't (off-by-one on the number, wrong slug, etc.).
    reach the user's committed `spec.md`. Do the same for any bracketed
    placeholder you didn't end up using (e.g. an unused User Story 2 slot) —
    delete the whole placeholder section rather than leaving it half-filled.
-6. **Stop. Present the draft spec to the user and ask for explicit
+6. If any extension pack was opted in, verify the spec against its rules now
+   (e.g. Security Baseline `SEC-01`/`SEC-02` shape what the requirements must
+   cover for inputs and access). Any unmet **Verification** condition is a
+   blocker — surface it before approval; don't defer a security gap to "later."
+7. **Stop. Present the draft spec to the user and ask for explicit
    approval** — or resolution of any `[NEEDS CLARIFICATION]` markers —
    before touching `plan.md`. Do not proceed on your own judgment that the
-   spec "looks done."
+   spec "looks done." On approval, append a **Specify** row to
+   `decision-log.md` (what was settled, any clarifications resolved).
 
 ## Phase 2 — Plan
 
@@ -171,10 +241,16 @@ Only after the user has approved Phase 1.
    of X ships with this capability?") and run those as parallel research
    tasks before finalising the plan — do not guess at version-sensitive
    details.
-5. Strip `plan.md`'s instructional comments the same way as Phase 1 step 5
+5. If any extension pack was opted in, verify the plan against its rules and
+   report compliance per rule ID (e.g. "SEC-03: secrets sourced from env, not
+   committed — PASS"). An unmet **Verification** condition is a blocker unless a
+   human explicitly accepts the risk, recorded in `decision-log.md`.
+6. Strip `plan.md`'s instructional comments the same way as Phase 1 step 5
    above, including the opening comment block.
-6. **Stop. Present the plan, the gate results, and any outstanding research
-   findings. Ask for explicit approval** before touching `tasks.md`.
+7. **Stop. Present the plan, the gate results, the extension-rule results, and
+   any outstanding research findings. Ask for explicit approval** before
+   touching `tasks.md`. On approval, append a **Plan** row to `decision-log.md`
+   (constitution gate verdicts; any complexity or risk justified).
 
 ## Phase 3 — Tasks
 
@@ -199,11 +275,15 @@ Only after the user has approved Phase 2.
    - Include the exact file path in every task description
    - End the phase with a Checkpoint describing how to verify the story
      works in isolation
-4. Strip `tasks.md`'s instructional comments the same way as Phase 1 step 5
+4. If any extension pack was opted in, ensure the relevant verification work is
+   represented as explicit tasks (e.g. an authz test for `SEC-02`, an
+   input-validation test for `SEC-01`) so compliance is checkable, not assumed.
+5. Strip `tasks.md`'s instructional comments the same way as Phase 1 step 5
    above.
-5. **Stop here.** Tell the user the three documents are ready and
-   implementation can begin story by story. This skill produces the
-   planning artifacts — it does not start writing implementation code.
+6. **Stop here.** Tell the user the documents are ready and implementation can
+   begin story by story. Append a **Tasks** row to `decision-log.md`. This skill
+   produces the planning artifacts — it does not start writing implementation
+   code.
 
 ## Phase 4 — Implementation handoff (guidance only)
 
@@ -221,6 +301,11 @@ session) applies them:
 - **Before any irreversible action** (deleting files or branches, dropping
   database tables, `git push --force`, posting to external services), stop
   and ask the user for confirmation.
+- Honour every opted-in extension pack's rules as blocking constraints while
+  implementing — they apply to the code, not just the plan.
+- If a decision changes during implementation (a deviation from spec or plan, a
+  risk accepted), record it in `decision-log.md` so the committed history of
+  *why* stays complete — don't leave the reasoning only in chat.
 - If approaching a context window limit, write a brief progress summary
   (what's done, what's next, any open decisions) to a scratch file before
   stopping so the session can resume cleanly.
