@@ -1,0 +1,31 @@
+# sed -i backups created by start-feature.sh on platforms where the in-place
+# edit leaves a .bak (the script removes them, but ignore as a safety net)
+*.bak
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+*.swp
+*~
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Scratch / progress files agents are told to write before stopping
+*.scratch
+/.agent-scratch/
+SCRATCH.md
+
+# Dependency-source resolution artifacts referenced in AGENTS.md
+# (decompiled / extracted upstream sources are never committed)
+/target/dependency-sources/
+/target/decompiled/
+
+# Common language build output — uncomment / extend for your stack
+# target/        # Java / Maven / Gradle
+# build/
+# __pycache__/   # Python
+# *.pyc
+# .venv/
+# node_modules/  # JS / TS
+# dist/

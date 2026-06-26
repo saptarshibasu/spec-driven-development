@@ -16,38 +16,36 @@ This repo is a ready-to-copy folder structure for teams practising **spec-driven
 │                                      #  Only add if your tool can't read AGENTS.md
 │                                      #  directly (most modern tools can)
 │
-├── .github/
-│   ├── copilot-instructions.md        # Optional — thin pointer to AGENTS.md
+├── .agents/                           # CANONICAL skills (tool-agnostic). This is
+│   └── skills/                        #  the SOURCE copy; setup.sh mirrors it into
+│       ├── spec-driven-feature/       #  .claude/.github/.codex so every tool sees
+│       │   ├── SKILL.md               #  identical definitions. Edit skills HERE,
+│       │   └── scripts/               #  then re-run setup.sh — never hand-edit a
+│       │       └── start-feature.sh   #  mirror (see docs/adr/0001-*).
+│       └── create-constitution/
+│           └── SKILL.md
+│
+├── .github/                           # GitHub Copilot
+│   ├── copilot-instructions.md        # Thin pointer to AGENTS.md
 │   ├── instructions/
-│   │   └── *.instructions.md          # Path-scoped Copilot rules — one file per
+│   │   └── sample.instructions.md     # Path-scoped Copilot rules — one file per
 │   │                                  #  path glob, declared with `applyTo:` frontmatter
-│   ├── skills/                        # Copilot-discoverable Skills
-│   │   └── <skill-name>/
-│   │       └── SKILL.md              # Skill definition (name, description, steps)
-│   │       └── scripts/
-│   │           └── start-feature.sh  # Automation scripts called by the skill
-│   ├── agents/                        # Copilot custom agents
-│   │   └── docs-agent.agent.md        # Selectable from the agent-picker in VS Code,
-│   │                                  #  via `/agent`, plain language, or `--agent=`
-│   └── workflows/                     # CI/CD — not covered by this playbook
+│   ├── skills/                        # ← mirror of .agents/skills/
+│   ├── agents/
+│   │   └── docs-agent.agent.md        # Example custom agent (docs upkeep)
+│   └── workflows/
+│       └── agent-harness.yml          # Example CI feedback harness (see docs/
+│                                      #  harness-engineering.md) — adapt to your stack
 │
-├── .claude/
-│   ├── skills/                        # Claude Code discoverable Skills
-│   │   └── <skill-name>/
-│   │       └── SKILL.md
-│   │       └── scripts/
-│   │           └── start-feature.sh
-│   └── agents/                        # Claude Code custom agents
-│       └── code-reviewer.md
+├── .claude/                           # Claude Code
+│   ├── skills/                        # ← mirror of .agents/skills/
+│   └── agents/
+│       └── code-reviewer.md           # Example review subagent (inferential sensor)
 │
-├── .codex/
-│   ├── skills/                        # Codex discoverable Skills
-│   │   └── <skill-name>/
-│   │       └── SKILL.md
-│   │       └── scripts/
-│   │           └── start-feature.sh
-│   └── agents/                        # Codex custom agents
-│       └── reviewer.toml
+├── .codex/                            # OpenAI Codex
+│   ├── skills/                        # ← mirror of .agents/skills/
+│   └── agents/
+│       └── reviewer.toml              # Example review agent
 │
 ├── memory/
 │   └── constitution.md                # Project-wide principles — rarely changes,
@@ -83,15 +81,22 @@ This repo is a ready-to-copy folder structure for teams practising **spec-driven
 │                                      #  own (e.g. model classes from a shared lib).
 │                                      #  Do not hand-edit — flag as stale if outdated
 │
-├── docs/
+├── docs/                              # Deep reference — read on demand, NOT loaded
+│   │                                  #  into every session (see context-engineering.md)
+│   ├── README.md                      # Index of the docs below
+│   ├── context-engineering.md         # What the agent sees per call; context rot
+│   ├── harness-engineering.md         # Feedforward guides + feedback sensors
+│   ├── token-efficiency.md            # Most correct work per token
+│   ├── model-selection-and-token-optimization-in-sdd.md   # Per-phase model routing
+│   ├── efficient-code-generation-and-performance-pitfalls.md  # Why agents write slow code
 │   ├── glossary.md                    # Domain vocabulary — pointed to (not inlined)
 │   │                                  #  from AGENTS.md's Domain Language section
 │   ├── adr/
+│   │   ├── 0000-template.md           # Copy this for a new ADR
 │   │   └── 0001-<decision>.md         # Architecture Decision Records — check here
 │   │                                  #  before changing any cross-cutting pattern
-│   └── <topic>.md                     # Deep-reference material: runbooks, API notes,
-│                                      #  one file per topic, referenced by name from
-│                                      #  AGENTS.md (not inlined)
+│   └── <topic>.md                     # Add your own deep-reference material here;
+│                                      #  reference by name from AGENTS.md (not inlined)
 │
 ├── src/
 │   └── ...                            # Your actual source tree — see AGENTS.md's
@@ -138,7 +143,8 @@ Or copy the files into an existing repo and run `setup.sh` from its root. Then:
 1. **Fill in `AGENTS.md`** — replace every `[bracketed placeholder]` with a fact that is true and specific to your repo. Delete any section that doesn't apply. Delete instructional comments once you're done. Every line should be something an agent could *not* already infer from training.
 2. **Ratify a constitution** — fill in `memory/constitution.md` (seeded from `templates/constitution.template.md` by `setup.sh`). Point to it from `AGENTS.md`.
 3. **Populate the glossary** — add your domain terms to `docs/glossary.md`.
-4. The `spec-driven-feature` skill is already installed in `.github/skills/`, `.claude/skills/`, and `.codex/skills/` after running `setup.sh`.
+4. The `spec-driven-feature` and `create-constitution` skills are installed in `.agents/skills/` (canonical) and mirrored into `.github/skills/`, `.claude/skills/`, and `.codex/skills/` by `setup.sh`. Edit them only in `.agents/` and re-run `setup.sh` to re-sync — never hand-edit a mirror.
+5. **Wire up the feedback half of your harness** — fill in `.github/workflows/agent-harness.yml` with your real lint/test commands (the same ones named in `AGENTS.md`), and set the model for the example review agents. See `docs/harness-engineering.md`.
 
 ### 2. Start a feature
 
@@ -172,11 +178,29 @@ Tasks in `tasks.md` are your implementation queue. Within each user story, tests
 
 ---
 
+## Engineering reference (`docs/`)
+
+The folder structure above is the *what*. These five guides are the *why* — the engineering principles that make agents productive, and what to wire up next. They are deep-reference material: read on demand, not loaded into every session.
+
+| Guide | Read it when |
+|---|---|
+| [`docs/context-engineering.md`](docs/context-engineering.md) | Deciding what goes in AGENTS.md vs. a doc vs. a spec; an agent is underperforming and you suspect a bloated or rotting context. |
+| [`docs/harness-engineering.md`](docs/harness-engineering.md) | Setting up the guides + sensors around your agent; deciding what to mechanize (tests/lint) vs. leave to review. |
+| [`docs/token-efficiency.md`](docs/token-efficiency.md) | Costs or latency are high; you want the most correct work per token without cutting the controls that prevent re-work. |
+| [`docs/model-selection-and-token-optimization-in-sdd.md`](docs/model-selection-and-token-optimization-in-sdd.md) | Configuring AGENTS.md's Model Routing — which model for Specify/Plan vs. routine work. |
+| [`docs/efficient-code-generation-and-performance-pitfalls.md`](docs/efficient-code-generation-and-performance-pitfalls.md) | Filling in AGENTS.md's Performance & Efficiency section; agents keep generating per-row loops or N+1 queries. |
+
+These tie back into the structure: context engineering shapes `AGENTS.md` and the tiering of instructions; harness engineering is embodied by the templates, gates, the `code-reviewer` agent, and `.github/workflows/agent-harness.yml`; the model-routing and performance docs are the reasoning behind those two `AGENTS.md` sections.
+
+---
+
 ## Further reading
 
 - [Distilled AI-Assisted Development Guidelines](https://medium.com/@sapbasu/distilled-ai-assisted-development-guidelines-351ac9ab0154) — the article this repo accompanies; includes the full reference SKILL.md and start-feature.sh
 - [AWS re:Invent 2025 — AI-Driven Development Lifecycle (AI-DLC)](https://youtu.be/1HNUH6j5t4A?si=RdaprHyWKS78UlmO) — the methodology this playbook builds on
 - [Harness engineering for coding agent users](https://martinfowler.com/articles/harness-engineering.html) — Martin Fowler on feedforward and feedback harnesses
+- [Effective context engineering for AI agents](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents) — Anthropic on the attention budget, compaction, and note-taking
+- [Agent READMEs: An Empirical Study of Context Files for Agentic Coding](https://arxiv.org/abs/2511.12884) — what's actually in real context files, and what helps vs. hurts
 - [How to write a great AGENTS.md](https://github.blog/ai-and-ml/github-copilot/how-to-write-a-great-agents-md-lessons-from-over-2500-repositories/) — lessons from 2,500+ repos (GitHub)
 - [Claude prompting best practices](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices) — Anthropic's guide to writing effective prompts; directly applicable to AGENTS.md and spec writing
 - [Claude Code documentation](https://docs.claude.com) — if you're using Claude as your agent runtime

@@ -77,6 +77,13 @@ anything crossing a service or repo boundary."]
   committed to version control, hard-coded in source files, or logged.
   Use the project's designated secrets manager or environment-variable
   mechanism — always.
+- **Cross-repo contracts — never guess, always verify.** When a dependency's
+  source is not visible in this repo, resolve it before writing any code that
+  depends on it: look for a sibling repo checkout, then a source jar, then
+  decompile the binary jar. The specific resolution commands and paths are in
+  `AGENTS.md`'s Multi-Repo section. If no resolution is possible, say so
+  explicitly — do not infer or fabricate class names, field names, method
+  signatures, or return types.
 - [Compliance / regulatory requirement, if any — e.g. "All PII must be
   encrypted at rest and in transit; no PII in logs."]
 - [Performance floor, if non-negotiable across all features — e.g.

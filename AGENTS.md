@@ -118,9 +118,9 @@ formatting, and the idioms you actually want repeated.]
      that the operation's grain is a design decision. State your project's
      actual idioms below; "be efficient" alone doesn't change the default.
      A real code snippet beats a prose rule here even more than elsewhere — see
-     `efficient-code-generation-and-performance-pitfalls.md` in the research
-     knowledge base this template comes from for the full reasoning and the
-     concrete cost numbers (typically 3-100x depending on the operation). -->
+     `docs/efficient-code-generation-and-performance-pitfalls.md` for the full
+     reasoning and the concrete cost numbers (typically 3-100x depending on the
+     operation). -->
 
 - **Batch/bulk over row-by-row — this is the highest-frequency, highest-cost
   pattern to call out explicitly.** [Name your stack's actual bulk idiom, e.g.
@@ -213,14 +213,24 @@ to use isn't in that glossary, ask rather than guessing at its meaning.
 - A contract snapshot of how this repo consumes that dependency is mirrored
   at `[path]` — do not hand-edit it; if it looks stale, the sync job is
   broken, not the file.
-- This repo cannot see [other repo]'s source. If you need to confirm a
-  contract and it isn't documented at `[path]`, say so explicitly rather than
-  inferring or fabricating the other side.
+- **Never guess or fabricate class names, field names, method signatures, or
+  return types for a dependency you cannot see.** Instead, resolve the source
+  in this order and stop at the first that succeeds:
+  1. **Sibling repo** — look for the dependency's source at `../[repo-name]/`
+     (one level up from this repo's root). If found, read directly from there.
+  2. **Source jar** — download the `-sources.jar` for the pinned version and
+     extract it to `[e.g., target/dependency-sources/]`. Read the extracted
+     `.java` files directly.
+  3. **Decompile the binary jar** — run `[e.g., java -jar cfr.jar
+     path/to/dep.jar --outputdir target/decompiled/]` and read the output.
+     Treat decompiled names as authoritative for field/method signatures.
+  4. **Stop and ask** — if none of the above is feasible in the current
+     environment, say so explicitly. Do not proceed by inference.
 
 ## Model Routing
 
-<!-- See model-selection-and-token-optimization-in-sdd.md in the research
-     folder for the full reasoning. Delete this section if your tooling
+<!-- See docs/model-selection-and-token-optimization-in-sdd.md for the full
+     reasoning. Delete this section if your tooling
      doesn't support per-phase model selection, but consider it default-on
      for any non-trivial project — the cost asymmetry is real in both
      directions. -->

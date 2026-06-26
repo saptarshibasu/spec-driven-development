@@ -1,0 +1,78 @@
+# agent-harness.yml — the computational FEEDBACK half of your harness.
+#
+# This is the backstop sensor that fires on every PR even when an agent (or a
+# human) skips the local checks. See docs/harness-engineering.md for the full
+# feedforward/feedback model. It is intentionally language-agnostic and mostly
+# commented out — uncomment and fill in the block for YOUR stack so the same
+# checks AGENTS.md tells the agent to run locally also run in CI.
+#
+# Principle: every prose rule you can turn into a job here becomes a
+# deterministic, non-hallucinating control — far stronger than a sentence the
+# agent re-reads each session.
+
+name: agent-harness
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# Cancel superseded runs on the same ref to save CI minutes (token efficiency
+# applies to CI too).
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # ── Repo-hygiene sensors (stack-agnostic — safe to keep on) ───────────
+      - name: No leftover template placeholders in committed docs
+        run: |
+          # Fails if a real (non-template) doc still contains unresolved
+          # [bracketed placeholders] or NEEDS CLARIFICATION markers.
+          # Adjust the path excludes to match where your templates live.
+          if grep -rnE '\[NEEDS CLARIFICATION' --include='*.md' \
+               specs/ 2>/dev/null; then
+            echo "::error::Unresolved [NEEDS CLARIFICATION] marker in a spec."
+            exit 1
+          fi
+
+      - name: Tool instruction files stay thin pointers
+        run: |
+          # CLAUDE.md and copilot-instructions.md must not grow real content —
+          # conventions belong in AGENTS.md (see ADR-0001).
+          for f in CLAUDE.md .github/copilot-instructions.md; do
+            [ -f "$f" ] || continue
+            if [ "$(grep -cvE '^\s*(<!--.*-->)?\s*$' "$f")" -gt 2 ]; then
+              echo "::error::$f has grown beyond a pointer — move content to AGENTS.md."
+              exit 1
+            fi
+          done
+
+      # ── Your stack's controls — UNCOMMENT and fill in ─────────────────────
+      # The commands here MUST match the ones named in AGENTS.md's Commands
+      # section, so local and CI enforcement are identical.
+      #
+      # - name: Set up runtime
+      #   uses: actions/setup-<java|python|node>@v4
+      #   with: { <version> }
+      #
+      # - name: Install
+      #   run: <exact install command from AGENTS.md>
+      #
+      # - name: Lint / format / type-check
+      #   run: <exact lint command from AGENTS.md>
+      #
+      # - name: Test (with coverage / query-count assertions)
+      #   run: <exact test command from AGENTS.md>
+      #
+      # Optional inferential sensor: an AI code-review step mirroring the
+      # .claude/agents/code-reviewer.md agent. Use a model/family different from
+      # the one that generated the code. See docs/harness-engineering.md.
