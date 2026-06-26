@@ -2,8 +2,8 @@
 
 # 🧭 Spec-Driven Development — Starter Kit
 
-**A ready-to-copy harness for building software with AI coding agents.**
-Specs before code, gates before merge, and a context file that earns every token.
+**A lightweight, customizable accelerator for spec-driven development with AI coding agents.**
+No install, no CLI — just files you adapt to your stack. Specs before code, gates before merge, and a context file that earns every token.
 
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![Method](https://img.shields.io/badge/method-Spec--Driven%20Development-6f42c1.svg)](#-the-workflow)
