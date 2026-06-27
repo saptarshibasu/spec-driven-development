@@ -34,6 +34,7 @@ deviation from the spec or plan made during implementation.
 | [DATE] | Specify | spec.md approved | [one line: what was settled, e.g. clarifications resolved] | [human] |
 | [DATE] | Plan | plan.md approved | [constitution gate results; any complexity justified] | [human] |
 | [DATE] | Tasks | tasks.md approved | [one line] | [human] |
+| [DATE] | Analyze | [implementation-ready / N blockers resolved / skipped — user's call] | [cross-artifact check: coverage + consistency; any finding knowingly accepted, or why skipped] | [human] |
 
 ## Notes
 

@@ -1,6 +1,6 @@
 ---
 name: spec-driven-feature
-description: Use when starting spec-driven development on a new feature — triggers on phrases like "create a spec for X", "let's spec out Y", "start a new feature: Z", "use SDD for this", or "write a spec before we code". First right-sizes the work by proposing a workflow track (direct fix / patch / feature / architecture) for human approval, then scaffolds specs/<NNN-feature-slug>/ from this project's templates/ folder and walks Specify -> Plan -> Tasks at the chosen depth, asking for explicit approval before each phase. Handles trivial changes too — they route to the lightweight track rather than being turned away.
+description: Use when starting spec-driven development on a new feature — triggers on phrases like "create a spec for X", "let's spec out Y", "start a new feature: Z", "use SDD for this", or "write a spec before we code". First right-sizes the work by proposing a workflow track (direct fix / patch / feature / architecture) for human approval, then scaffolds specs/<NNN-feature-slug>/ from this project's templates/ folder and walks Specify -> Plan -> Tasks -> Analyze at the chosen depth, asking for explicit approval before each phase. The Analyze gate (Tracks C/D) cross-checks the artifacts for coverage and consistency before implementation. Handles trivial changes too — they route to the lightweight track rather than being turned away.
 ---
 
 # Spec-Driven Feature
@@ -221,8 +221,48 @@ Only after the user has approved Phase 2.
    represented as explicit tasks (e.g. an authz test for `SEC-02`, an
    input-validation test for `SEC-01`) so compliance is checkable, not assumed.
 5. Strip `tasks.md`'s instructional comments (same as Phase 1 step 5).
-6. **Stop.** Tell the user docs are ready and implementation can begin story by
-   story. Append a **Tasks** row to `decision-log.md`.
+6. **Stop.** Present the task list and get approval. Append a **Tasks** row to
+   `decision-log.md`. Don't tell the user to start implementing yet — on Tracks
+   C/D the analyze gate (Phase 3.5) runs first.
+
+## Phase 3.5 — Analyze (gate, non-destructive)
+
+The last guide-side gate before implementation: cross-check the artifacts
+against each other and the constitution **while no code yet exists** — the
+cheapest place to catch a requirement that never became a task. Run the
+`analyze` skill (full detail there). It is **conditional on the track**:
+
+- **Track A** — skip (no artifacts to cross-check).
+- **Track B** — optional quick pass: spec ↔ tasks coverage only (no `plan.md`).
+- **Track C** — default-on: full spec ↔ plan ↔ tasks cross-check.
+- **Track D** — default-on, extended: also reconcile `research.md` /
+  `data-model.md` / `contracts/`, the ADR, and characterization-test ordering.
+
+On C/D analyze runs **by default**, but it is a gate the human controls, not a
+hard requirement: the user may **explicitly skip** it. Don't skip silently —
+offer to run it, and if the user declines, **record the skip** (and that it was
+their call) in `decision-log.md` before proceeding to implementation. Skipping a
+gate is the user's decision to make knowingly, exactly as with review.
+
+`analyze` **reports, it does not edit.** It checks requirement→task coverage,
+spec/plan/tasks contradictions, orphan/duplicate/ambiguous tasks, test-first
+integrity, constitution alignment, and any opted-in extension's verification
+tasks; each finding is routed to **the phase that owns the fix — Specify, Plan,
+or Tasks** (a missing task is a `tasks.md` fix; a spec/plan contradiction is a
+`spec.md` or `plan.md` fix). It is distinct from `checklist` (grades the spec
+alone) and the `code-reviewer` agent (reviews the diff later).
+
+1. Offer to run analyze at the depth for the track. If the user declines on C/D,
+   log the skip (step 4) and proceed.
+2. **Blockers** (coverage gap, contradiction, unmet opted-in verification,
+   constitution violation): loop back to whichever phase owns the fix (Specify /
+   Plan / Tasks) — not always Tasks — fix there, then **re-run analyze**. Don't
+   start implementation on an unresolved blocker.
+3. A human may knowingly accept a finding instead of fixing it — record that
+   acceptance in `decision-log.md`.
+4. On a clean verdict, a knowingly-accepted finding, **or an explicit skip**,
+   append an **Analyze** row to `decision-log.md` (verdict, or "skipped — user's
+   call") and tell the user implementation can begin story by story.
 
 ## Phase 4 — Implementation handoff (guidance only)
 

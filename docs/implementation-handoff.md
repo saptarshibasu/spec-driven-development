@@ -4,6 +4,10 @@ Rules for the agent (or session) that executes the tasks produced by the
 `spec-driven-feature` skill. The planning skill produces `tasks.md`; this
 document governs what happens when someone picks it up and starts building.
 
+On Tracks C/D, `tasks.md` has already cleared the **Analyze** gate (a
+non-destructive spec ↔ plan ↔ tasks coverage/consistency check) before reaching
+you — so begin from a task list whose blockers were resolved, not a raw draft.
+
 ## Execution rules
 
 - Execute tasks in the order defined in `tasks.md`, respecting phase and

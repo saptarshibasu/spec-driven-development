@@ -1,6 +1,6 @@
 ---
 name: spec-driven-feature
-description: Use when starting spec-driven development on a new feature — triggers on phrases like "create a spec for X", "let's spec out Y", "start a new feature: Z", "use SDD for this", or "write a spec before we code". First right-sizes the work by proposing a workflow track (direct fix / patch / feature / architecture) for human approval, then scaffolds specs/<NNN-feature-slug>/ from this project's templates/ folder and walks Specify -> Plan -> Tasks at the chosen depth, asking for explicit approval before each phase. Handles trivial changes too — they route to the lightweight track rather than being turned away.
+description: Use when starting spec-driven development on a new feature — triggers on phrases like "create a spec for X", "let's spec out Y", "start a new feature: Z", "use SDD for this", or "write a spec before we code". First right-sizes the work by proposing a workflow track (direct fix / patch / feature / architecture) for human approval, then scaffolds specs/<NNN-feature-slug>/ from this project's templates/ folder and walks Specify -> Plan -> Tasks -> Analyze at the chosen depth, asking for explicit approval before each phase. The Analyze gate (Tracks C/D) cross-checks the artifacts for coverage and consistency before implementation. Handles trivial changes too — they route to the lightweight track rather than being turned away.
 ---
 
 # Spec-Driven Feature
@@ -221,18 +221,15 @@ Only after the user has approved Phase 2.
    represented as explicit tasks (e.g. an authz test for `SEC-02`, an
    input-validation test for `SEC-01`) so compliance is checkable, not assumed.
 5. Strip `tasks.md`'s instructional comments (same as Phase 1 step 5).
-6. **Stop.** Tell the user docs are ready and implementation can begin story by
-   story. Append a **Tasks** row to `decision-log.md`.
+6. **Stop.** Present the task list and get approval. Append a **Tasks** row to
+   `decision-log.md`. Don't tell the user to start implementing yet — on Tracks
+   C/D the analyze gate (Phase 3.5) runs first.
 
-## Phase 4 — Implementation handoff (guidance only)
+## Phase 3.5 — Analyze (gate, non-destructive)
 
-This skill does not run implementation itself. When the user is ready to
-implement, point the executing agent (or a fresh session) to
-`docs/implementation-handoff.md` — it contains the full execution rules.
+The last guide-side gate before implementation: cross-check the artifacts
+against each other and the constitution **while no code yet exists** — the
+cheapest place to catch a requirement that never became a task. Run the
+`analyze` skill (full detail there). It is **conditional on the track**:
 
-## What this skill deliberately does not do
-
-- Writes only `spec.md`, `plan.md`, `tasks.md` — no source code. For
-  implementation, see `docs/implementation-handoff.md`.
-- Never skips a gate for impatience. "Skip review" is the user's call to make
-  knowingly — say so rather than silently complying.
+- **Track A** — skip (no ar

@@ -32,6 +32,7 @@ flowchart TD
     CK["Checklist<br/><i>optional</i>"]:::gate
     P["2 · Plan · plan.md<br/><b>HOW</b> — stack & design"]:::phase
     T["3 · Tasks · tasks.md<br/><b>ordered, tests-first</b>"]:::phase
+    AN["Analyze<br/><i>C/D default · skippable<br/>cross-artifact check</i>"]:::gate
     I["Implement<br/><i>red → green → refactor</i>"]:::impl
     R["🔍 Review<br/><i>code-reviewer agent</i>"]:::sensor
     B["📝 SCRATCH.md<br/><i>resume breadcrumb · gitignored</i>"]:::scratch
@@ -40,10 +41,13 @@ flowchart TD
     K -. governs every phase .-> S
     RT -->|✋ approve track| S
     K -. governs .-> RT
-    S -->|✋ approve| P -->|✋ approve| T -->|✋ approve| I --> R
+    S -->|✋ approve| P -->|✋ approve| T -->|✋ approve| AN -->|✋ ready| I --> R
     S -. optional sharpen .-> CL
     CL -.-> CK
     CK -.-> S
+    AN -. blockers → owning phase .-> S
+    AN -.-> P
+    AN -.-> T
     S -. writes at each gate .-> B
     P -.-> B
     T -.-> B
@@ -52,6 +56,7 @@ flowchart TD
     S -. logs each approval .-> DL
     P -.-> DL
     T -.-> DL
+    AN -.-> DL
 
     classDef gov fill:#6f42c1,color:#fff,stroke:#4c2889
     classDef phase fill:#0969da,color:#fff,stroke:#0a4b8c
@@ -67,13 +72,14 @@ A spec that survives a framework swap unchanged was written correctly. Specs are
 **What you actually run, and when:**
 
 1. **Setup (once per project)** — run `init-project` to scan the codebase and generate both `AGENTS.md` and `memory/constitution.md` with approval gates, then `git config core.hooksPath .githooks` to arm the pre-commit sensor.
-2. **Start a feature** — run `spec-driven-feature`. It first **right-sizes the work**: it proposes a workflow track (A direct fix / B patch / C feature / D architecture) and scans `.agents/extensions/` for opt-in rule packs (e.g. a security baseline), and waits for you to approve the route. Then it scaffolds `specs/<NNN>/` (calling `start-feature.sh` on macOS/Linux or `start-feature.ps1` on Windows) and drafts `spec.md` (Specify), marking open questions as `[NEEDS CLARIFICATION]`. Trivial changes route to Track A and skip straight to implementation.
+2. **Start a feature** — run `spec-driven-feature`. It first **right-sizes the work**: it proposes a workflow track (A direct fix / B patch / C feature / D architecture — this kit's own naming for adaptive depth; the [four-track table](docs/adaptive-workflow-and-extensions.md#the-four-tracks) explains each) and scans `.agents/extensions/` for opt-in rule packs (e.g. a security baseline), and waits for you to approve the route. Then it scaffolds `specs/<NNN>/` (calling `start-feature.sh` on macOS/Linux or `start-feature.ps1` on Windows) and drafts `spec.md` (Specify), marking open questions as `[NEEDS CLARIFICATION]`. Trivial changes route to Track A and skip straight to implementation.
 3. **(Optional) Sharpen the spec at the approval gate** — `spec-driven-feature` pauses after the draft and waits for you. If it left `[NEEDS CLARIFICATION]` markers or the spec needs tightening, run `clarify` and/or `checklist` *here*; otherwise just answer any open questions inline. Neither is a required step. **You approve the spec.**
 4. **Plan, then tasks — same run** — once you approve, the skill continues *on its own* to `plan.md`, pauses for approval, then generates `tasks.md`. You don't relaunch it; each "stop" is a pause-for-approval, not an exit.
-5. **Implement** — red → green → refactor, one story at a time; lean on the `test-writer` and `debugger` agents as needed.
-6. **Review & commit** — the `code-reviewer` agent checks the diff against spec + constitution; on commit, `.githooks/pre-commit` blocks secrets, unresolved markers, and runs your lint/tests.
+5. **Analyze (gate, Tracks C/D — default-on, skippable)** — before implementation, the skill runs `analyze`: a **non-destructive** cross-artifact check that every requirement maps to a task and that spec, plan, and tasks don't contradict each other. It *reports*, never rewrites — blockers loop back to **whichever phase owns the fix** (spec, plan, *or* tasks), then re-run; a clean verdict clears the gate. It runs by default on C/D but you can explicitly skip it (the skip is logged in `decision-log.md`, like skipping review). Skipped on Track A; a light spec↔tasks pass on Track B.
+6. **Implement** — red → green → refactor, one story at a time; lean on the `test-writer` and `debugger` agents as needed.
+7. **Review & commit** — the `code-reviewer` agent checks the diff against spec + constitution; on commit, `.githooks/pre-commit` blocks secrets, unresolved markers, and runs your lint/tests.
 
-Steps 2–6 repeat per feature; step 1 is one-time (re-run `sync-agents-md` whenever the project drifts).
+Steps 2–7 repeat per feature; step 1 is one-time (re-run `sync-agents-md` whenever the project drifts).
 
 > [!NOTE]
 > **Interrupted mid-feature?** Nothing is lost — your progress lives in that feature's `specs/<NNN>/spec.md`, `plan.md`, and `tasks.md`, and the skill keeps a gitignored `SCRATCH.md` breadcrumb updated **at each gate** (current phase, what's next, open questions). To resume, just re-invoke `spec-driven-feature` for the same feature (don't re-run `start-feature` — it won't overwrite an existing feature): it reads the breadcrumb plus the filled-in documents and picks up at the next unapproved gate. Even an abrupt kill mid-phase is covered, because the breadcrumb is written as it goes — not only on a graceful stop.
@@ -88,7 +94,7 @@ flowchart TB
     subgraph FF["🧭 Feedforward · guides (before)"]
         direction LR
         A["AGENTS.md + constitution<br/><i>always-on context</i>"]
-        SK["skills: spec-driven-feature (tracks),<br/><i>clarify, checklist</i>"]
+        SK["skills: spec-driven-feature (tracks),<br/><i>clarify, checklist, analyze</i>"]
         TPL["templates/<br/><i>spec · plan · tasks</i>"]
     end
     subgraph FB["🛰️ Feedback · sensors (after)"]
@@ -148,9 +154,10 @@ Then, in order:
 | `init-project` | Once, at setup | Scans the codebase and generates both `AGENTS.md` and `memory/constitution.md` from their templates, with approval gates before writing either file. |
 | `amend-constitution` | To amend the constitution | Updates `memory/constitution.md` section by section; use after `init-project` when principles need revisiting. |
 | `sync-agents-md` | To re-sync after drift | Re-fills `AGENTS.md` + `docs/glossary.md` from the actual repo when the project has changed significantly. |
-| `spec-driven-feature` | Start of every feature | Proposes a workflow track (right-sizes depth) + scans opt-in extensions, then scaffolds `specs/<NNN>/` (via `start-feature.sh` / `.ps1`) and walks Specify → Plan → Tasks with approval gates. |
+| `spec-driven-feature` | Start of every feature | Proposes a workflow track (right-sizes depth) + scans opt-in extensions, then scaffolds `specs/<NNN>/` (via `start-feature.sh` / `.ps1`) and walks Specify → Plan → Tasks → Analyze with approval gates. |
 | `clarify` | After the spec draft | Surfaces spec ambiguities, asks a few targeted questions, writes answers back. |
 | `checklist` | Before approving the spec | "Unit tests for the requirements" — complete, clear, consistent, measurable? |
+| `analyze` | After tasks, before implementing (Tracks C/D) | Non-destructive cross-check of spec ↔ plan ↔ tasks: requirement→task coverage, contradictions, orphan/duplicate tasks, constitution alignment. Reports & routes; never rewrites. ([ADR-0003](docs/adr/0003-analyze-gate.md)) |
 
 ### 🤖 Agents — the sensor half *(canonical in `.agents/agents/`, generated into every tool)*
 
@@ -202,24 +209,22 @@ Add your own under `.agents/extensions/<category>/<pack>/` — format in
 ├── AGENTS.md              # generated by init-project; keep short & specific
 ├── CLAUDE.md              # pointer → AGENTS.md
 ├── .mcp.json.example      # copy to .mcp.json; trim to 5–7 servers
-├── mirror-skills.sh/.ps1  # re-mirror .agents/skills/ → tool dirs after edits
-├── mirror-agents.sh/.ps1  # re-generate .agents/agents/ → per-tool formats
 │
 ├── .agents/               # canonical sources — edit here only (ADR-0001)
-│   ├── skills/            # spec-driven-feature · clarify · checklist
+│   ├── skills/            # spec-driven-feature · clarify · checklist · analyze
 │   │                      #   init-project · amend-constitution · sync-agents-md
 │   ├── agents/            # code-reviewer · test-writer · debugger · docs-agent
 │   └── extensions/        # opt-in rule packs (e.g. security/baseline)
 │
-├── .githooks/
-│   ├── pre-commit         # secret scan · ambiguity block · lint/test slot
-│   └── pre-commit.ps1
-│
+├── .claude/               # Claude Code: skills/ · agents/*.md (generated)
 ├── .github/               # Copilot: skills/ · agents/*.agent.md (generated)
 │   └── workflows/
 │       └── agent-harness.yml  # CI feedback harness
-├── .claude/               # Claude Code: skills/ · agents/*.md (generated)
 ├── .codex/                # Codex: skills/ · agents/*.toml (generated)
+│
+├── .githooks/
+│   ├── pre-commit         # secret scan · ambiguity block · lint/test slot
+│   └── pre-commit.ps1
 │
 ├── memory/
 │   └── constitution.md    # project-wide principles; governs every phase
@@ -234,7 +239,10 @@ Add your own under `.agents/extensions/<category>/<pack>/` — format in
 │   └── adr/               # architecture decision records
 │
 ├── src/                   # your source tree
-└── tests/                 # contract/ · integration/ · unit/ · characterization/
+├── tests/                 # contract/ · integration/ · unit/ · characterization/
+│
+├── mirror-skills.sh/.ps1  # re-mirror .agents/skills/ → tool dirs after edits
+└── mirror-agents.sh/.ps1  # re-generate .agents/agents/ → per-tool formats
 ```
 
 </details>

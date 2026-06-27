@@ -48,6 +48,11 @@ This is the breadth-and-depth elasticity AI-DLC calls "Principle 10 (no
 hard-wired, opinionated workflows)," expressed as four named, reviewable tracks
 rather than a free-form judgment, so the routing itself is auditable.
 
+The track also governs the **Analyze gate** — the non-destructive spec ↔ plan ↔
+tasks cross-check that runs before implementation: skipped on A, a light
+spec↔tasks pass on B, run on C, run extended on D. Same principle, depth scales
+with the work. See `docs/adr/0003-analyze-gate.md`.
+
 ## Opt-in extensions
 
 An **extension** is a pack of blocking rules layered onto a feature on demand —
