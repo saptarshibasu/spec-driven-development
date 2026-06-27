@@ -1,9 +1,9 @@
 <!--
   TEMPLATE — one per feature, at specs/<NNN-feature-name>/decision-log.md.
 
-  This is the feature's DURABLE, COMMITTED audit trail — distinct from SCRATCH.md
-  (which is an ephemeral, gitignored resume breadcrumb you delete when done). The
-  decision log is the opposite: it is committed and it outlives the feature, so a
+  This is the feature's DURABLE, COMMITTED audit trail. Live resume state lives
+  elsewhere — each document's **Status** header (Draft -> Approved) — so the log
+  doesn't track work in flight. It is committed and it outlives the feature, so a
   future agent or human can see WHAT was decided, WHO approved it, and WHY —
   without replaying chat history that no longer exists.
 

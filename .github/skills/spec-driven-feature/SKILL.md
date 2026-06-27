@@ -40,27 +40,29 @@ this kit first. One source of truth: the project root, not this skill.
 If `specs/<NNN>-<slug>/` already exists: **resume, don't start** — Step 0
 refuses to overwrite by design.
 
-1. Read `spec.md`, `plan.md`, `tasks.md`. Full of placeholders = not done;
-   filled in = complete.
-2. Resume at the first incomplete phase; honour the approval gate before moving on.
-3. If `SCRATCH.md` exists from an earlier session, read it first.
+1. Read each document's **Status** header (`spec.md`, `plan.md`, `tasks.md`):
+   `Draft` = drafted but not yet approved; `Approved` = that gate is cleared. A
+   document still full of placeholders hasn't been started.
+2. Resume at the first phase whose document is not `Approved`; honour the
+   approval gate before moving on. Any `[NEEDS CLARIFICATION]` markers still in
+   the documents are the open questions left to settle.
+3. Cross-check `decision-log.md` — it carries one committed row per approved gate.
 
-## Progress breadcrumb (keep it current)
+## Approval status (the resume signal)
 
-Maintain `specs/<NNN>-<slug>/SCRATCH.md` as you go (gitignored). Breadcrumb,
-not a deliverable — points at the real documents, doesn't duplicate them.
+Each document carries a **Status** field in its header — `Draft` until you
+approve that gate, then `Approved — <who>, <YYYY-MM-DD>`. This field *is* the
+resume state: it records what has been ratified without a separate breadcrumb
+file.
 
-- **At the end of each phase, immediately before you stop for approval**, write
-  or overwrite `SCRATCH.md` with a few lines: the current phase and its status
-  (drafted / approved), what the next phase is, and any open decisions or
-  `[NEEDS CLARIFICATION]` still outstanding.
-- **On resume**, read it first (see "Resuming an in-progress feature" above),
-  then trust the on-disk documents where they disagree.
-- **When the feature is complete** (`tasks.md` approved), delete `SCRATCH.md` —
-  the committed documents are now the full record.
-
-`SCRATCH.md` is throwaway resume state — not the audit trail. `decision-log.md`
-is the durable record; it outlives the feature.
+- **At each approval gate**, flip the just-approved document's Status from
+  `Draft` to `Approved — <who>, <date>` in the same step that appends the
+  `decision-log.md` row.
+- **On resume**, the first document still at `Draft` (or all-placeholder) is
+  where work picks up — see "Resuming an in-progress feature" above.
+- The filled-in body shows what's *drafted*; the Status field shows whether it's
+  *approved*; `decision-log.md` is the durable, committed audit trail of those
+  approvals. No throwaway scratch file is needed.
 
 ## Step R — Route the work (right-size before you scaffold)
 
@@ -69,17 +71,20 @@ Before scaffolding, **propose a track** (see `docs/adaptive-workflow-and-extensi
 
 Propose exactly one track with a one-line rationale and the artifacts you'll produce:
 
-- **Track A — Direct change.** Trivial, localized, no design choices: a typo,
+- **Track A · Trivial — Direct change.** Trivial, localized, no design choices: a typo,
   copy/comment edit, config value, dependency bump, obvious one-liner. *No
   feature folder.* Go straight to implement → review. Still test-first if
   behaviour changes. Capture the rationale in the commit message, not a spec.
-- **Track B — Patch.** A localized bug fix or small enhancement with no new
+- **Track B · Simple — Patch.** A localized bug fix or small enhancement with no new
   architecture. Scaffold the folder, write a **short `spec.md`** (problem +
-  acceptance + out-of-scope) and `tasks.md`; **skip `plan.md`** unless a design
-  decision surfaces. Tests-first.
-- **Track C — Feature (default).** A normal new capability. Full Specify → Plan →
+  acceptance + **unchanged-behavior / regression guard** + out-of-scope) and
+  `tasks.md`; **skip `plan.md`** unless a design decision surfaces. Tests-first —
+  for a bug fix, that includes a regression test for each unchanged-behavior
+  invariant (write it first, confirm it stays green) plus a test that fails on
+  the bug and passes once fixed.
+- **Track C · Moderate — Feature (default).** A normal new capability. Full Specify → Plan →
   Tasks at standard depth. This is the default when you're unsure between B and C.
-- **Track D — Architecture / brownfield.** A new service, a cross-cutting change,
+- **Track D · Complex — Architecture / brownfield.** A new service, a cross-cutting change,
   or modifying untested legacy code. Full pipeline at maximum depth: add
   `research.md` and/or `data-model.md` as needed, use the strongest model
   (see `AGENTS.md` Model Routing), write **characterization tests first** for any
@@ -104,7 +109,16 @@ Record the approved track and extension choices as the first entries in
 
 ## Step 0 — Scaffold (mechanical — don't use judgment here)
 
-Run the scaffold script with the feature description as a single argument.
+**First, check for an existing feature — don't blind-scaffold.** The script
+always mints a *new* incremented folder, so running it for work that already
+has one creates a duplicate. Before running it: list `specs/` and compare
+against the user's request. If a folder plausibly matches (by slug or topic),
+**stop and confirm** with the user — "resume `specs/<NNN>-<slug>/` or start a
+new feature?" — and on resume, follow "Resuming an in-progress feature" above
+instead of scaffolding. Only scaffold once you've confirmed this is genuinely
+new. When in doubt, ask; a wrong guess either duplicates or overwrites intent.
+
+Then run the scaffold script with the feature description as a single argument.
 Two byte-equivalent versions — use the one matching the current OS:
 
 ```bash
@@ -152,9 +166,15 @@ the four templates as `spec.md`, `plan.md`, `tasks.md`, `decision-log.md`.
    (e.g. Security Baseline `SEC-01`/`SEC-02` shape what the requirements must
    cover for inputs and access). Any unmet **Verification** condition is a
    blocker — surface it before approval; don't defer a security gap to "later."
-7. **Stop.** Present the draft, ask for explicit approval or resolution of any
-   `[NEEDS CLARIFICATION]` markers before touching `plan.md`. Don't proceed on
-   your own judgment. On approval, append a **Specify** row to `decision-log.md`.
+7. **Stop.** Present the draft. **Offer the optional sharpeners before approval** —
+   they aren't auto-run, so name them or the human won't know they exist: if any
+   `[NEEDS CLARIFICATION]` markers remain, recommend the `clarify` skill; for a
+   high-stakes, security-sensitive, or ambiguous spec, offer the `checklist` skill
+   (a requirements-quality or domain pass). Both are optional — surface them and
+   let the human choose; don't run them unprompted. Then ask for explicit approval
+   or resolution of any `[NEEDS CLARIFICATION]` markers before touching `plan.md`.
+   Don't proceed on your own judgment. On approval, set `spec.md`'s **Status** to
+   `Approved — <who>, <date>` and append a **Specify** row to `decision-log.md`.
 
 ## Phase 2 — Plan
 
@@ -191,8 +211,9 @@ Only after the user has approved Phase 1.
    human explicitly accepts the risk, recorded in `decision-log.md`.
 6. Strip `plan.md`'s instructional comments (same as Phase 1 step 5).
 7. **Stop.** Present plan, gate results, extension results, research findings.
-   Ask for explicit approval before touching `tasks.md`. On approval, append a
-   **Plan** row to `decision-log.md`.
+   Ask for explicit approval before touching `tasks.md`. On approval, set
+   `plan.md`'s **Status** to `Approved — <who>, <date>` and append a **Plan** row
+   to `decision-log.md`.
 
 ## Phase 3 — Tasks
 
@@ -221,8 +242,9 @@ Only after the user has approved Phase 2.
    represented as explicit tasks (e.g. an authz test for `SEC-02`, an
    input-validation test for `SEC-01`) so compliance is checkable, not assumed.
 5. Strip `tasks.md`'s instructional comments (same as Phase 1 step 5).
-6. **Stop.** Present the task list and get approval. Append a **Tasks** row to
-   `decision-log.md`. Don't tell the user to start implementing yet — on Tracks
+6. **Stop.** Present the task list and get approval. On approval, set
+   `tasks.md`'s **Status** to `Approved — <who>, <date>` and append a **Tasks**
+   row to `decision-log.md`. Don't tell the user to start implementing yet — on Tracks
    C/D the analyze gate (Phase 3.5) runs first.
 
 ## Phase 3.5 — Analyze (gate, non-destructive)
@@ -232,4 +254,17 @@ against each other and the constitution **while no code yet exists** — the
 cheapest place to catch a requirement that never became a task. Run the
 `analyze` skill (full detail there). It is **conditional on the track**:
 
-- **Track A** — skip (no ar
+- **Track A** — skip (no artifacts to cross-check).
+- **Track B** — optional quick pass: spec ↔ tasks coverage only (no `plan.md`).
+- **Track C** — default-on: full spec ↔ plan ↔ tasks cross-check.
+- **Track D** — default-on, extended: also reconcile `research.md` /
+  `data-model.md` / `contracts/`, the ADR, and characterization-test ordering.
+
+On C/D analyze runs **by default**, but it is a gate the human controls, not a
+hard requirement: the user may **explicitly skip** it. Don't skip silently —
+offer to run it, and if the user declines, **record the skip** (and that it was
+their call) in `decision-log.md` before proceeding to implementation. Skipping a
+gate is the user's decision to make knowingly, exactly as with review.
+
+`analyze` **reports, it does not edit.** It checks requirement→task coverage,
+spec/plan/tasks

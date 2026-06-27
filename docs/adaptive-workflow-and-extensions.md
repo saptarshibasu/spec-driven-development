@@ -33,10 +33,10 @@ every token") while preserving human-in-the-loop control.
 
 | Track | Use when | Artifacts | Model |
 |---|---|---|---|
-| **A — Direct change** | Trivial, localized, no design choice (typo, copy, config value, dep bump, obvious one-liner) | None — no feature folder; rationale in the commit message | Fast/cheap |
-| **B — Patch** | Localized bug fix or small enhancement, no new architecture | `spec.md` (short) + `tasks.md`; **no `plan.md`** | Mid-tier |
-| **C — Feature** *(default)* | A normal new capability | Full `spec.md` + `plan.md` + `tasks.md` | Strong for Specify/Plan |
-| **D — Architecture / brownfield** | New service, cross-cutting change, or touching untested legacy | Full pipeline + `research.md`/`data-model.md` as needed + **ADR** + characterization tests first | Strongest |
+| **A · Trivial — Direct change** | Trivial, localized, no design choice (typo, copy, config value, dep bump, obvious one-liner) | None — no feature folder; rationale in the commit message | Fast/cheap |
+| **B · Simple — Patch** | Localized bug fix or small enhancement, no new architecture | `spec.md` (short) + `tasks.md`; **no `plan.md`** | Mid-tier |
+| **C · Moderate — Feature** *(default)* | A normal new capability | Full `spec.md` + `plan.md` + `tasks.md` | Strong for Specify/Plan |
+| **D · Complex — Architecture / brownfield** | New service, cross-cutting change, or touching untested legacy | Full pipeline + `research.md`/`data-model.md` as needed + **ADR** + characterization tests first | Strongest |
 
 The agent recommends exactly one track with a one-line rationale and the precise
 artifact list; the human confirms or overrides. The choice — and any later
@@ -89,12 +89,12 @@ Every adaptive choice is recorded in the feature's committed
 `specs/<NNN>/decision-log.md`: the approved track, the extension opt-ins, and
 each gate approval, plus any deviation made during implementation. This is the
 *end-to-end traceability* AI-DLC emphasizes, and it is deliberately **distinct
-from `SCRATCH.md`**:
+from live resume state**, which lives in each document's **Status** header:
 
-| | `decision-log.md` | `SCRATCH.md` |
+| | `decision-log.md` | document **Status** header |
 |---|---|---|
-| Purpose | Durable record of *what was decided and why* | Throwaway *resume* breadcrumb |
-| Lifetime | Committed; outlives the feature | Gitignored; deleted when the feature is done |
+| Purpose | Durable record of *what was decided and why* | The live *resume* signal: `Draft` → `Approved` per gate |
+| Lifetime | Committed; outlives the feature | Committed with the document; reflects current state |
 | Audience | Future agents/humans, audits | The next session that resumes this work |
 
 Cross-cutting decisions (a pattern other features will follow) still go in a full

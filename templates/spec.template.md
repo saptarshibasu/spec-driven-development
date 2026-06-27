@@ -108,6 +108,19 @@ testable by doing X, delivers Y."]
 - [Explicitly excluded capability #1]
 - [Explicitly excluded capability #2]
 
+## Unchanged Behavior *(bug fixes / Track B — regression guard)*
+
+<!-- For a bug fix or any change to existing behavior, state explicitly what
+     must KEEP working exactly as before. "Out of Scope" says what you are not
+     building; this says what the change must not break — the difference between
+     a surgical fix and a regression. Each line should become a regression test
+     (write it first, watch it stay green). Delete this section for greenfield
+     work with no existing behavior to protect. -->
+
+- [Existing behavior that MUST continue unchanged, e.g. "WHEN a user submits a
+  valid form THEN it is processed exactly as before."]
+- [Another invariant the change must not disturb.]
+
 ## Assumptions
 
 <!-- Reasonable defaults you chose because the prompt didn't specify them.
@@ -125,5 +138,6 @@ testable by doing X, delivers Y."]
 - [ ] Every requirement is testable and unambiguous
 - [ ] Success criteria are measurable, not subjective
 - [ ] Out of Scope section is filled in, not left as a placeholder
+- [ ] (Bug fix / Track B) Unchanged-behavior regression guards are listed
 - [ ] No speculative "might need" features included
 - [ ] Spec contains no tech stack, API shapes, or implementation detail

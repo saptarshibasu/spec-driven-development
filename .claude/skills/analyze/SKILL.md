@@ -33,10 +33,10 @@ findings auditable.
 
 | Track | Run analyze? | Why |
 |---|---|---|
-| **A — Direct change** | **Skip** | No artifacts to cross-check. |
-| **B — Patch** | **Optional, quick pass** | No `plan.md`; check spec ↔ tasks coverage only. Light. |
-| **C — Feature** | **Default-on (skippable)** | Full spec ↔ plan ↔ tasks cross-check. |
-| **D — Architecture / brownfield** | **Default-on, extended (skippable)** | Also reconcile `research.md`, `data-model.md`, `contracts/`, the ADR, and characterization-test tasks. |
+| **A · Trivial — Direct change** | **Skip** | No artifacts to cross-check. |
+| **B · Simple — Patch** | **Optional, quick pass** | No `plan.md`; check spec ↔ tasks coverage only. Light. |
+| **C · Moderate — Feature** | **Default-on (skippable)** | Full spec ↔ plan ↔ tasks cross-check. |
+| **D · Complex — Architecture / brownfield** | **Default-on, extended (skippable)** | Also reconcile `research.md`, `data-model.md`, `contracts/`, the ADR, and characterization-test tasks. |
 
 On C/D this gate runs **by default**, but the human controls it: they may
 **explicitly skip** it, and that skip is recorded in `decision-log.md` (it is
@@ -131,4 +131,9 @@ For each finding, **route it**: which phase owns the fix —
 
 ## What this skill deliberately does not do
 
-- **Never edits artifacts.** It reports and routes; the owning phase 
+- **Never edits artifacts.** It reports and routes; the owning phase fixes.
+- Doesn't grade the spec alone (that's `checklist`) or resolve open questions
+  (that's `clarify`).
+- Doesn't review code (that's the `code-reviewer` agent, which runs later on the
+  diff).
+- Doesn't run on Track A, and runs

@@ -16,7 +16,7 @@
 # Tasks: [FEATURE NAME]
 
 **Input**: `spec.md` (required), `plan.md` (required), `data-model.md` /
-`contracts/` if present.
+`contracts/` if present. | **Status**: Draft
 
 ## Phase 1: Setup
 

@@ -16,6 +16,8 @@ context stays small (see `context-engineering.md` for why).
 | [`efficient-code-generation-and-performance-pitfalls.md`](efficient-code-generation-and-performance-pitfalls.md) | Why agents default to slow code (per-row loops, N+1) and what to put in AGENTS.md to stop it. Reasoning behind the Performance & Efficiency section. |
 | [`mcp.md`](mcp.md) | Which MCP servers to connect (and the 5–7 cap), when to build your own, and security. Companion to `.mcp.json.example`. |
 | [`hooks.md`](hooks.md) | Git hooks + agent-runtime hooks: turning prose rules into enforced, zero-token controls. Companion to `.githooks/pre-commit`. |
+| [`guardrails.md`](guardrails.md) | Universal behavioral guardrails shared across all skills — the always-on rules every skill session inherits. |
+| [`implementation-handoff.md`](implementation-handoff.md) | Rules for the agent that executes `tasks.md`: picking up an approved plan and implementing it safely. |
 
 ## Project reference
 

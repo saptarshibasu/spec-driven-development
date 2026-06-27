@@ -10,7 +10,7 @@
 
 # Implementation Plan: [FEATURE]
 
-**Branch**: `[###-feature-name]` | **Spec**: `specs/[###-feature-name]/spec.md`
+**Branch**: `[###-feature-name]` | **Spec**: `specs/[###-feature-name]/spec.md` | **Status**: Draft
 
 ## Summary
 

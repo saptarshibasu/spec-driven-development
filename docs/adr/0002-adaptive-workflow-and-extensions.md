@@ -44,7 +44,8 @@ conventions:
 3. **Durable decision log.** Each feature gets a committed
    `specs/<NNN>/decision-log.md` (from `templates/decision-log.template.md`,
    seeded by `start-feature.{sh,ps1}`) recording the track, extension opt-ins,
-   and each gate approval — distinct from the ephemeral, gitignored `SCRATCH.md`.
+   and each gate approval — distinct from live resume state, which is carried by
+   each document's **Status** header (`Draft` → `Approved`).
 
 Extensions are read on demand by path (like `docs/`), so they add no new mirror
 target and do not enlarge always-loaded context — consistent with ADR-0001 and
@@ -78,6 +79,7 @@ the kit's token-budget discipline.
 - **Use AI-DLC wholesale (its rule files, phases, and `aidlc-docs/` output)** —
   rejected: it duplicates machinery we already have (gated SDD, ADRs, mirroring)
   and is oriented to Amazon Q / Kiro; we took the ideas, not the implementation.
-- **One audit artifact instead of two (fold the log into `SCRATCH.md`)** —
-  rejected: resume state is throwaway and gitignored; an audit trail must be
-  durable and committed. Different lifetimes, different files.
+- **Fold the audit trail into resume state** — rejected: resume state is a
+  single live flag per document (the **Status** header, `Draft` → `Approved`),
+  while the audit trail is an append-only narrative of decisions, rationale, and
+  deviations. Different shapes and purposes, so they stay separate files.

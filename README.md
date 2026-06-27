@@ -25,46 +25,40 @@ Each feature flows through gated phases. **An agent never advances a gate withou
 
 ```mermaid
 flowchart TD
-    K["📜 Constitution<br/><i>always-true principles</i>"]:::gov
-    RT["🧭 Route<br/><b>pick a track</b> · A/B/C/D<br/>+ opt-in extensions"]:::gate
+    subgraph CTX["🌐 Always-on context · governs every phase"]
+        direction LR
+        K["📜 Constitution<br/><i>always-true principles</i>"]:::gov
+        AGT["📋 AGENTS.md<br/><i>conventions · commands · structure</i>"]:::gov
+    end
+    RT["🧭 Route<br/><b>pick a track</b><br/>A trivial · B simple<br/>C moderate · D complex<br/>+ opt-in extensions"]:::gate
     S["1 · Specify · spec.md<br/><b>WHAT & WHY</b> — no tech"]:::phase
-    CL["Clarify<br/><i>optional</i>"]:::gate
-    CK["Checklist<br/><i>optional</i>"]:::gate
-    P["2 · Plan · plan.md<br/><b>HOW</b> — stack & design"]:::phase
+    CL["Clarify<br/><i>optional · answer open questions</i>"]:::gate
+    CK["Checklist<br/><i>optional · is the spec solid?</i>"]:::gate
+    P["2 · Plan · plan.md<br/><b>HOW</b> — stack & design<br/><i>C/D only</i>"]:::phase
     T["3 · Tasks · tasks.md<br/><b>ordered, tests-first</b>"]:::phase
-    AN["Analyze<br/><i>C/D default · skippable<br/>cross-artifact check</i>"]:::gate
+    AN["Analyze<br/><i>C/D default · skippable<br/>do spec, plan & tasks agree?</i>"]:::gate
     I["Implement<br/><i>red → green → refactor</i>"]:::impl
     R["🔍 Review<br/><i>code-reviewer agent</i>"]:::sensor
-    B["📝 SCRATCH.md<br/><i>resume breadcrumb · gitignored</i>"]:::scratch
-    DL["📒 decision-log.md<br/><i>committed audit trail</i>"]:::audit
+    DL["📒 decision-log.md<br/><i>committed audit trail —<br/>every gate approval appended</i>"]:::audit
 
-    K -. governs every phase .-> S
-    RT -->|✋ approve track| S
-    K -. governs .-> RT
+    RT -->|✋ A · trivial fix| I
+    RT -->|✋ B / C / D| S
     S -->|✋ approve| P -->|✋ approve| T -->|✋ approve| AN -->|✋ ready| I --> R
+    S -. B · skips plan .-> T
     S -. optional sharpen .-> CL
     CL -.-> CK
     CK -.-> S
     AN -. "blockers: back to owning phase" .-> S
     AN -.-> P
     AN -.-> T
-    S -. writes at each gate .-> B
-    P -.-> B
-    T -.-> B
-    B -. read on resume .-> S
-    RT -. logs track + opt-ins .-> DL
-    S -. logs each approval .-> DL
-    P -.-> DL
-    T -.-> DL
-    AN -.-> DL
+    R ~~~ DL
 
     classDef gov fill:#6f42c1,color:#fff,stroke:#4c2889
     classDef phase fill:#0969da,color:#fff,stroke:#0a4b8c
     classDef gate fill:#bf8700,color:#fff,stroke:#7d5800
     classDef impl fill:#1a7f37,color:#fff,stroke:#0f5323
     classDef sensor fill:#cf222e,color:#fff,stroke:#8b1a22
-    classDef scratch fill:#6e7781,color:#fff,stroke:#424a53
-    classDef audit fill:#1a7f37,color:#fff,stroke:#0f5323,stroke-dasharray:3 2
+    classDef audit fill:#eaeef2,color:#24292f,stroke:#6e7781
 ```
 
 A spec that survives a framework swap unchanged was written correctly. Specs are pure **what/why**; the **how** lives in the plan; tasks are *generated* from both.
@@ -72,17 +66,17 @@ A spec that survives a framework swap unchanged was written correctly. Specs are
 **What you actually run, and when:**
 
 1. **Setup (once per project)** — run `init-project` to scan the codebase and generate both `AGENTS.md` and `memory/constitution.md` with approval gates, then `git config core.hooksPath .githooks` to arm the pre-commit sensor.
-2. **Start a feature** — run `spec-driven-feature`. It first **right-sizes the work**: it proposes a workflow track (A direct fix / B patch / C feature / D architecture — this kit's own naming for adaptive depth; the [four-track table](docs/adaptive-workflow-and-extensions.md#the-four-tracks) explains each) and scans `.agents/extensions/` for opt-in rule packs (e.g. a security baseline), and waits for you to approve the route. Then it scaffolds `specs/<NNN>/` (calling `start-feature.sh` on macOS/Linux or `start-feature.ps1` on Windows) and drafts `spec.md` (Specify), marking open questions as `[NEEDS CLARIFICATION]`. Trivial changes route to Track A and skip straight to implementation.
+2. **Start a feature** — run `spec-driven-feature`. It first **right-sizes the work**: it proposes a workflow track (A · trivial direct fix / B · simple patch / C · moderate feature / D · complex architecture — this kit's own naming for adaptive depth; the [four-track table](docs/adaptive-workflow-and-extensions.md#the-four-tracks) explains each) and scans `.agents/extensions/` for opt-in rule packs (e.g. a security baseline), and waits for you to approve the route. Then it scaffolds `specs/<NNN>/` (calling `start-feature.sh` on macOS/Linux or `start-feature.ps1` on Windows) and drafts `spec.md` (Specify), marking open questions as `[NEEDS CLARIFICATION]`. Trivial changes route to Track A and skip straight to implementation.
 3. **(Optional) Sharpen the spec at the approval gate** — `spec-driven-feature` pauses after the draft and waits for you. If it left `[NEEDS CLARIFICATION]` markers or the spec needs tightening, run `clarify` and/or `checklist` *here*; otherwise just answer any open questions inline. Neither is a required step. **You approve the spec.**
 4. **Plan, then tasks — same run** — once you approve, the skill continues *on its own* to `plan.md`, pauses for approval, then generates `tasks.md`. You don't relaunch it; each "stop" is a pause-for-approval, not an exit.
 5. **Analyze (gate, Tracks C/D — default-on, skippable)** — before implementation, the skill runs `analyze`: a **non-destructive** cross-artifact check that every requirement maps to a task and that spec, plan, and tasks don't contradict each other. It *reports*, never rewrites — blockers loop back to **whichever phase owns the fix** (spec, plan, *or* tasks), then re-run; a clean verdict clears the gate. It runs by default on C/D but you can explicitly skip it (the skip is logged in `decision-log.md`, like skipping review). Skipped on Track A; a light spec↔tasks pass on Track B.
 6. **Implement** — red → green → refactor, one story at a time; lean on the `test-writer` and `debugger` agents as needed.
-7. **Review & commit** — the `code-reviewer` agent checks the diff against spec + constitution; on commit, `.githooks/pre-commit` blocks secrets, unresolved markers, and runs your lint/tests.
+7. **Review & commit** — the `code-reviewer` agent checks the diff against spec + constitution; on commit, `.githooks/pre-commit` blocks secrets, unresolved markers, tool-pointer files that grow past a pointer ([ADR-0001](docs/adr/0001-agents-md-single-source-of-truth.md)), and runs your lint/tests.
 
 Steps 2–7 repeat per feature; step 1 is one-time (re-run `sync-agents-md` whenever the project drifts).
 
 > [!NOTE]
-> **Interrupted mid-feature?** Nothing is lost — your progress lives in that feature's `specs/<NNN>/spec.md`, `plan.md`, and `tasks.md`, and the skill keeps a gitignored `SCRATCH.md` breadcrumb updated **at each gate** (current phase, what's next, open questions). To resume, just re-invoke `spec-driven-feature` for the same feature (don't re-run `start-feature` — it won't overwrite an existing feature): it reads the breadcrumb plus the filled-in documents and picks up at the next unapproved gate. Even an abrupt kill mid-phase is covered, because the breadcrumb is written as it goes — not only on a graceful stop.
+> **Interrupted mid-feature?** Nothing is lost — your progress lives in that feature's committed `specs/<NNN>/spec.md`, `plan.md`, and `tasks.md`, which are the source of truth on resume. Each carries a **Status** header (`Draft` → `Approved — <who>, <date>`) the skill flips at each approval gate, so the documents themselves record exactly what's been ratified. To resume, just re-invoke `spec-driven-feature` for the same feature — there's no separate "start" command to re-run; the skill detects the existing feature folder, reads each document's Status (plus the filled-in body and the `decision-log.md` rows), and picks up at the first phase that isn't `Approved`. It never re-scaffolds or overwrites existing work — the scaffolding step only ever creates a *new* feature folder. A kill mid-phase is recoverable too: a half-written document still reads `Draft`, so that phase is simply resumed (recovery is phase-level, not line-level).
 
 ## 🛰️ The harness model
 
@@ -110,7 +104,6 @@ flowchart TB
     AGENT ==> FB
     AGENT ==>|produces| CODE["💻 code · diff<br/><i>output of implementation</i>"]:::out
     FB -. self-correct .-> AGENT
-    AGENT -. writes / reads breadcrumb .-> SC["📝 SCRATCH.md<br/><i>resume state · gitignored</i>"]:::cont
     AGENT -. logs decisions / approvals .-> DL2["📒 decision-log.md<br/><i>committed audit trail</i>"]:::cont
 
     classDef ff fill:#ddf4ff,stroke:#0969da,color:#0a3069
@@ -223,14 +216,14 @@ Add your own under `.agents/extensions/<category>/<pack>/` — format in
 ├── .codex/                # Codex: skills/ · agents/*.toml (generated)
 │
 ├── .githooks/
-│   ├── pre-commit         # secret scan · ambiguity block · lint/test slot
+│   ├── pre-commit         # secret scan · ambiguity block · thin-pointer guard · lint/test slot
 │   └── pre-commit.ps1
 │
 ├── memory/
 │   └── constitution.md    # project-wide principles; governs every phase
 │
 ├── templates/             # spec · plan · tasks · agents · constitution
-│                          #   decision-log · checklist · research · data-model
+│                          #   decision-log · checklist · research · data-model · quickstart
 ├── specs/
 │   └── <NNN-feature>/     # spec.md · plan.md · tasks.md · decision-log.md
 │       └── contracts/     # API/event contracts
@@ -281,6 +274,7 @@ These aren't advice buried in a doc — they're encoded in the constitution and 
 - [Agent READMEs: an empirical study of context files](https://arxiv.org/abs/2511.12884) — what helps vs. hurts
 - [How to write a great AGENTS.md](https://github.blog/ai-and-ml/github-copilot/how-to-write-a-great-agents-md-lessons-from-over-2500-repositories/) — GitHub, 2,500+ repos
 - [AI-DLC — AWS Labs adaptive workflows](https://github.com/awslabs/aidlc-workflows) (MIT-0) — the methodology this kit's tracks, extensions, and decision log draw from ([methodology blog](https://aws.amazon.com/blogs/devops/ai-driven-development-life-cycle/))
+- [New spec types: fix bugs and build on top of existing apps](https://kiro.dev/blog/specs-bugfix-and-design-first/) — Kiro on bug-fix specs (current / expected / unchanged behavior); relevant to this kit's Track B patch flow
 - [spec-kit](https://github.com/github/spec-kit) · [awesome-copilot](https://github.com/github/awesome-copilot)
 
 ---

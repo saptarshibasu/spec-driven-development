@@ -11,10 +11,10 @@ Thumbs.db
 .vscode/*
 !.vscode/extensions.json
 
-# Scratch / progress files agents are told to write before stopping
+# Stray agent scratch output — none is committed by this workflow (resume state
+# lives in each document's Status header), but ignore any an agent leaves behind
 *.scratch
 /.agent-scratch/
-SCRATCH.md
 
 # Active MCP config may hold tokens/paths — commit only .mcp.json.example
 .mcp.json
