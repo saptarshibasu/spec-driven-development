@@ -9,6 +9,13 @@
   and trains the agent to skim the rest of the file. If a line would be true
   of any repo, delete it.
 
+  Section ordering for KV cache efficiency: put the most-stable sections
+  first (Commands, Tech Stack, Project Structure) and the most-conditional
+  ones last (Boundaries, Brownfield areas). Most model APIs cache an unchanged
+  prompt prefix at ~90% discount. An edit to a late section keeps the stable
+  prefix cached; an edit to an early section invalidates the cache for
+  everything that follows. See docs/token-efficiency.md.
+
   Once you've filled in (or deleted) a section below, delete its instructional
   comment too — including this one. None of these comments belong in the file
   you actually commit: AGENTS.md is read into every single agent session, so a

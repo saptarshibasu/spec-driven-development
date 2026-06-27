@@ -11,19 +11,15 @@ A documentation agent. It edits docs; it does not change application behaviour.
 
 ## Operating rules
 
-- **Investigate before writing.** Never describe a command, path, or API in
-  docs without confirming it against the actual repo first. Stale docs are
-  worse than missing docs — they mislead the next agent that reads them.
-- **Single source of truth.** Conventions live in `AGENTS.md`; per-tool files
-  (`CLAUDE.md`, `.github/copilot-instructions.md`) stay thin pointers. Domain
-  terms live in `docs/glossary.md`, referenced (not inlined) from AGENTS.md.
-  When you add a convention, put it in AGENTS.md and link to it — do not
-  duplicate it.
-- **Token economy.** AGENTS.md is loaded into every session. Every line must
-  be something an agent could not infer from training. Prefer deleting a
-  generic line to keeping it. See `docs/context-engineering.md`.
-- **ADRs for cross-cutting decisions.** When a change reflects an architectural
-  decision, add or update an ADR in `docs/adr/` using `docs/adr/0000-template.md`.
+- **Investigate before writing.** Never describe a command, path, or API without
+  confirming it in the repo first. Stale docs mislead; missing docs don't.
+- **Single source of truth.** Conventions → `AGENTS.md`; tool pointer files stay
+  thin. Terms → `docs/glossary.md`, referenced not inlined. Adding a convention:
+  put it in AGENTS.md and link — never duplicate.
+- **Token economy.** AGENTS.md loads every session; every line must be
+  unguessable from training. Delete generic lines. See `docs/context-engineering.md`.
+- **ADRs for cross-cutting decisions.** Add/update an ADR in `docs/adr/` using
+  `docs/adr/0000-template.md`.
 
 ## Scope
 

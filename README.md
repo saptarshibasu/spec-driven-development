@@ -87,9 +87,9 @@ The kit is built as a **harness** ([Martin Fowler's term](https://martinfowler.c
 flowchart TB
     subgraph FF["🧭 Feedforward · guides (before)"]
         direction LR
-        A["AGENTS.md + constitution"]
+        A["AGENTS.md + constitution<i></i>"]
         SK["skills: spec-driven-feature (tracks),<br/>clarify, checklist"]
-        TPL["templates/"]
+        TPL["templates/<i></i>"]
     end
     subgraph FB["🛰️ Feedback · sensors (after)"]
         direction LR
@@ -102,7 +102,7 @@ flowchart TB
     end
     FF ==> AGENT(("🤖 coding<br/>agent"))
     AGENT ==> FB
-    AGENT ==>|produces| CODE["💻 code · diff"]:::out
+    AGENT ==>|produces| CODE["💻 code · diff<br/><i>output of implementation</i>"]:::out
     FB -. self-correct .-> AGENT
     AGENT -. writes / reads breadcrumb .-> SC["📝 SCRATCH.md<br/><i>resume state · gitignored</i>"]:::cont
     AGENT -. logs decisions / approvals .-> DL2["📒 decision-log.md<br/><i>committed audit trail</i>"]:::cont
@@ -246,33 +246,4 @@ These aren't advice buried in a doc — they're encoded in the constitution and 
 ## 💡 Why it's structured this way
 
 > [!IMPORTANT]
-> **`templates/agents.template.md` is the source; `AGENTS.md` is generated output.** Run `init-project` to generate it, `sync-agents-md` to re-sync after drift. Every tool file (`CLAUDE.md`, `.github/copilot-instructions.md`) is a thin pointer to the generated `AGENTS.md` — update the template, regenerate, not four files. ([ADR-0001](docs/adr/0001-agents-md-single-source-of-truth.md))
-
-- **Spec ≠ plan.** Mixing *what* and *how* makes agents anchor on implementation before requirements are stable.
-- **Tasks are generated, not hand-written.** With a locked spec and reviewed plan, an agent derives `tasks.md` deterministically.
-- **The constitution is short on purpose.** Only what's *always* true. Conditional rules go in `AGENTS.md`; feature rules go in specs.
-- **Every artifact is a context unit.** Specs aren't auto-loaded — the agent pulls in only the one it needs. ([`context-engineering.md`](docs/context-engineering.md))
-
-## Related: spec-kit & AI-DLC
-
-[GitHub spec-kit](https://github.com/github/spec-kit) is GitHub's toolkit for spec-driven development — a `specify` CLI with commands for constitution, specify, clarify, plan, tasks, and implement, plus integrations for many AI coding agents.
-
-[AWS Labs AI-DLC](https://github.com/awslabs/aidlc-workflows) (MIT-0) is a methodology shipped as agent steering/rules, built on adaptive workflows, flexible depth, and human-in-the-loop oversight. This kit's [workflow tracks, opt-in extensions, and decision log](docs/adaptive-workflow-and-extensions.md) are adapted from it — see [ADR-0002](docs/adr/0002-adaptive-workflow-and-extensions.md).
-
-## 📖 Further reading
-
-- [Distilled AI-Assisted Development Guidelines](https://medium.com/@sapbasu/distilled-ai-assisted-development-guidelines-351ac9ab0154) — the companion article
-- [Harness engineering for coding agents](https://martinfowler.com/articles/harness-engineering.html) — Martin Fowler
-- [Effective context engineering for AI agents](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents) — Anthropic
-- [Agent READMEs: an empirical study of context files](https://arxiv.org/abs/2511.12884) — what helps vs. hurts
-- [How to write a great AGENTS.md](https://github.blog/ai-and-ml/github-copilot/how-to-write-a-great-agents-md-lessons-from-over-2500-repositories/) — GitHub, 2,500+ repos
-- [AI-DLC — AWS Labs adaptive workflows](https://github.com/awslabs/aidlc-workflows) (MIT-0) — the methodology this kit's tracks, extensions, and decision log draw from ([methodology blog](https://aws.amazon.com/blogs/devops/ai-driven-development-life-cycle/))
-- [spec-kit](https://github.com/github/spec-kit) · [awesome-copilot](https://github.com/github/awesome-copilot)
-
----
-
-<div align="center">
-
-Licensed under [Apache 2.0](LICENSE) · Contributions welcome
-
-</div>
+> **`templates/agents.template.md` is 

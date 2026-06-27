@@ -5,20 +5,18 @@ description: Use when setting up a project's AI agent configuration from scratch
 
 # Init Project
 
-Bootstraps a project's agent configuration in one session by scanning the
-actual codebase and producing two generated files:
+Bootstraps agent config by scanning the codebase and producing:
 
-1. `AGENTS.md` — generated from `templates/agents.template.md`, filled with
-   real values specific to this project; loaded into every agent session
-2. `memory/constitution.md` — generated from `templates/constitution.template.md`,
-   containing universal always-true principles for this project
+1. `AGENTS.md` — from `templates/agents.template.md`, filled with real project
+   values; loaded into every agent session
+2. `memory/constitution.md` — from `templates/constitution.template.md`,
+   universal always-true principles for this project
 
-`AGENTS.md` is an **output**, not a source file. The template lives in
-`templates/agents.template.md` and should never be edited directly at the
-root. Re-run this skill to regenerate it if the project changes significantly.
+`AGENTS.md` is generated output — template lives in `templates/agents.template.md`,
+never edited at root. Re-run to regenerate after significant changes.
 
 Three gated phases: **Investigate → Draft AGENTS.md → Draft Constitution**.
-Never skip an approval gate or merge two phases into one turn.
+Never skip a gate or merge phases.
 
 ## What goes where (keep this distinction sharp throughout)
 
@@ -32,25 +30,24 @@ Never skip an approval gate or merge two phases into one turn.
 | Performance idioms specific to this stack | Governance / amendment process |
 | Brownfield area details | |
 
-If something is only sometimes true, or only applies to certain features, it
-belongs in AGENTS.md or a spec — not the constitution.
+If only sometimes true or feature-specific: AGENTS.md or a spec — not the
+constitution.
 
-## Behavioral guardrails (active for the entire session)
+## Behavioral guardrails (apply throughout this skill session)
 
-- **Investigate before asking.** Read the codebase first. Every question you
-  ask should be something you genuinely cannot answer by reading files. If
-  you can infer it (e.g., "I see `pytest` in requirements.txt — is tests/ the
-  right location?"), confirm briefly rather than asking open-endedly.
-- **No guessing.** Anything you cannot infer and the user doesn't answer →
-  mark `[NEEDS CLARIFICATION: specific question]`. Never fill a placeholder
-  with a fabricated value.
-- **No over-populating.** A short, accurate AGENTS.md beats a long generic
-  one. A short constitution enforced consistently beats a long one that gets
-  ignored. Push back on conditional or feature-specific content that doesn't
-  belong in these files.
-- **Conservative.** Do not write either file until the user explicitly
-  approves the draft. Treat this like schema changes — hard to walk back once
-  agents start reading it.
+- **No guessing.** Where input leaves something unspecified, write
+  `[NEEDS CLARIFICATION: specific question]` and surface it — never silently
+  invent an assumption.
+- **Investigate before claiming.** Never make statements about the codebase
+  without first reading the relevant files. If a claim requires looking at
+  code, look first. Read before asking — every question you raise should be
+  something you genuinely cannot answer from the files.
+- **Conservative by default.** Recommend before you write; stop and ask before
+  anything irreversible (deleting files, force-pushing, dropping tables,
+  external service calls). Do not write either file until the user explicitly
+  approves the draft.
+- **No over-populating.** Short and accurate beats long and generic. Push back
+  on conditional or feature-specific content that doesn't belong in these files.
 
 ## Before starting
 
@@ -67,8 +64,7 @@ belongs in AGENTS.md or a spec — not the constitution.
 
 ## Phase 1 — Investigate
 
-Do this before asking the user a single question. Scan the project and build
-a profile. Look for:
+Before asking anything, scan the project. Look for:
 
 - **Package / build files**: `package.json`, `pyproject.toml`, `pom.xml`,
   `Cargo.toml`, `go.mod`, `Gemfile`, `build.gradle`, etc. — extract language,
@@ -82,9 +78,8 @@ a profile. Look for:
 - **Git config**: branch protection hints, PR templates (`.github/`).
 - **Existing AGENTS.md**: note which sections are filled vs. still placeholder.
 
-After the scan, prepare a brief summary of what you found and what you still
-need to ask about. Group your questions by AGENTS.md section — don't dump
-them all at once. Work through them two or three at a time.
+After scanning, summarise findings and remaining gaps. Group questions by
+AGENTS.md section; work 2–3 at a time.
 
 **Key questions to resolve per section (ask only what you can't infer):**
 
@@ -124,25 +119,18 @@ Once you have enough to fill in the template accurately, move to Phase 2.
 
 ## Phase 2 — Draft AGENTS.md
 
-Fill in the AGENTS.md template from your investigation and the user's answers:
+Fill in the template from investigation and user answers:
 
-1. Replace every `[bracketed placeholder]` with a real value or remove the
-   section if it doesn't apply to this project.
-2. Remove **every** HTML comment (`<!-- ... -->`) — these are authoring
-   instructions, not content. They must not appear in the committed file.
-3. Remove any section that genuinely doesn't apply (e.g., Multi-Repo if the
-   project is self-contained) rather than leaving it with placeholder text.
-4. The Performance & Efficiency section is high-leverage — even if you only
-   have the bulk-operation idiom and the null-check convention, include them.
-   These are the patterns agents most often get wrong by default.
-5. Self-check: would an agent reading this file learn something it couldn't
-   already infer from general training data? If a line would be true of any
-   project, cut it.
+1. Replace every placeholder with a real value; remove inapplicable sections.
+2. Remove all HTML comments (`<!-- ... -->`).
+3. Remove sections that don't apply rather than leaving them with placeholder text.
+4. Performance & Efficiency is high-leverage — include even if only the
+   bulk-operation idiom and null-check convention. Agents get these wrong most.
+5. Self-check: does each line teach something unguessable from training? True of
+   any project → cut it.
 
-**Stop. Present the full draft to the user.** Highlight any `[NEEDS
-CLARIFICATION]` markers and any sections where you made a judgment call.
-Ask for explicit approval — or amendments — before proceeding. Do not write
-anything to disk yet.
+**Stop. Present the full draft.** Highlight `[NEEDS CLARIFICATION]` markers and
+judgment calls. Ask for explicit approval before writing anything to disk.
 
 ---
 
@@ -150,8 +138,8 @@ anything to disk yet.
 
 Only after the user has approved the AGENTS.md draft.
 
-Use `templates/constitution.template.md` as the base. You already learned a
-lot about this project in Phase 1 — use it. Ask only what remains unresolved:
+Use `templates/constitution.template.md`. Phase 1 covered most of the project —
+ask only what remains unresolved:
 
 **Article I — Architecture pattern:**
 > "What is the primary architectural boundary for new features — do they start
@@ -180,9 +168,7 @@ wants them as-is or amended.)*
 **Governance:**
 > "Who owns the constitution and has authority to amend it?"
 
-Apply the same filter as AGENTS.md: if a principle is only sometimes true, or
-only applies to certain features, note that it belongs in AGENTS.md or a spec
-instead.
+Same filter as AGENTS.md: only-sometimes-true belongs in AGENTS.md or a spec.
 
 Once drafted:
 1. Fill in the template, replacing all bracketed placeholders.
@@ -190,33 +176,27 @@ Once drafted:
 3. Remove any Article whose placeholder was never filled and isn't needed.
 4. Set **Version** to `1.0.0`, **Ratified** to today's date.
 
-**Stop. Present the full draft to the user.** Highlight any `[NEEDS
-CLARIFICATION]` markers and judgment calls. Require explicit approval before
-writing. Do not write either file to disk until both are approved.
+**Stop. Present the full draft.** Highlight `[NEEDS CLARIFICATION]` markers and
+judgment calls. Require explicit approval before writing either file to disk.
 
 ---
 
 ## Writing files (after both are approved)
 
-Write in this order:
-
-1. **AGENTS.md** — write to the project root, replacing the stub. This file
-   is generated output; `templates/agents.template.md` remains the source.
-2. **constitution.md** — confirm the save path with the user (default:
-   `memory/constitution.md`). Create the `memory/` directory if needed.
-3. Verify AGENTS.md's Specs section references the correct constitution path;
-   update if the save location differs from what was drafted.
+1. **AGENTS.md** — write to project root, replacing the stub.
+2. **constitution.md** — confirm save path (default: `memory/constitution.md`);
+   create `memory/` if needed.
+3. Verify AGENTS.md's Specs section references the correct constitution path.
 
 Then confirm to the user:
 - Both files written and their paths
 - Constitution version and ratification date
 - Reminder: run `mirror-agents.sh` (or `.ps1`) to sync AGENTS.md to
-  `.agents/` and `.codex/` (this project uses mirroring)
-- Next step: use `spec-driven-feature` to start the first feature
+  `.agents/` and `.codex/` format files
 
 ## What this skill does not do
 
-- It does not create feature specs, plans, or tasks — those are per-feature.
-- It does not skip approval gates even if the drafts look complete — a
-  constitution that hasn't been read and approved by a human is not ratified,
-  and an AGENTS.md that hasn't been confirmed may contain wrong commands.
+- Doesn't run `spec-driven-feature` — that's a separate workflow for individual
+  features.
+- Doesn't fabricate values — unresolvable facts get `[NEEDS CLARIFICATION]`.
+- Never writes either file until the user explicitly approves both drafts.

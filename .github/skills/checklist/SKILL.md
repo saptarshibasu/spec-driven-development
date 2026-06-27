@@ -5,46 +5,40 @@ description: Use to generate a requirements-quality checklist for a feature — 
 
 # Checklist
 
-Generates a checklist that tests the **spec**, not the code. Think of each item
-as a unit test for a requirement: does it pass the bar of being complete, clear,
-consistent, and measurable? A spec that sails through `clarify` can still be
-vague or internally contradictory; this gate catches that before planning.
+Tests the **spec**, not the code — each item is a unit test for a requirement:
+complete, clear, consistent, measurable? A spec that passes `clarify` can still
+be vague or contradictory; this catches it before planning.
 
-Output goes to `specs/<NNN-feature>/checklist.md` (or a named variant like
-`security-checklist.md`), built from `templates/checklist.template.md`.
+Output: `specs/<NNN-feature>/checklist.md` (or `security-checklist.md`), from
+`templates/checklist.template.md`.
 
 ## When to run
 
-After `clarify`, before `plan`, for any feature with meaningful risk or
-ambiguity. Also use it to run a *narrow, repeatable* review pass — security,
-accessibility, migration-readiness — the same way across many features.
+After `clarify`, before `plan`, on any risky or ambiguous feature. Also for
+narrow repeatable domain passes — security, accessibility, migration-readiness.
 
 ## Behavioral guardrails
 
-- **Test the requirements, not the implementation.** Every item interrogates the
-  spec's quality ("Is the latency target measurable?"), never the code's
-  behaviour ("Does the endpoint return 200?"). If an item could only be checked
-  by running code, it belongs in the test suite, not here.
-- **No trivially-passing items.** If every item always passes, the checklist
-  isn't earning its keep. Each item should be one a real spec could fail.
-- **Confirm the template exists.** Requires `templates/checklist.template.md`. If
-  missing, stop and tell the user.
+- **Test requirements, not implementation.** Items interrogate spec quality
+  ("Is the latency target measurable?"), never code behaviour. Runnable-only
+  items belong in the test suite.
+- **No trivially-passing items.** Each must be one a real spec could fail.
+- **Requires `templates/checklist.template.md`** — missing? Stop.
 
 ## Step 1 — Pick the checklist's purpose
 
-Ask the user (or infer from the request) which kind of pass this is:
+Ask (or infer) which kind of pass:
 
 - **Requirements-quality** (default) — completeness, clarity, consistency,
   measurability of the spec as a whole.
 - **Domain pass** — security, accessibility, migration-readiness, performance,
-  data-privacy: a focused lens over the same spec.
+  data-privacy.
 
-One checklist = one purpose. Don't blend a security pass into a general-quality
-pass.
+One checklist, one purpose.
 
 ## Step 2 — Generate items from the spec
 
-Read `spec.md` (and `plan.md` if it exists). Derive concrete, checkable items.
+Read `spec.md` (and `plan.md` if present). Derive concrete, checkable items.
 For a requirements-quality pass, cover:
 
 - **Completeness** — Are all user stories given acceptance criteria? Is every
@@ -61,19 +55,17 @@ For a domain pass, generate items from that domain's known failure modes (e.g.
 security: authN/authZ stated per endpoint, secrets handling, input validation,
 PII classification, rate limiting).
 
-Write each as `CHK0NN [specific, checkable item]`, grouped by category, using the
-template's structure. Strip the template's instructional comments from the
-output.
+Write each as `CHK0NN [item]`, grouped by category per the template. Strip
+instructional comments from output.
 
 ## Step 3 — Run the checklist and report
 
-Go through each item against the spec and mark it: `[x]` pass, `[ ]` fail, with a
-one-line note on every *finding* (not on trivial passes). Then:
+Check each item: `[x]` pass, `[ ]` fail, one-line note on every finding (not
+trivial passes). Then:
 
-- Summarise the failures — these are the spec's real gaps.
-- Recommend: route ambiguity findings back through `clarify`; route genuine
-  missing requirements back to the spec author.
-- State whether the spec is checklist-clean enough to plan.
+- Summarise failures — the spec's real gaps.
+- Route: ambiguity → `clarify`; missing requirements → spec author.
+- State if spec is plan-ready.
 
 **Example output** (requirements-quality pass, abbreviated):
 
@@ -94,6 +86,5 @@ one-line note on every *finding* (not on trivial passes). Then:
 
 ## What this skill does not do
 
-- It does not test implementation correctness — that's the test suite.
-- It does not resolve the gaps it finds — it routes them to `clarify` or the
-  author.
+- Doesn't test implementation — that's the test suite.
+- Doesn't resolve gaps — routes them to `clarify` or the author.

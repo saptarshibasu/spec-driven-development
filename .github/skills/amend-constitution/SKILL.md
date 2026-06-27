@@ -5,15 +5,12 @@ description: Use when updating or revisiting a project's governing constitution 
 
 # Amend Constitution
 
-Updates specific sections of an existing `memory/constitution.md` by walking
-the user through the relevant sections of `templates/constitution.template.md`.
-Two gated phases — gather updated principles, then ratify — never skip the
-approval gate.
+Updates sections of `memory/constitution.md` using `templates/constitution.template.md`.
+Two gated phases: gather principles → ratify. Never skip the gate.
 
 ## What belongs in a constitution vs. elsewhere
 
-Before starting, be clear about the distinction so the output lands in the
-right file:
+Keep this distinction clear so output lands in the right file:
 
 | Belongs in **constitution.md** | Belongs in **AGENTS.md** | Belongs in **spec.md** |
 |---|---|---|
@@ -22,21 +19,22 @@ right file:
 | Universal quality gates (test-first, no secrets) | Git/PR workflow, model routing | Success criteria, edge cases |
 | Governance and amendment process | Brownfield area details, performance idioms | Out of scope for this feature |
 
-If a principle is only sometimes true, or only applies to certain features
-or areas, it does not belong in the constitution.
+Only-sometimes-true or feature-specific principles don't belong here.
 
-## Behavioral guardrails (active for the entire session)
+## Behavioral guardrails (apply throughout this skill session)
 
-- **No guessing.** If the user's answers leave something unspecified, write
-  `[NEEDS CLARIFICATION: question]` rather than inventing a principle.
+- **No guessing.** Where input leaves something unspecified, write
+  `[NEEDS CLARIFICATION: specific question]` and surface it — never silently
+  invent an assumption.
+- **Investigate before claiming.** Never make statements about the codebase
+  without first reading the relevant files. If a claim requires looking at
+  code, look first.
+- **Conservative by default.** Recommend before you write; stop and ask before
+  anything irreversible (deleting files, force-pushing, dropping tables,
+  external service calls).
 - **No over-populating.** A short constitution enforced consistently beats a
-  long one that gets ignored. Push back if the user tries to add something
-  conditional or feature-specific.
-- **Investigate before claiming.** Read `AGENTS.md` and any existing
-  constitution file before making any statements about the project's current
-  principles.
-- **Conservative by default.** Do not modify any existing files (including
-  an existing constitution) until the user explicitly approves the draft.
+  long one that gets ignored. Push back on conditional or feature-specific
+  content that doesn't belong in the constitution.
 
 ## Before starting
 
@@ -52,9 +50,7 @@ or areas, it does not belong in the constitution.
 
 ## Phase 1 — Gather Principles
 
-Ask the user about each section of the constitution template in turn. Do not
-dump all questions at once — work through them one or two at a time so the
-conversation stays focused. For each section:
+Walk sections one or two at a time — don't dump all at once.
 
 ### Core Principles (Articles I–V and any custom ones)
 
@@ -98,7 +94,7 @@ For each answer:
 
 ### Additional Constraints
 
-Prompt the user specifically for:
+Ask specifically about:
 - Security / credentials policy (the template already includes a "no
   secrets committed" placeholder — confirm whether this applies as-is or
   needs to be worded differently for their context)
@@ -111,8 +107,7 @@ Prompt the user specifically for:
 > "What gates apply to every PR without exception — required CI checks,
 > minimum reviewers, coverage floors, anything that blocks a merge?"
 
-Only include gates that are truly universal. If a gate only applies to
-certain modules or feature types, note that it belongs in AGENTS.md.
+Universal gates only — module/feature-type-specific gates belong in AGENTS.md.
 
 ### Governance
 
@@ -124,42 +119,25 @@ set the version and ratification date.
 
 ### Draft and self-check
 
-Once you have answers for all sections:
+1. Fill in the template, replacing all placeholders.
+2. Remove all instructional HTML comments (`<!-- ... -->`).
+3. Remove any Article whose placeholder was never filled.
+4. Self-check each principle: always-true, every feature, every session?
+   "Sometimes" or "it depends" → flag it.
 
-1. Fill in `templates/constitution.template.md` with the gathered
-   principles, replacing all bracketed placeholders.
-2. Remove every instructional HTML comment (`<!-- ... -->`) from the output —
-   these guided drafting and must not appear in the committed file.
-3. Remove any Article or section whose placeholder was never filled and is
-   not needed — do not leave half-filled placeholder sections.
-4. Self-check: for every principle, ask yourself — "is this actually
-   always-true for every feature, every session?" If the honest answer is
-   "sometimes" or "it depends," flag it rather than including it.
-
-5. **Stop. Present the full draft to the user and ask for explicit
-   approval** — or resolution of any `[NEEDS CLARIFICATION]` markers —
-   before writing anything to disk. Highlight any places where you made
-   a judgement call the user should review.
+5. **Stop. Present the full draft** and ask for explicit approval or resolution
+   of `[NEEDS CLARIFICATION]` markers before writing. Highlight judgement calls.
 
 ## Phase 2 — Ratify
 
-Only after the user has approved Phase 1.
+Only after Phase 1 approved.
 
-1. Apply any changes from the review pass.
-2. Write the amended file to the same path it came from.
-3. Increment the **minor version** (e.g. `1.0.0` → `1.1.0`) and set
-   **Last Amended** to today.
-4. **Stop. Confirm to the user** where the file was saved and what version it is.
+1. Apply review changes.
+2. Write amended file to the same path.
+3. Increment **minor version** (e.g. `1.0.0` → `1.1.0`); set **Last Amended** to today.
+4. Confirm path and version to the user.
 
-## What this skill deliberately does not do
+## What this skill does not do
 
-- It does not populate `spec.md`, `plan.md`, or `tasks.md` — those are
-  feature-specific documents, not project-wide principles.
-- It does not skip the approval gate even if the draft looks complete —
-  a constitution that hasn't been read and approved by a human is not
-  ratified.
-
-(No-guessing, no-over-populating, the conditional-vs-universal test, and the
-template requirement are covered by the guardrails, the table, and "Before
-starting" above.)
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
+- Doesn't populate `spec.md`, `plan.md`, or `tasks.md` — those are feature-specific.
+- Never skips the approval gate — unapproved = unratified.

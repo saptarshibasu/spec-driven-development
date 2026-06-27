@@ -5,18 +5,14 @@ description: Use when re-syncing AGENTS.md after the project has drifted — tri
 
 # Sync AGENTS.md
 
-Re-syncs `AGENTS.md` (and `docs/glossary.md`) against the **actual current
-state of the repository** after the project has changed. Diffs the existing
-file against reality and proposes corrections for what has drifted, preserving
-human-written prose. Ends at an approval gate — nothing written to disk until
-the user approves.
+Re-syncs `AGENTS.md` (and `docs/glossary.md`) against the current repo state.
+Diffs existing file against reality, proposes corrections, preserves human prose.
+Nothing written until approved.
 
 ## Why this skill exists
 
-As the project evolves — commands change, dependencies update, directories
-restructure, CI config shifts — AGENTS.md silently goes stale. A stale
-AGENTS.md is worse than empty because every agent session trusts it. This skill
-re-grounds it in evidence rather than memory.
+As commands, deps, and structure shift, AGENTS.md goes stale silently. Stale is
+worse than empty — every session trusts it. Re-grounds it in evidence.
 
 ## Behavioral guardrails (active for the entire session)
 
@@ -40,20 +36,20 @@ re-grounds it in evidence rather than memory.
 - **Preserve human prose on resync.** Treat existing filled-in text as
   authoritative unless the repo contradicts it. Touch only the lines that have
   actually drifted; never rewrite a section wholesale to "tidy" it.
-- **Conservative by default.** Do not modify any file until the user approves
-  the draft.
+- **Conservative by default.** Recommend before you write; stop and ask before
+  anything irreversible (deleting files, force-pushing, dropping tables,
+  external service calls).
 
 ## Before starting
 
-1. Confirm `AGENTS.md` exists and looks like a filled-in file (not the stub).
-   If it's still the stub, tell the user to run `init-project` first — this
-   skill re-syncs an existing AGENTS.md, it does not generate it from scratch.
-2. Read `memory/constitution.md` (or the path AGENTS.md references) so you do
-   not duplicate constitution material into AGENTS.md.
+1. Confirm `AGENTS.md` is filled in, not the stub — if stub, tell user to run
+   `init-project` first.
+2. Read `memory/constitution.md` (or the path AGENTS.md references) — don't
+   duplicate constitution material.
 
-## Evidence sources (read these before writing anything)
+## Evidence sources (read before writing anything)
 
-Gather facts from whatever applies; do not assume an ecosystem — detect it.
+Detect the ecosystem — don't assume it.
 
 - **Commands & tech stack:** `package.json` scripts, `pom.xml` /
   `build.gradle`, `pyproject.toml` / `Makefile` / `tox.ini`, `go.mod`,
@@ -75,50 +71,38 @@ Gather facts from whatever applies; do not assume an ecosystem — detect it.
 - **Glossary:** domain terms that recur in code/docs but an outsider would not
   know.
 
-For every fact, note its source so the draft can cite it and a later reader
-need not redo the investigation.
+Note every fact's source so the draft can cite it.
 
 ## Resync
 
-1. Re-derive facts from the current repo using the evidence sources above.
-2. Build a **drift report** — a table of: section · current AGENTS.md claim ·
-   what the repo actually shows now · proposed edit.
-3. Flag, but do not auto-change, anything where the repo is ambiguous or where
-   the existing prose may reflect a deliberate human decision the files don't
-   capture (e.g. an intentional Ask-first boundary). Ask the user.
-4. Prepare edits that change only the drifted lines — never rewrite a section
-   wholesale to "tidy" it.
+1. Re-derive facts from the evidence sources above.
+2. Build a **drift report**: section · current claim · actual · proposed edit.
+3. Flag — don't auto-change — anything ambiguous or that may reflect a deliberate
+   human decision. Ask the user.
+4. Edit only drifted lines — never rewrite a section wholesale.
 
-## Approval gate (both modes)
+## Approval gate
 
-**Stop. Present the full draft (Bootstrap) or the drift report (Resync) and
-ask for explicit approval**, including resolution of any `[NEEDS VERIFICATION]`
-markers. Call out every judgement call. Only after approval, write the file(s).
+**Stop. Present the drift report and ask for explicit approval**, resolving any
+`[NEEDS VERIFICATION]` markers. Call out every judgement call. Write only after
+approval.
 
 ## Verify before finishing
 
-Add a verification pass after writing:
+After writing:
 
-- Re-scan committed AGENTS.md for leftover `[bracketed placeholders]` — none
-  should remain except intentional `[NEEDS VERIFICATION]` markers the user
-  accepted.
-- Sanity-check that each command in the Commands section actually exists in the
-  source it came from (the script name is really in `package.json`, the Make
-  target really exists). Where cheap and safe, dry-run `--help` to confirm the
-  tool is present. Do not run build/test suites as part of this skill.
-- Confirm no project facts leaked into `CLAUDE.md` or
-  `.github/copilot-instructions.md`.
+- No leftover `[bracketed placeholders]` in committed AGENTS.md (except accepted
+  `[NEEDS VERIFICATION]` markers).
+- Each command in Commands exists in its source. Where cheap, `--help` to confirm.
+  Don't run build/test suites.
+- No project facts in `CLAUDE.md` or `.github/copilot-instructions.md`.
 
-## What this skill deliberately does not do
+## What this skill does not do
 
-- It does not write or amend the constitution — that is `amend-constitution`,
-  and universal principles do not belong in AGENTS.md.
-- It does not populate `spec.md` / `plan.md` / `tasks.md`.
-- It does not invent the AGENTS.md template, and it does not fabricate facts to
-  make a section look complete — an unverifiable line is marked, not guessed.
+- Doesn't amend the constitution (`amend-constitution` does that).
+- Doesn't populate `spec.md` / `plan.md` / `tasks.md`.
+- Doesn't fabricate facts — unverifiable lines are marked, not guessed.
 
 ## Keeping it current
 
-Resync is worth running on a cadence (e.g. a scheduled task, or wired into CI
-as a warning when AGENTS.md's commands no longer match the build files). Offer
-this to the user after a successful Bootstrap.
+Offer to schedule a resync cadence or CI warning after completing successfully.
