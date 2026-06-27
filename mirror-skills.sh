@@ -37,8 +37,4 @@ for tool_skills in \
   done
 done
 
-# Keep bundled shell scripts executable across all copies (.ps1 needs no bit).
-find "$CANON" "$ROOT/.claude/skills" "$ROOT/.github/skills" "$ROOT/.codex/skills" \
-     -name '*.sh' -exec chmod +x {} + 2>/dev/null || true
-
 echo "Mirrored $(find "$CANON" -mindepth 1 -maxdepth 1 -type d | wc -l | tr -d ' ') skill(s) → .claude, .github, .codex"
