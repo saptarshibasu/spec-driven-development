@@ -1,6 +1,16 @@
 ---
 name: spec-driven-feature
-description: Use when starting spec-driven development on a new feature — triggers on phrases like "create a spec for X", "let's spec out Y", "start a new feature: Z", "use SDD for this", or "write a spec before we code". First right-sizes the work by proposing a workflow track (direct fix / patch / feature / architecture) for human approval, then scaffolds specs/<NNN-feature-slug>/ from this project's templates/ folder and walks Specify -> Plan -> Tasks -> Analyze at the chosen depth, asking for explicit approval before each phase. The Analyze gate (Tracks C/D) cross-checks the artifacts for coverage and consistency before implementation. Handles trivial changes too — they route to the lightweight track rather than being turned away.
+description: >-
+  Use when starting spec-driven development on a new feature — triggers on
+  phrases like "create a spec for X", "let's spec out Y", "start a new
+  feature: Z", "use SDD for this", or "write a spec before we code". First
+  right-sizes the work by proposing a workflow track (direct fix / patch /
+  feature / architecture) for human approval, then scaffolds
+  specs/<NNN-feature-slug>/ from this project's templates/ folder and walks
+  Specify -> Plan -> Tasks -> Analyze at the chosen depth, asking for explicit
+  approval before each phase. The Analyze gate (Tracks C/D) cross-checks the
+  artifacts for coverage and consistency before implementation. Handles trivial
+  changes too — they route to the lightweight track rather than being turned away.
 ---
 
 # Spec-Driven Feature

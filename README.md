@@ -71,7 +71,7 @@ A spec that survives a framework swap unchanged was written correctly. Specs are
 4. **Plan, then tasks — same run** — once you approve, the skill continues *on its own* to `plan.md`, pauses for approval, then generates `tasks.md`. You don't relaunch it; each "stop" is a pause-for-approval, not an exit.
 5. **Analyze (gate, Tracks C/D — default-on, skippable)** — before implementation, the skill runs `analyze`: a **non-destructive** cross-artifact check that every requirement maps to a task and that spec, plan, and tasks don't contradict each other. It *reports*, never rewrites — blockers loop back to **whichever phase owns the fix** (spec, plan, *or* tasks), then re-run; a clean verdict clears the gate. It runs by default on C/D but you can explicitly skip it (the skip is logged in `decision-log.md`, like skipping review). Skipped on Track A; a light spec↔tasks pass on Track B.
 6. **Implement** — red → green → refactor, one story at a time; lean on the `test-writer` and `debugger` agents as needed.
-7. **Review & commit** — the `code-reviewer` agent checks the diff against spec + constitution; on commit, `.githooks/pre-commit` blocks secrets, unresolved markers, tool-pointer files that grow past a pointer ([ADR-0001](docs/adr/0001-agents-md-single-source-of-truth.md)), and runs your lint/tests.
+7. **Review & commit** — the `code-reviewer` agent checks the diff against spec + constitution; on commit, `.githooks/pre-commit` blocks secrets, unresolved markers, tool-pointer files that grow past a pointer, and runs your lint/tests.
 
 Steps 2–7 repeat per feature; step 1 is one-time (re-run `sync-agents-md` whenever the project drifts).
 
@@ -134,9 +134,8 @@ copies with `bash mirror-agents.sh` / `pwsh ./mirror-agents.ps1`.)
 Then, in order:
 
 1. **Initialize the project** — run the `init-project` skill. It scans your codebase and generates both `AGENTS.md` (from `templates/agents.template.md`) and `memory/constitution.md` (from `templates/constitution.template.md`) with explicit approval gates before writing either file.
-2. **Add domain terms** to `docs/glossary.md`.
-3. **Enable the hook** — `git config core.hooksPath .githooks`. (On Windows, Git runs the POSIX `pre-commit` via Git Bash; a native `pre-commit.ps1` is also provided.)
-4. **Start a feature** — *"start a new feature: &lt;description&gt;"* (the `spec-driven-feature` skill).
+2. **Enable the hook** — `git config core.hooksPath .githooks`. (On Windows, Git runs the POSIX `pre-commit` via Git Bash; a native `pre-commit.ps1` is also provided.)
+3. **Start a feature** — *"start a new feature: &lt;description&gt;"* (the `spec-driven-feature` skill).
 
 ## 📦 What's inside
 
@@ -146,16 +145,17 @@ Then, in order:
 |---|---|---|
 | `init-project` | Once, at setup | Scans the codebase and generates both `AGENTS.md` and `memory/constitution.md` from their templates, with approval gates before writing either file. |
 | `amend-constitution` | To amend the constitution | Updates `memory/constitution.md` section by section; use after `init-project` when principles need revisiting. |
-| `sync-agents-md` | To re-sync after drift | Re-fills `AGENTS.md` + `docs/glossary.md` from the actual repo when the project has changed significantly. |
+| `sync-agents-md` | To re-sync after drift | Re-fills `AGENTS.md` from the actual repo when the project has changed significantly. |
+| `create-adr` | To record an architecture decision | Finds the next ADR number, fills the template from your input, and writes `docs/adr/<NNNN-slug>.md` with approval before writing. |
 | `spec-driven-feature` | Start of every feature | Proposes a workflow track (right-sizes depth) + scans opt-in extensions, then scaffolds `specs/<NNN>/` (via `start-feature.sh` / `.ps1`) and walks Specify → Plan → Tasks → Analyze with approval gates. |
 | `clarify` | After the spec draft | Surfaces spec ambiguities, asks a few targeted questions, writes answers back. |
 | `checklist` | Before approving the spec | "Unit tests for the requirements" — complete, clear, consistent, measurable? |
-| `analyze` | After tasks, before implementing (Tracks C/D) | Non-destructive cross-check of spec ↔ plan ↔ tasks: requirement→task coverage, contradictions, orphan/duplicate tasks, constitution alignment. Reports & routes; never rewrites. ([ADR-0003](docs/adr/0003-analyze-gate.md)) |
+| `analyze` | After tasks, before implementing (Tracks C/D) | Non-destructive cross-check of spec ↔ plan ↔ tasks: requirement→task coverage, contradictions, orphan/duplicate tasks, constitution alignment. Reports & routes; never rewrites. |
 
 ### 🤖 Agents — the sensor half *(canonical in `.agents/agents/`, generated into every tool)*
 
 Defined once as Markdown in `.agents/agents/`; `mirror-agents` emits each tool's
-native format — Claude `.md`, Copilot `.agent.md`, Codex `.toml` (ADR-0001).
+native format — Claude `.md`, Copilot `.agent.md`, Codex `.toml`.
 
 | Agent | Role |
 |---|---|
@@ -177,7 +177,7 @@ the `code-reviewer` agent then enforces them by rule ID.
 | `security/baseline` | The feature touches auth, secrets, user data, external input, files, or network | `SEC-01`…`SEC-07`: input validation, authz, secret handling, data protection, output encoding, dependency hygiene, secure failure (directional reference — customise to your threat model). |
 
 Add your own under `.agents/extensions/<category>/<pack>/` — format in
-[`.agents/extensions/README.md`](.agents/extensions/README.md). Adapted from AWS Labs' AI-DLC (MIT-0); see [ADR-0002](docs/adr/0002-adaptive-workflow-and-extensions.md).
+[`.agents/extensions/README.md`](.agents/extensions/README.md). Adapted from AWS Labs' AI-DLC (MIT-0).
 
 ### 📚 Engineering reference — `docs/` *(read on demand, never auto-loaded)*
 
@@ -205,7 +205,7 @@ Add your own under `.agents/extensions/<category>/<pack>/` — format in
 │
 ├── .agents/               # canonical sources — edit here only (ADR-0001)
 │   ├── skills/            # spec-driven-feature · clarify · checklist · analyze
-│   │                      #   init-project · amend-constitution · sync-agents-md
+│   │                      #   init-project · amend-constitution · sync-agents-md · create-adr
 │   ├── agents/            # code-reviewer · test-writer · debugger · docs-agent
 │   └── extensions/        # opt-in rule packs (e.g. security/baseline)
 │
@@ -253,7 +253,7 @@ These aren't advice buried in a doc — they're encoded in the constitution and 
 ## 💡 Why it's structured this way
 
 > [!IMPORTANT]
-> **`AGENTS.md` is the single source of truth.** Every tool file (`CLAUDE.md`, `.github/copilot-instructions.md`) is a thin pointer to it. Update one file, not four. ([ADR-0001](docs/adr/0001-agents-md-single-source-of-truth.md))
+> **`AGENTS.md` is the single source of truth.** Every tool file (`CLAUDE.md`, `.github/copilot-instructions.md`) is a thin pointer to it. Update one file, not four.
 
 - **Spec ≠ plan.** Mixing *what* and *how* makes agents anchor on implementation before requirements are stable.
 - **Tasks are generated, not hand-written.** With a locked spec and reviewed plan, an agent derives `tasks.md` deterministically.
@@ -264,7 +264,7 @@ These aren't advice buried in a doc — they're encoded in the constitution and 
 
 [GitHub spec-kit](https://github.com/github/spec-kit) is GitHub's toolkit for spec-driven development — a `specify` CLI with commands for constitution, specify, clarify, plan, tasks, and implement, plus integrations for many AI coding agents.
 
-[AWS Labs AI-DLC](https://github.com/awslabs/aidlc-workflows) (MIT-0) is a methodology shipped as agent steering/rules, built on adaptive workflows, flexible depth, and human-in-the-loop oversight. This kit's [workflow tracks, opt-in extensions, and decision log](docs/adaptive-workflow-and-extensions.md) are adapted from it — see [ADR-0002](docs/adr/0002-adaptive-workflow-and-extensions.md).
+[AWS Labs AI-DLC](https://github.com/awslabs/aidlc-workflows) (MIT-0) is a methodology shipped as agent steering/rules, built on adaptive workflows, flexible depth, and human-in-the-loop oversight. This kit's [workflow tracks, opt-in extensions, and decision log](docs/adaptive-workflow-and-extensions.md) are adapted from it.
 
 ## 📖 Further reading
 

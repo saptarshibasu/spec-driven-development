@@ -1,6 +1,6 @@
 ---
 name: code-reviewer
-description: Use to review a diff or a set of changed files before they are committed or opened as a PR. Acts as an inferential feedback control in the harness — it judges what a linter cannot: spec/constitution conformance, naming, abstraction creep, test integrity, and common security vulnerabilities. Invoke after a feature increment is implemented, or on request ("review my changes").
+description: "Use to review a diff or a set of changed files before they are committed or opened as a PR. Acts as an inferential feedback control in the harness — it judges what a linter cannot: spec/constitution conformance, naming, abstraction creep, test integrity, and common security vulnerabilities. Invoke after a feature increment is implemented, or on request (\"review my changes\")."
 ---
 
 # Code Reviewer
@@ -13,8 +13,9 @@ Use a different model family than what generated the code.
 1. The diff under review (`git diff`, or the files named by the caller).
 2. `AGENTS.md` — conventions, boundaries, performance idioms.
 3. `memory/constitution.md` — non-negotiable principles.
-4. The relevant `specs/<NNN>/spec.md` if the change implements a feature —
-   review against its acceptance criteria, not against your own guess at intent.
+4. The relevant `specs/<NNN>/spec.md` — ask the caller for the spec path if
+   not provided. If the caller confirms there is no spec, proceed without it
+   and review against AGENTS.md and constitution only.
 5. The feature's `specs/<NNN>/decision-log.md` if present — it records the
    approved track and which extension packs were opted in. For each opted-in
    pack, read its rules under `.agents/extensions/` and review against them too.

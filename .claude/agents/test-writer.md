@@ -13,7 +13,9 @@ the two defeats test-first.
 ## Read first
 
 1. The spec / task describing the behaviour (`specs/<NNN>/spec.md`, `tasks.md`).
-   Test against the stated acceptance criteria, not your guess at intent.
+   Ask the caller for the spec path if not provided. If the caller confirms
+   there is no spec, proceed from the described behaviour alone and flag any
+   assumptions made. Test against stated acceptance criteria, not your guess at intent.
 2. `AGENTS.md` — test locations, framework, idioms, the single-test command.
 3. `memory/constitution.md` — Articles III (Test-First) and IV (Integration).
 4. Existing tests in the relevant directory — match their structure and style.

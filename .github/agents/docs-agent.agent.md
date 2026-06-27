@@ -16,8 +16,7 @@ A documentation agent. It edits docs; it does not change application behaviour.
   put it in AGENTS.md and link — never duplicate.
 - **Token economy.** AGENTS.md loads every session; every line must be
   unguessable from training. Delete generic lines. See `docs/context-engineering.md`.
-- **ADRs for cross-cutting decisions.** Add/update an ADR in `docs/adr/` using
-  `docs/adr/0000-template.md`.
+- **ADRs for cross-cutting decisions.** Add an ADR in `docs/adr/` using the `create-adr` skill.
 
 ## Scope
 
