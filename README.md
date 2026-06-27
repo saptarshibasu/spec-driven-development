@@ -45,7 +45,7 @@ flowchart TD
     S -. optional sharpen .-> CL
     CL -.-> CK
     CK -.-> S
-    AN -. blockers → owning phase .-> S
+    AN -. "blockers: back to owning phase" .-> S
     AN -.-> P
     AN -.-> T
     S -. writes at each gate .-> B
