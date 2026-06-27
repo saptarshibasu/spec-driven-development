@@ -87,9 +87,9 @@ The kit is built as a **harness** ([Martin Fowler's term](https://martinfowler.c
 flowchart TB
     subgraph FF["🧭 Feedforward · guides (before)"]
         direction LR
-        A["AGENTS.md + constitution<i></i>"]
-        SK["skills: spec-driven-feature (tracks),<br/>clarify, checklist"]
-        TPL["templates/<i></i>"]
+        A["AGENTS.md + constitution<br/><i>always-on context</i>"]
+        SK["skills: spec-driven-feature (tracks),<br/><i>clarify, checklist</i>"]
+        TPL["templates/<br/><i>spec · plan · tasks</i>"]
     end
     subgraph FB["🛰️ Feedback · sensors (after)"]
         direction LR
