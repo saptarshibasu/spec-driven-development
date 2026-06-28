@@ -16,8 +16,6 @@ No install, no CLI — just files you adapt to your stack. Specs before code, ga
 
 Clone it, fill in the placeholders, and you have an opinionated structure for **spec-driven development (SDD)**: a constitution, gated spec→plan→tasks templates, skills and subagents, hooks, CI, and a `docs/` knowledge base on the engineering that makes agents actually productive.
 
-> [!TIP]
-> **The one idea behind everything here:** an agent's context is a budget, not a junk drawer. Every line in `AGENTS.md`, every doc, every tool must earn its place. Empirical studies find kitchen-sink context files can *hurt* performance — so this kit optimizes for *the smallest set of high-signal guidance that makes the agent act correctly.*
 
 ## 🔄 The workflow
 
@@ -46,7 +44,7 @@ flowchart TD
 
     RT -->|✋ A · trivial fix| I
     RT -->|✋ B / C / D| S
-    S -->|✋ approve| P -->|✋ approve| T -->|✋ approve| AN -->|✋ ready| TW -->|✋ red confirmed| I --> R
+    S -->|✋ approve| P -->|✋ approve| T -->|✋ approve| AN -->|✋ ready| TW -->|✋ red confirmed| I -->|✋ green| R
     S -. B · skips plan .-> T
     S -. optional sharpen .-> CL
     CL -.-> CK
@@ -264,8 +262,6 @@ These aren't advice buried in a doc — they're encoded in the constitution and 
 **KV caching — put stable context first.** Inference APIs cache the prefix of the prompt. Structure your context so stable, rarely-changing content (constitution, AGENTS.md, system instructions) comes before dynamic content (the current task, spec excerpt). Maximising cache hits cuts latency and cost significantly on repeated agent calls within a session.
 
 **Caveman prompts for non-negotiable rules.** Subtle prose hints are easy for a model to rationalize away. For rules that must hold without exception — never delete a failing test, never fabricate a method signature, always write the test before the implementation — state them bluntly and repeat them at the point of action. Specificity and repetition beat elegant prose when correctness is non-negotiable.
-
-**Simplicity / anti-abstraction.** No speculative "might need it later" abstraction without a current, concrete requirement. Use the framework directly unless a wrapper is justified in writing.
 
 **Multi-repo — resolve, never guess.** When a dependency's source isn't visible in this repo, resolve it before writing code against it (sibling checkout → source jar → decompile → stop and ask) rather than fabricating a class, field, or method signature you can't see.
 
