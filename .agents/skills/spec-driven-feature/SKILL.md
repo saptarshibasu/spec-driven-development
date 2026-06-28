@@ -7,10 +7,12 @@ description: >-
   right-sizes the work by proposing a workflow track (direct fix / patch /
   feature / architecture) for human approval, then scaffolds
   specs/<NNN-feature-slug>/ from this project's templates/ folder and walks
-  Specify -> Plan -> Tasks -> Analyze at the chosen depth, asking for explicit
-  approval before each phase. The Analyze gate (Tracks C/D) cross-checks the
-  artifacts for coverage and consistency before implementation. Handles trivial
-  changes too — they route to the lightweight track rather than being turned away.
+  Specify -> Plan -> Tasks -> Analyze -> Tests (red) at the chosen depth, asking
+  for explicit approval before each phase. The Analyze gate (Tracks C/D)
+  cross-checks the artifacts for coverage and consistency; the test-writer gate
+  then writes and confirms failing tests before implementation begins. Handles
+  trivial changes too — they route to the lightweight track rather than being
+  turned away.
 ---
 
 # Spec-Driven Feature
@@ -295,6 +297,43 @@ alone) and the `code-reviewer` agent (reviews the diff later).
 4. On a clean verdict, a knowingly-accepted finding, **or an explicit skip**,
    append an **Analyze** row to `decision-log.md` (verdict, or "skipped — user's
    call") and tell the user implementation can begin story by story.
+
+## Phase 3.7 — Write failing tests (test-writer gate)
+
+After the Analyze gate clears (or is explicitly skipped), invoke the
+`test-writer` agent to write failing tests **before any implementation begins**.
+This is the point where TDD becomes mechanical rather than advisory.
+
+Conditioned on track — mirrors the Analyze pattern:
+
+- **Track A** — skip (trivial changes; still test-first if behaviour changes,
+  but enforced in the commit message, not here).
+- **Track B** — default-on: write a regression test for the bug and one test
+  per acceptance scenario. Confirm each fails for the right reason before
+  proceeding.
+- **Track C** — default-on: write tests for every user story's acceptance
+  scenarios before implementation of that story begins.
+- **Track D** — default-on, plus characterization tests for any brownfield area
+  identified in `AGENTS.md` or the plan must be written *before* any changes to
+  that code. The test-writer handles this in its characterization mode.
+
+The `test-writer` agent:
+1. Reads `spec.md` and `tasks.md` to derive test cases from acceptance criteria.
+2. Writes tests (right tier: contract / integration / unit per `tests/README.md`).
+3. Runs each test and confirms it **fails for the right reason** — an assertion
+   failure or missing-implementation error, not an import error or syntax typo.
+   Errors ≠ valid red; the agent fixes those before reporting.
+4. Reports: each test path + confirmed-failing output, criteria covered, anything
+   not yet covered (flagged for `clarify` if ambiguous).
+
+On B/C/D the test-writer gate runs **by default** but the user may explicitly
+skip it. Don't skip silently — if the user declines, **record the skip** in
+`decision-log.md` (same pattern as the Analyze gate).
+
+After the test-writer reports a clean red-state:
+- Append a **Tests (red)** row to `decision-log.md`.
+- Tell the user implementation can begin story by story — the implementer's job
+  is now to make tests green, not to decide what to test.
 
 ## Phase 4 — Implementation handoff (guidance only)
 

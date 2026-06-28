@@ -7,10 +7,12 @@ description: >-
   right-sizes the work by proposing a workflow track (direct fix / patch /
   feature / architecture) for human approval, then scaffolds
   specs/<NNN-feature-slug>/ from this project's templates/ folder and walks
-  Specify -> Plan -> Tasks -> Analyze at the chosen depth, asking for explicit
-  approval before each phase. The Analyze gate (Tracks C/D) cross-checks the
-  artifacts for coverage and consistency before implementation. Handles trivial
-  changes too — they route to the lightweight track rather than being turned away.
+  Specify -> Plan -> Tasks -> Analyze -> Tests (red) at the chosen depth, asking
+  for explicit approval before each phase. The Analyze gate (Tracks C/D)
+  cross-checks the artifacts for coverage and consistency; the test-writer gate
+  then writes and confirms failing tests before implementation begins. Handles
+  trivial changes too — they route to the lightweight track rather than being
+  turned away.
 ---
 
 # Spec-Driven Feature
@@ -274,7 +276,4 @@ On C/D analyze runs **by default**, but it is a gate the human controls, not a
 hard requirement: the user may **explicitly skip** it. Don't skip silently —
 offer to run it, and if the user declines, **record the skip** (and that it was
 their call) in `decision-log.md` before proceeding to implementation. Skipping a
-gate is the user's decision to make knowingly, exactly as with review.
-
-`analyze` **reports, it does not edit.** It checks requirement→task coverage,
-spec/plan/tasks
+gate is the user's decision to make knowingly, exactly as
