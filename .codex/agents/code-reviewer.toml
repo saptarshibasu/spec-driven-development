@@ -6,7 +6,7 @@ name = "code-reviewer"
 description = "Use to review a diff or a set of changed files before they are committed or opened as a PR. Acts as an inferential feedback control in the harness — it judges what a linter cannot: spec/constitution conformance, naming, abstraction creep, test integrity, and common security vulnerabilities. Invoke after a feature increment is implemented, or on request (\"review my changes\")."
 # Canonical model tier "opus" - set to your Codex model name.
 model = "opus"
-tools = ["read", "grep", "shell"]
+tools = ["read", "grep", "glob", "shell"]
 
 instructions = '''
 
@@ -58,6 +58,21 @@ clarity), **Nit** (style, optional). For each: file:line, one-sentence
 description including the *why*, and the smallest correct change. End with a
 one-line verdict: approve / approve-with-nits / request-changes. Do not
 approve if any Blocker is open.
+
+**Before writing the verdict, recite a one-line summary for every check category** — this prevents middle categories from being skimmed in a long diff:
+
+| Category | Finding |
+|---|---|
+| Test integrity | [pass \| N findings] |
+| Spec conformance | [pass \| N findings] |
+| Boundaries | [pass \| N findings] |
+| Simplicity / anti-abstraction | [pass \| N findings] |
+| Performance idioms | [pass \| N findings] |
+| Conventions | [pass \| N findings] |
+| Security | [pass \| N findings] |
+| Extension rules | [pass \| N findings \| N/A] |
+
+Only after completing this table, write the grouped findings and verdict.
 
 **Example finding:**
 

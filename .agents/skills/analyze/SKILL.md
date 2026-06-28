@@ -55,10 +55,13 @@ task list, not a blank one. This skill reads only; it makes no changes.
 Read `spec.md`, `plan.md` (if present), `tasks.md`, and any `research.md` /
 `data-model.md` / `contracts/` and the feature ADR on Track D. Then evaluate:
 
-1. **Requirement coverage.** Every Functional and Non-Functional Requirement and
-   every Acceptance Scenario in `spec.md` maps to at least one task in
-   `tasks.md`. List any requirement with **no** covering task (a coverage gap)
-   and any User Story with no task phase.
+1. **Requirement coverage.** For each Functional Requirement, Non-Functional
+   Requirement, and Acceptance Scenario in `spec.md`, re-state its ID and
+   one-line description, then immediately check whether at least one task in
+   `tasks.md` covers it. Do this one requirement at a time — do not batch them.
+   List any requirement with **no** covering task (a coverage gap) and any User
+   Story with no task phase. This per-requirement recitation is mandatory: it
+   prevents middle requirements from being skimmed in a long spec.
 2. **Cross-artifact consistency.** `plan.md` does not contradict `spec.md`
    (e.g. plan adds scope the spec excludes, or picks an approach the spec rules
    out); `tasks.md` does not contradict `plan.md` (e.g. tasks reference a
@@ -98,6 +101,20 @@ For each finding, **route it**: which phase owns the fix —
 `spec.md` (back to Specify / `clarify`), `plan.md` (back to Plan), or `tasks.md`
 (back to Tasks). End with a one-line verdict: **implementation-ready** or
 **not ready — N blockers**.
+
+**Before writing findings, recite a one-line summary for every check** — this prevents middle checks from being skimmed across long artifacts:
+
+| Check | Finding |
+|---|---|
+| Requirement coverage | [all covered \| N gaps] |
+| Cross-artifact consistency | [consistent \| N contradictions] |
+| Orphan / duplicate / ambiguous tasks | [none \| N issues] |
+| Test-first integrity | [pass \| N violations] |
+| Constitution alignment | [pass \| N violations] |
+| Extension compliance | [pass \| N unmet \| N/A] |
+| Leftover markers | [none \| N remaining] |
+
+Only after completing this table, write the grouped findings and verdict.
 
 **Example output (abbreviated):**
 

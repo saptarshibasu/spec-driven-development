@@ -52,6 +52,21 @@ description including the *why*, and the smallest correct change. End with a
 one-line verdict: approve / approve-with-nits / request-changes. Do not
 approve if any Blocker is open.
 
+**Before writing the verdict, recite a one-line summary for every check category** — this prevents middle categories from being skimmed in a long diff:
+
+| Category | Finding |
+|---|---|
+| Test integrity | [pass \| N findings] |
+| Spec conformance | [pass \| N findings] |
+| Boundaries | [pass \| N findings] |
+| Simplicity / anti-abstraction | [pass \| N findings] |
+| Performance idioms | [pass \| N findings] |
+| Conventions | [pass \| N findings] |
+| Security | [pass \| N findings] |
+| Extension rules | [pass \| N findings \| N/A] |
+
+Only after completing this table, write the grouped findings and verdict.
+
 **Example finding:**
 
 > **Blocker** — `src/orders/service.py:42`

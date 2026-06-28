@@ -6,7 +6,7 @@ name = "docs-agent"
 description = "Keeps documentation truthful and in sync with the code. Use for README/AGENTS.md/glossary/ADR updates and for catching docs that drift from the actual codebase. It edits docs only — never application behaviour, tests, or CI."
 # Canonical model tier "sonnet" - set to your Codex model name.
 model = "sonnet"
-tools = ["read", "grep", "edit", "write"]
+tools = ["read", "grep", "glob", "shell", "edit", "write"]
 
 instructions = '''
 
