@@ -254,7 +254,7 @@ These aren't advice buried in a doc — they're encoded in the constitution and 
 
 **Opt-in over always-on.** Constraints that don't apply to every feature (e.g. security rules for features touching auth or user data) live in opt-in extensions, not in the always-loaded `AGENTS.md`. Load them only when needed, keep the base context lean.
 
-**Context is a budget, not a junk drawer.** Every line in `AGENTS.md` must be something the agent cannot infer from training. Generic advice wastes tokens and can hurt performance. Prefer deleting a section to filling it with filler. Every artifact is a context unit — specs aren't auto-loaded; the agent pulls in only the one it needs.
+**Context is a budget, not a junk drawer.** Every line in `AGENTS.md` must be something the agent cannot infer from training. Generic advice wastes tokens and can hurt performance. Prefer deleting a section to filling it with filler. Every artifact is a context unit — specs aren't auto-loaded; the agent pulls in only the one it needs. Where detail is needed, link to a doc rather than inlining it — the agent fetches it only when the task requires it.
 
 **KV caching — put stable context first.** Inference APIs cache the prefix of the prompt. Structure your context so stable, rarely-changing content (constitution, AGENTS.md, system instructions) comes before dynamic content (the current task, spec excerpt). Maximising cache hits cuts latency and cost significantly on repeated agent calls within a session.
 
@@ -265,6 +265,8 @@ These aren't advice buried in a doc — they're encoded in the constitution and 
 **MCP servers: fewer is better.** Each connected MCP server adds to every session's context overhead. Cap at 5–7; remove any server the project doesn't actively use.
 
 **Hooks over prose.** A git hook that blocks a bad commit is more reliable than a rule that asks the agent to remember. Wire your highest-value rules into `.githooks/pre-commit` or CI so they're enforced mechanically, not by trust.
+
+**`.agents/` is the canonical source — never edit the generated copies.** Skills live in `.agents/skills/` and agents in `.agents/agents/`; the per-tool files (`.claude/`, `.github/`, `.codex/`) are generated outputs. Edit the source, then run `mirror-skills.sh` / `mirror-agents.sh` (or the `.ps1` equivalents on Windows) to propagate changes. Editing a generated copy directly means the next mirror run silently overwrites it.
 
 **Resilient by default.** Feature progress is never lost — each document's `Status` header records what's been approved, and re-invoking `spec-driven-feature` resumes from the first unapproved phase. A kill mid-phase leaves the document in `Draft`, so recovery is automatic at the phase level.
 
