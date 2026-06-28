@@ -254,6 +254,11 @@ to use isn't in that glossary, ask rather than guessing at its meaning.
 - Code review / verification: prefer a different model or model family than
   whatever generated the code under review, where available.
 
+## Output Rules
+
+- Output code or actions directly. No preamble, no explanation, no commentary.
+- Only speak if something is ambiguous or would cause irreversible harm — one sentence, then act.
+
 ## Out of Scope for Agents
 
 <!-- Anything you want a human to always do, full stop. -->

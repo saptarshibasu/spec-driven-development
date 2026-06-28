@@ -22,7 +22,7 @@ Clone it, fill in the placeholders, and you have an opinionated structure for **
 Each feature flows through gated phases. **An agent never advances a gate without explicit human approval.**
 
 ```mermaid
-%%{init: {'flowchart': {'nodeSpacing': 50, 'rankSpacing': 10, 'subGraphTitleMargin': {'top': 10, 'bottom': 10}}}}%%
+%%{init: {'flowchart': {'nodeSpacing': 50, 'rankSpacing': 45, 'subGraphTitleMargin': {'top': 10, 'bottom': 10}}, 'themeVariables': {'fontSize': '16px'}}}%%
 flowchart TD
     subgraph CTX["🌐 Always-on context<br/>governs every phase"]
         direction LR
@@ -32,19 +32,22 @@ flowchart TD
     end
     RT["🧭 Route<br/><b>pick a track</b><br/>A trivial · B simple<br/>C moderate · D complex<br/>+ opt-in extensions"]:::gate
     S["1 · Specify · spec.md<br/><b>WHAT & WHY</b> — no tech"]:::phase
-    CL["Clarify<br/><i>optional · answer open questions</i>"]:::gate
-    CK["Checklist<br/><i>optional · is the spec solid?</i>"]:::gate
+    CL["Clarify<br/><i>optional · answer open questions</i>"]:::opt
+    CK["Checklist<br/><i>optional · is the spec solid?</i>"]:::opt
     P["2 · Plan · plan.md<br/><b>HOW</b> — stack & design<br/><i>C/D only</i>"]:::phase
     T["3 · Tasks · tasks.md<br/><b>ordered, tests-first</b>"]:::phase
     AN["Analyze<br/><i>C/D default · skippable<br/>do spec, plan & tasks agree?</i>"]:::gate
-    TW["🧪 test-writer agent<br/><i>B/C/D default · skippable<br/>write & confirm failing tests</i>"]:::sensor
-    I["Implement<br/><i>red → green → refactor</i>"]:::impl
-    R["🔍 Review<br/><i>code-reviewer agent</i>"]:::sensor
+    TW["🧪 test-writer<br/><i>B/C/D default · skippable<br/>write & confirm failing tests</i>"]:::twriter
+    I["⚙️ Implement<br/><i>red → green → refactor</i>"]:::impl
+    R["🔍 code-reviewer<br/><i>spec · constitution · security</i>"]:::reviewer
+    DB["🐛 debugger<br/><i>fix all blockers · consolidated report</i>"]:::debug
     DL["📒 decision-log.md<br/><i>committed audit trail —<br/>every gate approval appended</i>"]:::audit
 
     RT -->|✋ A · trivial fix| I
     RT -->|✋ B / C / D| S
     S -->|✋ approve| P -->|✋ approve| T -->|✋ approve| AN -->|✋ ready| TW -->|✋ red confirmed| I -->|✋ green| R
+    R -->|"✋ blockers · user approves"| DB
+    DB -. "fixes applied → re-check" .-> R
     S -. B · skips plan .-> T
     S -. optional sharpen .-> CL
     CL -.-> CK
@@ -55,11 +58,14 @@ flowchart TD
     RT -.-> DL
 
     classDef gov fill:#6f42c1,color:#fff,stroke:#4c2889
-    classDef phase fill:#0969da,color:#fff,stroke:#0a4b8c
-    classDef gate fill:#bf8700,color:#fff,stroke:#7d5800
+    classDef phase fill:#2a5fa8,color:#fff,stroke:#1e4472
+    classDef gate fill:#7a5f28,color:#fff,stroke:#54421c
+    classDef opt fill:#6a5222,color:#fff,stroke:#4a3a18,font-style:italic
     classDef impl fill:#1a7f37,color:#fff,stroke:#0f5323
-    classDef sensor fill:#cf222e,color:#fff,stroke:#8b1a22
-    classDef audit fill:#eaeef2,color:#24292f,stroke:#6e7781
+    classDef twriter fill:#2a5e88,color:#fff,stroke:#1e4464
+    classDef reviewer fill:#8b2020,color:#fff,stroke:#621616
+    classDef debug fill:#7a4e2a,color:#fff,stroke:#56361e
+    classDef audit fill:#eaeef2,color:#24292f,stroke:#6e7781,font-style:italic
 ```
 
 Specs are pure **what/why**; the **how** lives in the plan; tasks are *generated* from both.
@@ -73,7 +79,7 @@ Specs are pure **what/why**; the **how** lives in the plan; tasks are *generated
 5. **Analyze (gate, Tracks C/D — default-on, skippable)** — before implementation, the skill runs `analyze`: a **non-destructive** cross-artifact check that every requirement maps to a task and that spec, plan, and tasks don't contradict each other. It *reports*, never rewrites — blockers loop back to **whichever phase owns the fix** (spec, plan, *or* tasks), then re-run; a clean verdict clears the gate. It runs by default on C/D but you can explicitly skip it (the skip is logged in `decision-log.md`, like skipping review). Skipped on Track A; a light spec↔tasks pass on Track B.
 6. **Write failing tests (gate, Tracks B/C/D — default-on, skippable)** — after Analyze clears, the `test-writer` agent writes tests from the spec's acceptance criteria, runs them, and confirms each fails **for the right reason** (assertion failure or missing implementation — not an import error or typo). Errors ≠ valid red; the agent fixes those before reporting. For Track D brownfield areas, characterization tests are written first to pin current behaviour. Only once every test is confirmed red does the skill hand off to implementation. The skip (if the user chooses) is recorded in `decision-log.md`.
 7. **Implement** — red → green → refactor, one story at a time; lean on the `debugger` agent when root cause is unclear.
-8. **Review & commit** — the `code-reviewer` agent checks the diff against spec + constitution; on commit, `.githooks/pre-commit` blocks secrets, unresolved markers, tool-pointer files that grow past a pointer, and runs your lint/tests.
+8. **Review & commit** — the `code-reviewer` agent checks the full diff against spec, constitution, and conventions, then groups findings by severity. If there are Blockers, it presents all of them to you and — on your approval — invokes the `debugger` agent once with the complete list. The debugger fixes every Blocker in order and returns a consolidated report; the reviewer then runs a single re-check pass on only the touched files before issuing its final verdict. On commit, `.githooks/pre-commit` blocks secrets, unresolved markers, tool-pointer files that grow past a pointer, and runs your lint/tests.
 
 Steps 2–8 repeat per feature; step 1 is one-time (re-run `sync-agents-md` whenever the project drifts).
 
@@ -158,7 +164,7 @@ native format — Claude `.md`, Copilot `.agent.md`, Codex `.toml`.
 
 | Agent | Role |
 |---|---|
-| `code-reviewer` | Inferential review vs. spec, constitution, conventions, and baseline security. Read-only. |
+| `code-reviewer` | Inferential review vs. spec, constitution, conventions, and baseline security. Completes the full review, then batches all Blockers and — on user approval — hands them to the `debugger` in one call. Runs a single focused re-check pass on the fixed files before issuing the final verdict. Read-only. |
 | `test-writer` | Invoked after Analyze clears; writes tests from acceptance criteria, runs them, and confirms each fails for the right reason before implementation begins. Also handles characterization tests for brownfield areas (Track D). |
 | `debugger` | Root-cause in its own discardable context; returns cause + minimal fix. |
 | `docs-agent` | Keeps docs truthful and in sync with the code. |

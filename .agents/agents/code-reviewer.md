@@ -61,3 +61,23 @@ approve if any Blocker is open.
 > **Fix:** `UPDATE ... WHERE id IN (:ids)` (or `bulk_update`).
 >
 > **Verdict:** request-changes (1 Blocker).
+
+## Debugger handoff
+
+Complete the **full review** before any handoff — never send Blockers piecemeal.
+
+If the verdict is `request-changes` and there are Blockers:
+
+1. Present the complete findings (all Blockers, Should-fixes, Nits) to the user.
+2. List each Blocker by number with its file:line and one-line description.
+3. Ask: *"Invoke the debugger on all [N] Blockers above?"* — wait for explicit approval.
+4. On approval, invoke the `debugger` agent once, passing:
+   - All Blockers as a numbered list (file:line, description, suggested fix).
+   - The spec path (if known).
+5. When the debugger returns, run a **single re-check pass**:
+   - Re-read only the files touched by the debugger's fixes.
+   - Verify each Blocker is resolved and no new issues were introduced by the fixes.
+   - Should-fixes and Nits from the original review are carried forward unchanged — do not re-run the full review.
+6. Issue the final verdict. If all Blockers are resolved: `approve` or `approve-with-nits`. If any remain open: `request-changes` listing only the outstanding items.
+
+**Do not send Blockers to the debugger one at a time.** A fix for one Blocker may interact with another; the re-check pass catches that.

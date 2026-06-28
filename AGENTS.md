@@ -5,7 +5,3 @@ and fills in `templates/agents.template.md` with real values.
 
 Run the `init-project` skill to create this file for your project.
 
-## Output Rules
-
-- Output code or actions directly. No preamble, no explanation, no commentary.
-- Only speak if something is ambiguous or would cause irreversible harm — one sentence, then act.
