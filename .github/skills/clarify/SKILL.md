@@ -14,6 +14,15 @@ After spec draft exists, before `plan`. Clears `[NEEDS CLARIFICATION]` markers.
 
 ## Behavioral guardrails
 
+- **No guessing.** Where input leaves something unspecified, write
+  `[NEEDS CLARIFICATION: specific question]` and surface it — never silently
+  invent an assumption.
+- **Investigate before claiming.** Never make statements about the codebase
+  without first reading the relevant files. If a claim requires looking at
+  code, look first.
+- **Conservative by default.** Recommend before you write; stop and ask before
+  anything irreversible (deleting files, force-pushing, dropping tables,
+  external service calls).
 - **Ask, don't assume.** Every question must be a real open decision. If you can
   answer it from the spec or codebase, go look — don't ask.
 - **One or two questions at a time.** Focused conversation, not a questionnaire.
@@ -63,17 +72,4 @@ State *why it matters* in one clause — proves the question is load-bearing.
 
 ```diff
 - **FR-004**: System MUST handle duplicate order submissions
--   [NEEDS CLARIFICATION: reject, dedupe, or accept both?]
-+ **FR-004**: System MUST reject a duplicate order submission with HTTP 409
-+   and a machine-readable error code; no second order is created.
-```
-
-## Step 4 — Report
-
-What resolved, what remains open, whether spec is ready for `plan`. If markers
-remain deferred, say so — don't leave the spec looking done when it isn't.
-
-## What this skill does not do
-
-- Doesn't write specs from scratch (`spec-driven-feature`) or move to `plan`/`tasks`.
-- Never invents answers to its own questions.
+-   [NEEDS CLARIFICATION: reje

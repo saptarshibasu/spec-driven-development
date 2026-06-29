@@ -16,6 +16,15 @@ worse than empty — every session trusts it. Re-grounds it in evidence.
 
 ## Behavioral guardrails (active for the entire session)
 
+- **No guessing.** Where input leaves something unspecified, write
+  `[NEEDS CLARIFICATION: specific question]` and surface it — never silently
+  invent an assumption.
+- **Investigate before claiming.** Never make statements about the codebase
+  without first reading the relevant files. If a claim requires looking at
+  code, look first.
+- **Conservative by default.** Recommend before you write; stop and ask before
+  anything irreversible (deleting files, force-pushing, dropping tables,
+  external service calls).
 - **Evidence or nothing.** Every line written into AGENTS.md must trace to a
   file you actually read (a build file, lockfile, CI workflow, the directory
   tree, an existing doc). If you cannot ground a fact, do **not** write a
@@ -36,9 +45,6 @@ worse than empty — every session trusts it. Re-grounds it in evidence.
 - **Preserve human prose on resync.** Treat existing filled-in text as
   authoritative unless the repo contradicts it. Touch only the lines that have
   actually drifted; never rewrite a section wholesale to "tidy" it.
-- **Conservative by default.** Recommend before you write; stop and ask before
-  anything irreversible (deleting files, force-pushing, dropping tables,
-  external service calls).
 
 ## Before starting
 
@@ -92,14 +98,4 @@ After writing:
   `[NEEDS VERIFICATION]` markers).
 - Each command in Commands exists in its source. Where cheap, `--help` to confirm.
   Don't run build/test suites.
-- No project facts in `CLAUDE.md` or `.github/copilot-instructions.md`.
-
-## What this skill does not do
-
-- Doesn't amend the constitution (`amend-constitution` does that).
-- Doesn't populate `spec.md` / `plan.md` / `tasks.md`.
-- Doesn't fabricate facts — unverifiable lines are marked, not guessed.
-
-## Keeping it current
-
-Offer to schedule a resync cadence or CI warning after completing successfully.
+- No project facts in `CLAUDE.md` or `.github/copilot-instructi

@@ -18,6 +18,18 @@ This is **distinct** from the other quality steps:
 - **`analyzer` checks that the artifacts agree with each other and cover every
   requirement** — across spec ↔ plan ↔ tasks, before implementation.
 
+## Behavioral guardrails
+
+- **No guessing.** Where input leaves something unspecified, write
+  `[NEEDS CLARIFICATION: specific question]` and surface it — never silently
+  invent an assumption.
+- **Investigate before claiming.** Never make statements about the codebase
+  without first reading the relevant files. If a claim requires looking at
+  code, look first.
+- **Conservative by default.** Recommend before you write; stop and ask before
+  anything irreversible (deleting files, force-pushing, dropping tables,
+  external service calls).
+
 ## Non-destructive — this is the whole point
 
 `analyzer` **reports**; it does not edit. It never rewrites `spec.md`, `plan.md`,
@@ -113,7 +125,7 @@ For each finding, **route it**: which phase owns the fix —
 
 **Example output (abbreviated):**
 
-\`\`\`markdown
+```markdown
 ### Blockers
 - FR-004 (rate limiting) has no covering task. → tasks.md (add to US2 phase).
 - plan.md introduces a Redis cache; spec Out-of-Scope excludes external infra.
@@ -126,7 +138,7 @@ For each finding, **route it**: which phase owns the fix —
 
 ### Notes
 - US3 priority is P2 in spec but sequenced before P1 work in tasks. → tasks.md.
-\`\`\`
+```
 
 > Verdict: **not ready — 3 blockers.** Resolve coverage of FR-004 and the
 > plan/spec scope conflict, add the SEC-02 task, then re-run analyzerr.
@@ -134,15 +146,4 @@ For each finding, **route it**: which phase owns the fix —
 ## After reporting
 
 Return the full report to the caller. The caller (`spec-driven-feature`) handles
-the approval gate — appending the Analyzer row to `decision-log.md`, recording
-any knowingly-accepted findings, and deciding whether to loop back to the owning
-phase or clear the gate to implementation.
-
-## What this agent deliberately does not do
-
-- **Never edits artifacts.** It reports and routes; the owning phase fixes.
-- Doesn't grade the spec alone (that's `checklist`) or resolve open questions
-  (that's `clarify`).
-- Doesn't review code (that's the `code-reviewer` agent, which runs later on the
-  diff).
-- Doesn't run on Track A, and runs only a light spec↔tasks pass on Track B.
+the approval gate — appending the Analyzer row

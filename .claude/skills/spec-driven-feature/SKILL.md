@@ -85,8 +85,11 @@ Propose exactly one track with a one-line rationale and the artifacts you'll pro
 
 - **Track A · Trivial — Direct change.** Trivial, localized, no design choices: a typo,
   copy/comment edit, config value, dependency bump, obvious one-liner. *No
-  feature folder.* Go straight to implement → review. Still test-first if
-  behaviour changes. Capture the rationale in the commit message, not a spec.
+  feature folder, no spec, no tasks.* Make the change; if it touches behaviour,
+  write and confirm a failing test first, then make it pass. When done, invoke
+  the `code-reviewer` agent on the diff (no spec path — it reviews against
+  `AGENTS.md` and `memory/constitution.md` only). Capture the rationale in the
+  commit message.
 - **Track B · Simple — Patch.** A localized bug fix or small enhancement with no new
   architecture. Scaffold the folder, write a **short `spec.md`** (problem +
   acceptance + **unchanged-behavior / regression guard** + out-of-scope) and
@@ -116,7 +119,7 @@ In the same turn:
 Record the approved track and extension choices as the first entries in
 `decision-log.md` immediately after scaffolding.
 
-**Track A**: no folder, no further phases — implement under guardrails, then review.
+**Track A**: no folder, no further phases — implement, then invoke `code-reviewer` on the diff.
 **Tracks B/C/D**: continue to Step 0.
 
 ## Step 0 — Scaffold (mechanical — don't use judgment here)
@@ -274,6 +277,4 @@ cheapest place to catch a requirement that never became a task. Invoke the
 
 On C/D analyze runs **by default**, but it is a gate the human controls, not a
 hard requirement: the user may **explicitly skip** it. Don't skip silently —
-offer to run it, and if the user declines, **record the skip** (and that it was
-their call) in `decision-log.md` before proceeding to implementation. Skipping a
-gate is the user's decision to make knowingly, exactly as
+offer to run it, and if t

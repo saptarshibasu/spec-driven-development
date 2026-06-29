@@ -266,4 +266,33 @@ These aren't advice buried in a doc — they're encoded in the constitution and 
 
 **Caveman prompts for non-negotiable rules.** Subtle prose hints are easy for a model to rationalize away. For rules that must hold without exception — never delete a failing test, never fabricate a method signature, always write the test before the implementation — state them bluntly and repeat them at the point of action. Specificity and repetition beat elegant prose when correctness is non-negotiable.
 
-**Multi-repo — resolve, never 
+**Multi-repo — resolve, never guess.** When a dependency's source isn't visible in this repo, resolve it before writing code against it (sibling checkout → source jar → decompile → stop and ask) rather than fabricating a class, field, or method signature you can't see.
+
+**MCP servers: fewer is better.** Each connected MCP server adds to every session's context overhead. Cap at 5–7; remove any server the project doesn't actively use.
+
+**Hooks over prose.** A git hook that blocks a bad commit is more reliable than a rule that asks the agent to remember. Wire your highest-value rules into `.githooks/pre-commit` or CI so they're enforced mechanically, not by trust.
+
+**`.agents/` is the canonical source — never edit the generated copies.** Skills live in `.agents/skills/` and agents in `.agents/agents/`; the per-tool files (`.claude/`, `.github/`, `.codex/`) are generated outputs. Edit the source, then run `mirror-skills.sh` / `mirror-agents.sh` (or the `.ps1` equivalents on Windows) to propagate changes. Editing a generated copy directly means the next mirror run silently overwrites it.
+
+**Resilient by default.** Feature progress is never lost — each document's `Status` header records what's been approved, and re-invoking `spec-driven-feature` resumes from the first unapproved phase. A kill mid-phase leaves the document in `Draft`, so recovery is automatic at the phase level.
+
+**Composable — skills work standalone.** You don't have to enter at step 1. Run `checklist` against any spec, `analyze` against an existing spec + plan + tasks, or `clarify` at any time. The kit works as a full end-to-end workflow or as individual tools dropped into an existing process.
+
+## 📖 Further reading
+
+- [Distilled AI-Assisted Development Guidelines](https://medium.com/@sapbasu/distilled-ai-assisted-development-guidelines-351ac9ab0154) — the companion article
+- [Harness engineering for coding agents](https://martinfowler.com/articles/harness-engineering.html) — Martin Fowler
+- [Effective context engineering for AI agents](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents) — Anthropic
+- [Agent READMEs: an empirical study of context files](https://arxiv.org/abs/2511.12884) — what helps vs. hurts
+- [How to write a great AGENTS.md](https://github.blog/ai-and-ml/github-copilot/how-to-write-a-great-agents-md-lessons-from-over-2500-repositories/) — GitHub, 2,500+ repos
+- [AI-DLC — AWS Labs adaptive workflows](https://github.com/awslabs/aidlc-workflows) (MIT-0) — the methodology this kit's tracks, extensions, and decision log draw from ([methodology blog](https://aws.amazon.com/blogs/devops/ai-driven-development-life-cycle/)); shipped as agent steering/rules with adaptive workflows and human-in-the-loop oversight
+- [spec-kit](https://github.com/github/spec-kit) — GitHub's spec-driven development toolkit; a `specify` CLI covering constitution → specify → clarify → plan → tasks → implement, with integrations for many AI coding agents · [awesome-copilot](https://github.com/github/awesome-copilot)
+- [New spec types: fix bugs and build on top of existing apps](https://kiro.dev/blog/specs-bugfix-and-design-first/) — Kiro on bug-fix specs (current / expected / unchanged behavior); relevant to this kit's Track B patch flow
+
+---
+
+<div align="center">
+
+Licensed under [Apache 2.0](LICENSE) · Contributions welcome
+
+</div>

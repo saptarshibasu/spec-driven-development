@@ -19,6 +19,15 @@ narrow repeatable domain passes — security, accessibility, migration-readiness
 
 ## Behavioral guardrails
 
+- **No guessing.** Where input leaves something unspecified, write
+  `[NEEDS CLARIFICATION: specific question]` and surface it — never silently
+  invent an assumption.
+- **Investigate before claiming.** Never make statements about the codebase
+  without first reading the relevant files. If a claim requires looking at
+  code, look first.
+- **Conservative by default.** Recommend before you write; stop and ask before
+  anything irreversible (deleting files, force-pushing, dropping tables,
+  external service calls).
 - **Test requirements, not implementation.** Items interrogate spec quality
   ("Is the latency target measurable?"), never code behaviour. Runnable-only
   items belong in the test suite.
@@ -73,18 +82,4 @@ trivial passes). Then:
 ## Measurability
 - [x] CHK001 Every success criterion is a number or binary.
 - [ ] CHK002 Latency target is quantified.
-      ✖ SC-002 says "responses feel fast" — no number. → clarify (suggest p95 target).
-
-## Completeness
-- [ ] CHK003 Every user story has acceptance scenarios.
-      ✖ US2 has none. → back to author.
-- [x] CHK004 Out of Scope is filled in, not a placeholder.
-```
-
-> Verdict: 2 of 4 failing — not plan-ready. CHK002 is an ambiguity (route to
-> `clarify`); CHK003 is a missing requirement (route to the author).
-
-## What this skill does not do
-
-- Doesn't test implementation — that's the test suite.
-- Doesn't resolve gaps — routes them to `clarify` or the author.
+      ✖ SC-002 says "responses feel fast" — no number. 

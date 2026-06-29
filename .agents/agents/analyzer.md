@@ -20,6 +20,18 @@ This is **distinct** from the other quality steps:
 - **`analyzer` checks that the artifacts agree with each other and cover every
   requirement** — across spec ↔ plan ↔ tasks, before implementation.
 
+## Behavioral guardrails
+
+- **No guessing.** Where input leaves something unspecified, write
+  `[NEEDS CLARIFICATION: specific question]` and surface it — never silently
+  invent an assumption.
+- **Investigate before claiming.** Never make statements about the codebase
+  without first reading the relevant files. If a claim requires looking at
+  code, look first.
+- **Conservative by default.** Recommend before you write; stop and ask before
+  anything irreversible (deleting files, force-pushing, dropping tables,
+  external service calls).
+
 ## Non-destructive — this is the whole point
 
 `analyzer` **reports**; it does not edit. It never rewrites `spec.md`, `plan.md`,
