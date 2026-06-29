@@ -36,7 +36,7 @@ flowchart TD
     CK["Checklist<br/><i>optional · is the spec solid?</i>"]:::opt
     P["2 · Plan · plan.md<br/><b>HOW</b> — stack & design<br/><i>C/D only</i>"]:::phase
     T["3 · Tasks · tasks.md<br/><b>ordered, tests-first</b>"]:::phase
-    AN["Analyze<br/><i>C/D default · skippable<br/>do spec, plan & tasks agree?</i>"]:::gate
+    AN["Analyzer<br/><i>C/D default · skippable<br/>do spec, plan & tasks agree?</i>"]:::gate
     TW["🧪 test-writer<br/><i>B/C/D default · skippable<br/>write & confirm failing tests</i>"]:::twriter
     I["⚙️ Implement<br/><i>red → green → refactor</i>"]:::impl
     R["🔍 code-reviewer<br/><i>spec · constitution · security</i>"]:::reviewer
@@ -76,8 +76,8 @@ Specs are pure **what/why**; the **how** lives in the plan; tasks are *generated
 2. **Start a feature** — run `spec-driven-feature`. It first **right-sizes the work**: it proposes a workflow track (A · trivial / B · simple / C · moderate / D · complex) and scans `.agents/extensions/` for opt-in rule packs (e.g. a security baseline), and waits for you to approve the route. Then it scaffolds `specs/<NNN>/` (calling `start-feature.sh` on macOS/Linux or `start-feature.ps1` on Windows) and drafts `spec.md` (Specify), marking open questions as `[NEEDS CLARIFICATION]`. Trivial changes route to Track A and skip straight to implementation.
 3. **(Optional) Sharpen the spec at the approval gate** — `spec-driven-feature` pauses after the draft and waits for you. If it left `[NEEDS CLARIFICATION]` markers or the spec needs tightening, run `clarify` and/or `checklist` *here*; otherwise just answer any open questions inline. Neither is a required step. **You approve the spec.**
 4. **Plan, then tasks — same run** — once you approve, the skill continues *on its own* to `plan.md`, pauses for approval, then generates `tasks.md`. You don't relaunch it; each "stop" is a pause-for-approval, not an exit.
-5. **Analyze (gate, Tracks C/D — default-on, skippable)** — before implementation, the skill runs `analyze`: a **non-destructive** cross-artifact check that every requirement maps to a task and that spec, plan, and tasks don't contradict each other. It *reports*, never rewrites — blockers loop back to **whichever phase owns the fix** (spec, plan, *or* tasks), then re-run; a clean verdict clears the gate. It runs by default on C/D but you can explicitly skip it (the skip is logged in `decision-log.md`, like skipping review). Skipped on Track A; a light spec↔tasks pass on Track B.
-6. **Write failing tests (gate, Tracks B/C/D — default-on, skippable)** — after Analyze clears, the `test-writer` agent writes tests from the spec's acceptance criteria, runs them, and confirms each fails **for the right reason** (assertion failure or missing implementation — not an import error or typo). Errors ≠ valid red; the agent fixes those before reporting. For Track D brownfield areas, characterization tests are written first to pin current behaviour. Only once every test is confirmed red does the skill hand off to implementation. The skip (if the user chooses) is recorded in `decision-log.md`.
+5. **Analyzer (gate, Tracks C/D — default-on, skippable)** — before implementation, the skill runs `analyzer`: a **non-destructive** cross-artifact check that every requirement maps to a task and that spec, plan, and tasks don't contradict each other. It *reports*, never rewrites — blockers loop back to **whichever phase owns the fix** (spec, plan, *or* tasks), then re-run; a clean verdict clears the gate. It runs by default on C/D but you can explicitly skip it (the skip is logged in `decision-log.md`, like skipping review). Skipped on Track A; a light spec↔tasks pass on Track B.
+6. **Write failing tests (gate, Tracks B/C/D — default-on, skippable)** — after Analyzer clears, the `test-writer` agent writes tests from the spec's acceptance criteria, runs them, and confirms each fails **for the right reason** (assertion failure or missing implementation — not an import error or typo). Errors ≠ valid red; the agent fixes those before reporting. For Track D brownfield areas, characterization tests are written first to pin current behaviour. Only once every test is confirmed red does the skill hand off to implementation. The skip (if the user chooses) is recorded in `decision-log.md`.
 7. **Implement** — red → green → refactor, one story at a time; lean on the `debugger` agent when root cause is unclear.
 8. **Review & commit** — the `code-reviewer` agent checks the full diff against spec, constitution, and conventions, then groups findings by severity. If there are Blockers, it presents all of them to you and — on your approval — invokes the `debugger` agent once with the complete list. The debugger fixes every Blocker in order and returns a consolidated report; the reviewer then runs a single re-check pass on only the touched files before issuing its final verdict. On commit, `.githooks/pre-commit` blocks secrets, unresolved markers, tool-pointer files that grow past a pointer, and runs your lint/tests.
 
@@ -94,7 +94,7 @@ flowchart TB
     subgraph FF["🧭 Feedforward · guides (before)"]
         direction LR
         A["AGENTS.md + constitution<br/><i>always-on context</i>"]
-        SK["skills: spec-driven-feature (tracks),<br/><i>clarify, checklist, analyze, create-adr</i>"]
+        SK["skills: spec-driven-feature (tracks),<br/><i>clarify, checklist, create-adr</i>"]
         TW["🧪 test-writer agent<br/><i>red tests before implementation · B/C/D</i>"]
         TPL["templates/<br/><i>spec · plan · tasks</i>"]
     end
@@ -152,10 +152,9 @@ Then, in order:
 | `amend-constitution` | To amend the constitution | Updates `memory/constitution.md` section by section; use after `init-project` when principles need revisiting. |
 | `sync-agents-md` | To re-sync after drift | Re-fills `AGENTS.md` from the actual repo when the project has changed significantly. |
 | `create-adr` | To record an architecture decision | Finds the next ADR number, fills the template from your input, and writes `docs/adr/<NNNN-slug>.md` with approval before writing. |
-| `spec-driven-feature` | Start of every feature | Proposes a workflow track (right-sizes depth) + scans opt-in extensions, then scaffolds `specs/<NNN>/` (via `start-feature.sh` / `.ps1`) and walks Specify → Plan → Tasks → Analyze → Tests (red) with approval gates. |
+| `spec-driven-feature` | Start of every feature | Proposes a workflow track (right-sizes depth) + scans opt-in extensions, then scaffolds `specs/<NNN>/` (via `start-feature.sh` / `.ps1`) and walks Specify → Plan → Tasks → Analyzer → Tests (red) with approval gates. |
 | `clarify` | After the spec draft | Surfaces spec ambiguities, asks a few targeted questions, writes answers back. |
 | `checklist` | Before approving the spec | "Unit tests for the requirements" — complete, clear, consistent, measurable? |
-| `analyze` | After tasks, before implementing (Tracks C/D) | Non-destructive cross-check of spec ↔ plan ↔ tasks: requirement→task coverage, contradictions, orphan/duplicate tasks, constitution alignment. Reports & routes; never rewrites. |
 
 ### 🤖 Agents — the sensor half *(canonical in `.agents/agents/`, generated into every tool)*
 
@@ -164,8 +163,9 @@ native format — Claude `.md`, Copilot `.agent.md`, Codex `.toml`.
 
 | Agent | Role |
 |---|---|
+| `analyzer` | Last guide-side gate before implementation (opus model). Cross-checks spec ↔ plan ↔ tasks for coverage gaps, contradictions, orphan tasks, test-first integrity, and constitution violations. Reports findings routed to the owning phase; never edits artifacts. |
 | `code-reviewer` | Inferential review vs. spec, constitution, conventions, and baseline security. Completes the full review, then batches all Blockers and — on user approval — hands them to the `debugger` in one call. Runs a single focused re-check pass on the fixed files before issuing the final verdict. Read-only. |
-| `test-writer` | Invoked after Analyze clears; writes tests from acceptance criteria, runs them, and confirms each fails for the right reason before implementation begins. Also handles characterization tests for brownfield areas (Track D). |
+| `test-writer` | Invoked after Analyzer clears; writes tests from acceptance criteria, runs them, and confirms each fails for the right reason before implementation begins. Also handles characterization tests for brownfield areas (Track D). |
 | `debugger` | Root-cause in its own discardable context; returns cause + minimal fix. |
 | `docs-agent` | Keeps docs truthful and in sync with the code. |
 
@@ -199,9 +199,9 @@ Add your own under `.agents/extensions/<category>/<pack>/` — format in
 ├── .mcp.json.example      # copy to .mcp.json; trim to 5–7 servers
 │
 ├── .agents/               # canonical sources — edit here only (ADR-0001)
-│   ├── skills/            # spec-driven-feature · clarify · checklist · analyze
+│   ├── skills/            # spec-driven-feature · clarify · checklist
 │   │                      #   init-project · amend-constitution · sync-agents-md · create-adr
-│   ├── agents/            # code-reviewer · test-writer · debugger · docs-agent
+│   ├── agents/            # analyzer · code-reviewer · test-writer · debugger · docs-agent
 │   └── extensions/        # opt-in rule packs (e.g. security/baseline)
 │
 ├── .claude/               # Claude Code: skills/ · agents/*.md (generated)
@@ -248,7 +248,7 @@ These aren't advice buried in a doc — they're encoded in the constitution and 
 
 **Characterization tests for brownfield.** Before changing any untested legacy behaviour, write tests that pin *current* behaviour first — so modifications are deliberate, not accidental. Brownfield areas are flagged in `AGENTS.md` and planned with the strongest model.
 
-**Cross-artifact consistency before implementation.** The `analyze` gate (Tracks C/D) cross-checks spec, plan, and tasks as a set before a single line of code is written: every requirement maps to at least one task, no contradictions exist between artifacts, no orphan or duplicate tasks. It reports and routes blockers back to whichever phase owns the fix; it never rewrites artifacts itself. A clean verdict is the green light for implementation.
+**Cross-artifact consistency before implementation.** The `analyzer` gate (Tracks C/D) cross-checks spec, plan, and tasks as a set before a single line of code is written: every requirement maps to at least one task, no contradictions exist between artifacts, no orphan or duplicate tasks. It reports and routes blockers back to whichever phase owns the fix; it never rewrites artifacts itself. A clean verdict is the green light for implementation.
 
 **Separate agents for separate concerns — each with its own context and model.** The coding agent implements; the `test-writer` writes tests in its own discardable context so test intent is never contaminated by implementation choices; the `debugger` isolates root cause in a throwaway context and returns only the minimal fix; the `code-reviewer` is read-only and checks the diff against spec, constitution, and conventions; the `docs-agent` keeps documentation truthful without touching code. Each agent gets only the context its role needs.
 
@@ -256,7 +256,7 @@ These aren't advice buried in a doc — they're encoded in the constitution and 
 
 **Guides before, sensors after.** The harness has two halves: feedforward guides (AGENTS.md, constitution, specs, skills) that steer the agent before it acts, and feedback sensors (tests, linters, hooks, CI, code-reviewer) that catch it after.
 
-**Right-size the workflow.** Not every change needs a full spec → plan → tasks pipeline. Track A (trivial) goes straight to implementation; Track B (simple patch) skips the plan; Tracks C/D get the full pipeline plus the Analyze gate. Match depth to risk.
+**Right-size the workflow.** Not every change needs a full spec → plan → tasks pipeline. Track A (trivial) goes straight to implementation; Track B (simple patch) skips the plan; Tracks C/D get the full pipeline plus the Analyzer gate. Match depth to risk.
 
 **Opt-in over always-on.** Constraints that don't apply to every feature (e.g. security rules for features touching auth or user data) live in opt-in extensions, not in the always-loaded `AGENTS.md`. Load them only when needed, keep the base context lean.
 
@@ -266,33 +266,4 @@ These aren't advice buried in a doc — they're encoded in the constitution and 
 
 **Caveman prompts for non-negotiable rules.** Subtle prose hints are easy for a model to rationalize away. For rules that must hold without exception — never delete a failing test, never fabricate a method signature, always write the test before the implementation — state them bluntly and repeat them at the point of action. Specificity and repetition beat elegant prose when correctness is non-negotiable.
 
-**Multi-repo — resolve, never guess.** When a dependency's source isn't visible in this repo, resolve it before writing code against it (sibling checkout → source jar → decompile → stop and ask) rather than fabricating a class, field, or method signature you can't see.
-
-**MCP servers: fewer is better.** Each connected MCP server adds to every session's context overhead. Cap at 5–7; remove any server the project doesn't actively use.
-
-**Hooks over prose.** A git hook that blocks a bad commit is more reliable than a rule that asks the agent to remember. Wire your highest-value rules into `.githooks/pre-commit` or CI so they're enforced mechanically, not by trust.
-
-**`.agents/` is the canonical source — never edit the generated copies.** Skills live in `.agents/skills/` and agents in `.agents/agents/`; the per-tool files (`.claude/`, `.github/`, `.codex/`) are generated outputs. Edit the source, then run `mirror-skills.sh` / `mirror-agents.sh` (or the `.ps1` equivalents on Windows) to propagate changes. Editing a generated copy directly means the next mirror run silently overwrites it.
-
-**Resilient by default.** Feature progress is never lost — each document's `Status` header records what's been approved, and re-invoking `spec-driven-feature` resumes from the first unapproved phase. A kill mid-phase leaves the document in `Draft`, so recovery is automatic at the phase level.
-
-**Composable — skills work standalone.** You don't have to enter at step 1. Run `checklist` against any spec, `analyze` against an existing spec + plan + tasks, or `clarify` at any time. The kit works as a full end-to-end workflow or as individual tools dropped into an existing process.
-
-## 📖 Further reading
-
-- [Distilled AI-Assisted Development Guidelines](https://medium.com/@sapbasu/distilled-ai-assisted-development-guidelines-351ac9ab0154) — the companion article
-- [Harness engineering for coding agents](https://martinfowler.com/articles/harness-engineering.html) — Martin Fowler
-- [Effective context engineering for AI agents](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents) — Anthropic
-- [Agent READMEs: an empirical study of context files](https://arxiv.org/abs/2511.12884) — what helps vs. hurts
-- [How to write a great AGENTS.md](https://github.blog/ai-and-ml/github-copilot/how-to-write-a-great-agents-md-lessons-from-over-2500-repositories/) — GitHub, 2,500+ repos
-- [AI-DLC — AWS Labs adaptive workflows](https://github.com/awslabs/aidlc-workflows) (MIT-0) — the methodology this kit's tracks, extensions, and decision log draw from ([methodology blog](https://aws.amazon.com/blogs/devops/ai-driven-development-life-cycle/)); shipped as agent steering/rules with adaptive workflows and human-in-the-loop oversight
-- [spec-kit](https://github.com/github/spec-kit) — GitHub's spec-driven development toolkit; a `specify` CLI covering constitution → specify → clarify → plan → tasks → implement, with integrations for many AI coding agents · [awesome-copilot](https://github.com/github/awesome-copilot)
-- [New spec types: fix bugs and build on top of existing apps](https://kiro.dev/blog/specs-bugfix-and-design-first/) — Kiro on bug-fix specs (current / expected / unchanged behavior); relevant to this kit's Track B patch flow
-
----
-
-<div align="center">
-
-Licensed under [Apache 2.0](LICENSE) · Contributions welcome
-
-</div>
+**Multi-repo — resolve, never 

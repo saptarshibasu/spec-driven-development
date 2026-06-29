@@ -32,6 +32,13 @@ larger system if there is one. e.g. "Java 17 / Spring Boot 3 service owning
 the Order domain. Part of a multi-repo system — this repo's source is the
 only source an agent here can see by default."]
 
+## Always-on context
+
+Before acting on any task, read `memory/constitution.md`. It contains the
+project's non-negotiable principles — test-first, simplicity, integration-first,
+and any project-specific rules ratified by the team. Every agent session inherits
+these; they are never optional and are not repeated in this file.
+
 ## Commands
 
 <!-- Full runnable commands with flags, not just tool names. The agent will

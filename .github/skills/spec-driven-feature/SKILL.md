@@ -8,7 +8,7 @@ description: >-
   feature / architecture) for human approval, then scaffolds
   specs/<NNN-feature-slug>/ from this project's templates/ folder and walks
   Specify -> Plan -> Tasks -> Analyze -> Tests (red) at the chosen depth, asking
-  for explicit approval before each phase. The Analyze gate (Tracks C/D)
+  for explicit approval before each phase. The Analyzer gate (Tracks C/D)
   cross-checks the artifacts for coverage and consistency; the test-writer gate
   then writes and confirms failing tests before implementation begins. Handles
   trivial changes too — they route to the lightweight track rather than being
@@ -257,14 +257,14 @@ Only after the user has approved Phase 2.
 6. **Stop.** Present the task list and get approval. On approval, set
    `tasks.md`'s **Status** to `Approved — <who>, <date>` and append a **Tasks**
    row to `decision-log.md`. Don't tell the user to start implementing yet — on Tracks
-   C/D the analyze gate (Phase 3.5) runs first.
+   C/D the analyzer gate (Phase 3.5) runs first.
 
-## Phase 3.5 — Analyze (gate, non-destructive)
+## Phase 3.5 — Analyzer (gate, non-destructive)
 
 The last guide-side gate before implementation: cross-check the artifacts
 against each other and the constitution **while no code yet exists** — the
-cheapest place to catch a requirement that never became a task. Run the
-`analyze` skill (full detail there). It is **conditional on the track**:
+cheapest place to catch a requirement that never became a task. Invoke the
+`analyzer` agent (full detail there). It is **conditional on the track**:
 
 - **Track A** — skip (no artifacts to cross-check).
 - **Track B** — optional quick pass: spec ↔ tasks coverage only (no `plan.md`).
