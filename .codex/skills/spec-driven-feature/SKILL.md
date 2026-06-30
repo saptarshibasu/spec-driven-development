@@ -277,4 +277,76 @@ cheapest place to catch a requirement that never became a task. Invoke the
 
 On C/D analyze runs **by default**, but it is a gate the human controls, not a
 hard requirement: the user may **explicitly skip** it. Don't skip silently —
-offer to run it, and if t
+offer to run it, and if the user declines, **record the skip** (and that it was
+their call) in `decision-log.md` before proceeding to implementation. Skipping a
+gate is the user's decision to make knowingly, exactly as with review.
+
+`analyze` **reports, it does not edit.** It checks requirement→task coverage,
+spec/plan/tasks contradictions, orphan/duplicate/ambiguous tasks, test-first
+integrity, constitution alignment, and any opted-in extension's verification
+tasks; each finding is routed to **the phase that owns the fix — Specify, Plan,
+or Tasks** (a missing task is a `tasks.md` fix; a spec/plan contradiction is a
+`spec.md` or `plan.md` fix). It is distinct from `checklist` (grades the spec
+alone) and the `code-reviewer` agent (reviews the diff later).
+
+1. Offer to run analyze at the depth for the track. If the user declines on C/D,
+   log the skip (step 4) and proceed.
+2. **Blockers** (coverage gap, contradiction, unmet opted-in verification,
+   constitution violation): loop back to whichever phase owns the fix (Specify /
+   Plan / Tasks) — not always Tasks — fix there, then **re-run analyze**. Don't
+   start implementation on an unresolved blocker.
+3. A human may knowingly accept a finding instead of fixing it — record that
+   acceptance in `decision-log.md`.
+4. On a clean verdict, a knowingly-accepted finding, **or an explicit skip**,
+   append an **Analyze** row to `decision-log.md` (verdict, or "skipped — user's
+   call") and tell the user implementation can begin story by story.
+
+## Phase 3.7 — Write failing tests (test-writer gate)
+
+After the Analyze gate clears (or is explicitly skipped), invoke the
+`test-writer` agent to write failing tests **before any implementation begins**.
+This is the point where TDD becomes mechanical rather than advisory.
+
+Conditioned on track — mirrors the Analyze pattern:
+
+- **Track A** — skip (trivial changes; still test-first if behaviour changes,
+  but enforced in the commit message, not here).
+- **Track B** — default-on: write a regression test for the bug and one test
+  per acceptance scenario. Confirm each fails for the right reason before
+  proceeding.
+- **Track C** — default-on: write tests for every user story's acceptance
+  scenarios before implementation of that story begins.
+- **Track D** — default-on, plus characterization tests for any brownfield area
+  identified in `AGENTS.md` or the plan must be written *before* any changes to
+  that code. The test-writer handles this in its characterization mode.
+
+The `test-writer` agent:
+1. Reads `spec.md` and `tasks.md` to derive test cases from acceptance criteria.
+2. Writes tests (right tier: contract / integration / unit per `tests/README.md`).
+3. Runs each test and confirms it **fails for the right reason** — an assertion
+   failure or missing-implementation error, not an import error or syntax typo.
+   Errors ≠ valid red; the agent fixes those before reporting.
+4. Reports: each test path + confirmed-failing output, criteria covered, anything
+   not yet covered (flagged for `clarify` if ambiguous).
+
+On B/C/D the test-writer gate runs **by default** but the user may explicitly
+skip it. Don't skip silently — if the user declines, **record the skip** in
+`decision-log.md` (same pattern as the Analyze gate).
+
+After the test-writer reports a clean red-state:
+- Append a **Tests (red)** row to `decision-log.md`.
+- Tell the user implementation can begin story by story — the implementer's job
+  is now to make tests green, not to decide what to test.
+
+## Phase 4 — Implementation handoff (guidance only)
+
+This skill does not run implementation itself. When the user is ready to
+implement, point the executing agent (or a fresh session) to
+`docs/implementation-handoff.md` — it contains the full execution rules.
+
+## What this skill deliberately does not do
+
+- Writes only `spec.md`, `plan.md`, `tasks.md` — no source code. For
+  implementation, see `docs/implementation-handoff.md`.
+- Never skips a gate for impatience. "Skip review" is the user's call to make
+  knowingly — say so rather than silently complying.
