@@ -78,12 +78,4 @@ On approval, append a **Review** row to `decision-log.md` (verdict + model used)
 
 ## Dependencies
 
-- Setup → Foundational → (User stories, parallel or priority order) → Polish → Review Gate
-- Within a story: tests before implementation; models before services;
-  services before endpoints; story complete before moving to the next.
-
-## Implementation Strategy
-
-**MVP first**: Setup → Foundational → User Story 1 only → stop, validate,
-deploy/demo if ready, *then* continue to the next story. Don't build all
-stories before validating the first one works end-to-end.
+- Setup → Foundational → (User stories, parallel or priority order) → 
