@@ -4,7 +4,7 @@ Two related ideas let this kit scale its rigor to the work in front of it
 instead of applying one fixed ceremony to everything: **workflow tracks** (adapt
 the *breadth and depth* of the pipeline) and **opt-in extensions** (adapt the
 *constraints* a feature must satisfy). Both are driven by the
-`spec-driven-feature` skill and recorded in each feature's `decision-log.md`.
+`develop-feature` skill and recorded in each feature's `decision-log.md`.
 
 Both are adapted from AWS Labs' **AI-DLC** (AI-Driven Development Life Cycle,
 MIT-0) — specifically its principle that an AI-native workflow should *adapt to

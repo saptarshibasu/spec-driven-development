@@ -85,7 +85,7 @@ Read this as "which file is which control."
                     glossary, ADRs                     spec-conformance review
 ```
 
-The approval gates in the `spec-driven-feature` skill (Specify → Plan → Tasks,
+The approval gates in the `develop-feature` skill (Specify → Plan → Tasks,
 each requiring human sign-off) are a deliberate *human-in-the-loop* sensor
 placed at the points where a mistake is cheapest to catch and most expensive to
 let through. A wrong spec caught at the gate costs a re-draft; the same error

@@ -20,7 +20,7 @@ prompts — a single source here makes future edits propagate consistently.
 
 Each skill may extend these with its own guardrails — for example:
 
-- `spec-driven-feature` adds **No over-engineering** (only build what's
+- `develop-feature` adds **No over-engineering** (only build what's
   directly requested).
 - `init-project` and `amend-constitution` add **No over-populating** (short
   and accurate beats long and generic).

@@ -7,7 +7,8 @@ model: sonnet
 
 # Debugger
 
-Find root causes. Explore freely — only your conclusion returns to the caller.
+Root-cause investigator. Explores freely in its own discardable context —
+only the conclusion returns to the caller.
 
 ## Behavioral guardrails
 
@@ -76,4 +77,7 @@ Return: (1) repro + exact error, (2) spec reference — the section that defines
 The reviewer may pass a numbered list of Blockers rather than a single failure. In that case:
 
 1. Work through each Blocker in order using the standard Method above.
-2. Apply each fix before moving to the next — co
+2. Apply each fix before moving to the next — confirm the test/assertion passes after each one.
+3. If a fix for one Blocker affects another (shared file, related logic), note the interaction explicitly in your report.
+4. Do not return until every Blocker is either fixed or escalated. A Blocker that turns out to be a spec bug must be surfaced to the human before this session ends — do not return a partial fix silently.
+5. Return a single consolidated report: for each Blocker, its repro, root cause, fix applied, and status. The reviewer uses this repo

@@ -94,7 +94,7 @@ techniques keep an agent effective past that point:
   restart with the summary. Prefer *reversible* compaction — drop content the
   agent can re-fetch from the environment later (a file it can re-read) — over
   *lossy* summarization of reasoning, which is harder to recover. The
-  `spec-driven-feature` skill's Phase 4 guidance ("if approaching a context
+  `develop-feature` skill's Phase 4 guidance ("if approaching a context
   limit, write a brief progress summary to a scratch file before stopping") is
   exactly this, done manually and durably.
 - **Structured note-taking.** Persist decisions and progress to a file

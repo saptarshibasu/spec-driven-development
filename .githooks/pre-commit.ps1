@@ -31,7 +31,7 @@ foreach ($f in $staged) {
   if ($f -like 'specs/*' -and $f -match '\.md$') {
     $blob = (git show ":$f" 2>$null) -join "`n"
     if ($blob -match 'NEEDS CLARIFICATION') {
-      Write-Host "X $f still has a [NEEDS CLARIFICATION] marker - resolve it (run the clarify skill) before committing."
+      Write-Host "X $f still has a [NEEDS CLARIFICATION] marker - resolve it (run the clarify-spec skill) before committing."
       $fail = $true
     }
   }

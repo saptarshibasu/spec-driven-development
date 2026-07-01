@@ -28,7 +28,7 @@ modular constraints, and a durable audit trail were genuine gaps.
 We will adopt three AI-DLC-influenced mechanisms, adapted to this kit's
 conventions:
 
-1. **Workflow tracks.** `spec-driven-feature` first proposes one of four named
+1. **Workflow tracks.** `develop-feature` first proposes one of four named
    tracks — A (direct change, no folder), B (patch: short spec + tasks, no
    plan), C (feature: full pipeline, the default), D (architecture/brownfield:
    full pipeline + research/data-model + ADR + characterization tests) — with a

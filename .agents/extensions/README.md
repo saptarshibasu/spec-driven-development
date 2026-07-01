@@ -7,7 +7,7 @@ kit's answer to "how do I add a class of constraint without bloating `AGENTS.md`
 or the constitution, which are read on *every* call?"
 
 Extensions are **read on demand, never auto-loaded** (same discipline as
-`docs/`): the `spec-driven-feature` skill scans only the tiny `*.opt-in.md`
+`docs/`): the `develop-feature` skill scans only the tiny `*.opt-in.md`
 prompts at the start of a feature, and the full rules file is pulled in *only if
 the human opts that pack in*. A pack you don't use costs zero context.
 
@@ -43,7 +43,7 @@ constraints that are non-negotiable for every feature in your repo.
 
 ## The lifecycle
 
-1. **Scan** — at feature start, `spec-driven-feature` lists every
+1. **Scan** — at feature start, `develop-feature` lists every
    `*.opt-in.md` under this directory and presents each question to the human.
 2. **Opt in / out** — the human's choice is recorded in the feature's
    `specs/<NNN>/decision-log.md` (Extensions row). Opt-outs are recorded too, so

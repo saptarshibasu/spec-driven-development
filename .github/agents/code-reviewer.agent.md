@@ -100,4 +100,9 @@ If the verdict is `request-changes` and there are Blockers:
    - All Blockers as a numbered list (file:line, description, suggested fix).
    - The spec path (if known).
 5. When the debugger returns, run a **single re-check pass**:
-   - Re-read only th
+   - Re-read only the files touched by the debugger's fixes.
+   - Verify each Blocker is resolved and no new issues were introduced by the fixes.
+   - Should-fixes and Nits from the original review are carried forward unchanged — do not re-run the full review.
+6. Issue the final verdict. If all Blockers are resolved: `approve` or `approve-with-nits`. If any remain open: `request-changes` listing only the outstanding items.
+
+**Do not send Blockers to the debugger one at a time.** A fix for one Blocker may interact with another; the re-check pass catches that.

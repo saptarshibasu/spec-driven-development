@@ -28,7 +28,7 @@ extensions in ADR-0002. `analyze` is the remaining spec-kit idea worth taking.)
 ## Decision
 
 Add an **`analyze`** skill and an **Analyze gate** as Phase 3.5 of
-`spec-driven-feature`, between Tasks and the implementation handoff, with three
+`develop-feature`, between Tasks and the implementation handoff, with three
 design constraints:
 
 1. **Non-destructive.** `analyze` *reports and routes*; it never rewrites
@@ -66,8 +66,8 @@ The gate's outcome is recorded as an **Analyze** row in the feature's committed
 noted there too). No new per-feature artifact/template is introduced — analyze
 reports to chat and logs a row — keeping the maintenance surface small.
 
-The agent is canonical in `.agents/agents/analyzer.md` and mirrored to the tool
-dirs via `mirror-agents.sh` (ADR-0001); the `spec-driven-feature` edit propagates
+The agent is canonical in `.agents/agents/artifact-analyzer.md` and mirrored to the tool
+dirs via `mirror-agents.sh` (ADR-0001); the `develop-feature` edit propagates
 the same way.
 
 ## Consequences

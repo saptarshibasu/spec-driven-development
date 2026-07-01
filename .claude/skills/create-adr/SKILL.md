@@ -69,4 +69,28 @@ Use this structure:
 **Deciders**: <from user, or leave blank for user to fill>
 
 ## Context
-<context
+<context>
+
+## Decision
+<decision>
+
+## Consequences
+<consequences>
+
+## Alternatives considered
+- **<alternative>** — <why rejected>
+```
+
+Remove the HTML comment block from the template — it must not appear in the
+real ADR.
+
+### 5 — Approval gate
+
+**Stop. Present the full draft.** Ask for explicit approval before writing.
+Note the target path: `docs/adr/<NNNN-slug>.md`.
+
+### 6 — Write
+
+After approval, write the file. Confirm the path to the user.
+
+No mirroring is needed — ADRs are plain docs, not skills or agents.

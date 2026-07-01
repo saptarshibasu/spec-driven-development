@@ -38,7 +38,7 @@ for f in $staged; do
   case "$f" in
     specs/*.md)
       if git show ":$f" | grep -n 'NEEDS CLARIFICATION' >/dev/null 2>&1; then
-        echo "✖ $f still has a [NEEDS CLARIFICATION] marker — resolve it (run the clarify skill) before committing."
+        echo "✖ $f still has a [NEEDS CLARIFICATION] marker — resolve it (run the clarify-spec skill) before committing."
         fail=1
       fi
       ;;

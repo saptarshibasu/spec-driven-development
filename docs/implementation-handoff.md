@@ -1,7 +1,7 @@
 # Implementation Handoff
 
 Rules for the agent (or session) that executes the tasks produced by the
-`spec-driven-feature` skill. The planning skill produces `tasks.md`; this
+`develop-feature` skill. The planning skill produces `tasks.md`; this
 document governs what happens when someone picks it up and starts building.
 
 On Tracks C/D, `tasks.md` has already cleared the **Analyze** gate (a

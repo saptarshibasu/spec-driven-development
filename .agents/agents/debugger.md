@@ -7,7 +7,8 @@ model: sonnet
 
 # Debugger
 
-Find root causes. Explore freely — only your conclusion returns to the caller.
+Root-cause investigator. Explores freely in its own discardable context —
+only the conclusion returns to the caller.
 
 ## Behavioral guardrails
 

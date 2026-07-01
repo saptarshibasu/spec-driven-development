@@ -71,7 +71,13 @@ these; they are never optional and are not repeated in this file.
 
 ## Code Style
 
-<!-- One real snippet showing your style beats three paragraphs describing it. -->
+<!-- One real snippet showing your style beats three paragraphs describing it.
+     Only put rules here if they're true repo-wide. A rule that only applies
+     to one subtree (e.g. "components in src/frontend/** use this prop-naming
+     convention") does NOT belong here — it costs tokens on every session,
+     including the ones that never touch that subtree. Create
+     `.github/instructions/<name>.instructions.md` with an `applyTo` glob
+     instead; see docs/context-engineering.md. -->
 
 ```[language]
 [A short, real example from this codebase that shows naming conventions,
@@ -114,7 +120,12 @@ formatting, and the idioms you actually want repeated.]
 <!-- "No field injection" doesn't generalize. "No field injection — it broke
      our ability to unit-test without a Spring context" does, because the
      agent can apply the underlying reasoning to cases this file didn't
-     explicitly anticipate. State the reason, briefly, every time. -->
+     explicitly anticipate. State the reason, briefly, every time.
+
+     Same subtree-scoping caveat as Code Style above: if a rule is scoped to
+     one directory or glob rather than the whole repo, it belongs in
+     `.github/instructions/<name>.instructions.md`, not here. Keep this
+     section to conventions that hold everywhere. -->
 
 - [Do/Don't] [specific practice] — [short reason, ideally tied to a real incident or constraint]
 - [Do/Don't] [specific practice] — [short reason]
@@ -173,7 +184,7 @@ to use isn't in that glossary, ask rather than guessing at its meaning.
   `templates/tasks.template.md`) — do not invent a different structure for
   any of the three, not just the spec.** Mark anything ambiguous with
   `[NEEDS CLARIFICATION: ...]` rather than guessing.
-- To start a new feature, use the `spec-driven-feature` skill rather than
+- To start a new feature, use the `develop-feature` skill rather than
   creating `specs/<NNN>/` by hand — it scaffolds the folder and templates
   for you and enforces the Specify → Plan → Tasks approval gates.
 - That skill first proposes a **workflow track** (A direct / B patch / C feature
@@ -255,20 +266,4 @@ to use isn't in that glossary, ask rather than guessing at its meaning.
 - Tasks / routine Implement work: **[mid-tier model]**, or auto-selection, is
   fine.
 - Quick edits, file search, formatting, lint fixes: fast/cheap tier, or
-  auto-selection.
-- Characterization tests on legacy code: treat like Plan, not like ordinary
-  test-writing — use **[your strongest available model]**.
-- Code review / verification: prefer a different model or model family than
-  whatever generated the code under review, where available.
-
-## Output Rules
-
-- Output code or actions directly. No preamble, no explanation, no commentary.
-- Only speak if something is ambiguous or would cause irreversible harm — one sentence, then act.
-
-## Out of Scope for Agents
-
-<!-- Anything you want a human to always do, full stop. -->
-
-- [e.g., "Production deploys — always require a human to trigger these"]
-- [e.g., "Customer-data migrations"]
+  auto-
