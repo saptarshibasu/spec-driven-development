@@ -129,8 +129,13 @@ Fill in the template from investigation and user answers:
 5. Self-check: does each line teach something unguessable from training? True of
    any project → cut it.
 
-**Stop. Present the full draft.** Highlight `[NEEDS CLARIFICATION]` markers and
-judgment calls. Ask for explicit approval before writing anything to disk.
+**Stop. Write the draft to `AGENTS.md.draft` (project root), not to chat.**
+Printing the full document into the conversation burns roughly 3x the tokens
+of writing it once to disk. In chat, give only a short summary — section list,
+line count, and every `[NEEDS CLARIFICATION]` marker or judgment call — and
+point the user to the draft file to read. Ask for explicit approval before
+writing anything to its final path. If the user requests changes, edit the
+draft file and repeat the summary; do not paste the revised draft into chat.
 
 ---
 
@@ -176,17 +181,24 @@ Once drafted:
 3. Remove any Article whose placeholder was never filled and isn't needed.
 4. Set **Version** to `1.0.0`, **Ratified** to today's date.
 
-**Stop. Present the full draft.** Highlight `[NEEDS CLARIFICATION]` markers and
-judgment calls. Require explicit approval before writing either file to disk.
+**Stop. Write the draft to `constitution.md.draft` (project root, or next to
+the intended save path), not to chat.** Same reasoning as Phase 2: writing it
+once to disk beats printing it. In chat, give only a short summary — Article
+list and every `[NEEDS CLARIFICATION]` marker or judgment call — and point the
+user to the draft file. Require explicit approval before writing either file
+to its final path. If the user requests changes, edit the draft file and
+repeat the summary; do not paste the revised draft into chat.
 
 ---
 
 ## Writing files (after both are approved)
 
-1. **AGENTS.md** — write to project root, replacing the stub.
+1. **AGENTS.md** — move/rename `AGENTS.md.draft` to the project root as
+   `AGENTS.md`, replacing the stub.
 2. **constitution.md** — confirm save path (default: `memory/constitution.md`);
-   create `memory/` if needed.
-3. Verify AGENTS.md's Specs section references the correct constitution path.
+   create `memory/` if needed, then move/rename `constitution.md.draft` there.
+3. Delete any leftover `.draft` file once its final copy is written.
+4. Verify AGENTS.md's Specs section references the correct constitution path.
 
 Then confirm to the user:
 - Both files written and their paths
