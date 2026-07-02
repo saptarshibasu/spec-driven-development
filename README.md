@@ -38,16 +38,17 @@ flowchart TD
     T["3 · Tasks · tasks.md<br/><i>✍️ task-decomposer agent</i><br/><b>ordered, tests-first</b>"]:::draft
     AN["Artifact Analyzer<br/><i>C/D default · skippable<br/>do spec, plan & tasks agree?</i>"]:::gate
     TW["🧪 test-writer<br/><i>B/C/D default · skippable<br/>write & confirm failing tests</i>"]:::twriter
-    I["⚙️ Implement<br/><i>red → green → refactor</i>"]:::impl
+    I["⚙️ implementor agent<br/><i>red → green → refactor<br/>one story at a time</i>"]:::impl
     R["🔍 code-reviewer<br/><i>spec · constitution · security</i>"]:::reviewer
-    DB["🐛 debugger<br/><i>fix all blockers · consolidated report</i>"]:::debug
+    DB["🐛 debugger<br/><i>root cause + minimal fix</i>"]:::debug
     DL["📒 decision-log.md<br/><i>committed audit trail —<br/>every gate approval appended</i>"]:::audit
 
     RT -->|✋ A · trivial fix| I
     RT -->|✋ B / C / D| S
     S -->|✋ approve| P -->|✋ approve| T -->|✋ approve| AN -->|✋ ready| TW -->|✋ red confirmed| I -->|✋ green| R
-    R -->|"✋ blockers · user approves"| DB
-    DB -. "fixes applied → re-check" .-> R
+    R -->|next story| TW
+    R -->|"✋ 1st round · user approves<br/>then loops on its own"| DB
+    DB -. "fixes applied → re-check<br/>repeats until clean or stuck" .-> R
     S -. B · skips plan .-> T
     S -. optional sharpen .-> CL
     CL -.-> CK
@@ -77,11 +78,13 @@ Specs are pure **what/why**; the **how** lives in the plan; tasks are *generated
 3. **(Optional) Sharpen the spec at the approval gate** — `develop-feature` pauses after the draft and waits for you. If it left `[NEEDS CLARIFICATION]` markers or the spec needs tightening, run `clarify-spec` and/or `check-spec` *here*; otherwise just answer any open questions inline. Neither is a required step. **You approve the spec.**
 4. **Plan, then tasks — same run** — once you approve, the skill continues *on its own*, delegating `plan.md` to the `planner` agent, pausing for approval, then delegating `tasks.md` to the `task-decomposer` agent. You don't relaunch it; each "stop" is a pause-for-approval, not an exit.
 5. **Artifact Analyzer (gate, Tracks C/D — default-on, skippable)** — before implementation, the skill runs `artifact-analyzer`: a **non-destructive** cross-artifact check that every requirement maps to a task and that spec, plan, and tasks don't contradict each other. It *reports*, never rewrites — blockers loop back to **whichever phase owns the fix** (spec, plan, *or* tasks), then re-run; a clean verdict clears the gate. It runs by default on C/D but you can explicitly skip it (the skip is logged in `decision-log.md`, like skipping review). Skipped on Track A; a light spec↔tasks pass on Track B.
-6. **Write failing tests (gate, Tracks B/C/D — default-on, skippable)** — after Artifact Analyzer clears, the `test-writer` agent writes tests from the spec's acceptance criteria, runs them, and confirms each fails **for the right reason** (assertion failure or missing implementation — not an import error or typo). Errors ≠ valid red; the agent fixes those before reporting. For Track D brownfield areas, characterization tests are written first to pin current behaviour. Only once every test is confirmed red does the skill hand off to implementation. The skip (if the user chooses) is recorded in `decision-log.md`.
-7. **Implement** — red → green → refactor, one story at a time; lean on the `debugger` agent when root cause is unclear.
-8. **Review & commit** — the `code-reviewer` agent checks the full diff against spec, constitution, and conventions, then groups findings by severity. If there are Blockers, it presents all of them to you and — on your approval — invokes the `debugger` agent once with the complete list. The debugger fixes every Blocker in order and returns a consolidated report; the reviewer then runs a single re-check pass on only the touched files before issuing its final verdict. On commit, `.githooks/pre-commit` blocks secrets, unresolved markers, tool-pointer files that grow past a pointer, and runs your lint/tests.
+Steps 6–8 below repeat **for each user story** in `tasks.md`'s priority order, not once for the whole feature (Tracks B/C/D — each is default-on and skippable per story):
 
-Steps 2–8 repeat per feature; step 1 is one-time (re-run `sync-agents-md` whenever the project drifts).
+6. **Write failing tests (red)** — after Artifact Analyzer clears, the `test-writer` agent writes that story's tests from the spec's acceptance criteria, runs them, and confirms each fails **for the right reason** (assertion failure or missing implementation — not an import error or typo). Errors ≠ valid red; the agent fixes those before reporting. For a Track D brownfield story, characterization tests are written first to pin current behaviour. The skip (if the user chooses) is recorded in `decision-log.md`.
+7. **Implement (green)** — once the story's tests are confirmed red, the `implementor` agent takes over: it writes the smallest code that makes each test pass, task by task, runs the full story-level suite before calling a task done, then refactors with tests kept green. It never writes or weakens a test — an apparently-wrong test is flagged back to you, not edited — and it invokes the `debugger` agent itself when a failure's root cause isn't obvious after one focused look.
+8. **Review & commit (loop until clean)** — the `code-reviewer` agent checks that story's diff against spec, constitution, and conventions, then groups findings by severity. If there are Blockers, it presents all of them and — on your approval for the first round — invokes the `debugger` agent, then re-checks only the touched files. This repeats on its own, round after round, until every Blocker is resolved (`approve`/`approve-with-nits`) or a Blocker stops making progress across two rounds, at which point the reviewer stops looping and escalates just that item to you. On commit, `.githooks/pre-commit` blocks secrets, unresolved markers, tool-pointer files that grow past a pointer, and runs your lint/tests. Once a story is reviewed and committed, the next story starts back at step 6.
+
+Steps 2–8 repeat per feature (and steps 6–8 repeat per story within a feature); step 1 is one-time (re-run `sync-agents-md` whenever the project drifts).
 
 
 ## 🛰️ The harness model
@@ -152,7 +155,7 @@ Then, in order:
 | `amend-constitution` | To amend the constitution | Updates `memory/constitution.md` section by section; use after `init-project` when principles need revisiting. |
 | `sync-agents-md` | To re-sync after drift | Re-fills `AGENTS.md` from the actual repo when the project has changed significantly. |
 | `create-adr` | To record an architecture decision | Finds the next ADR number, fills the template from your input, and writes `docs/adr/<NNNN-slug>.md` with approval before writing. |
-| `develop-feature` | Start of every feature | Proposes a workflow track (right-sizes depth) + scans opt-in extensions, then scaffolds `specs/<NNN>/` (via `start-feature.sh` / `.ps1`) and orchestrates Specify → Plan → Tasks → Analyze → Tests (red) with approval gates — the first three phases delegated to the `specifier` / `planner` / `task-decomposer` agents, each in its own context and model tier. |
+| `develop-feature` | Start of every feature | Proposes a workflow track (right-sizes depth) + scans opt-in extensions, then scaffolds `specs/<NNN>/` (via `start-feature.sh` / `.ps1`) and orchestrates Specify → Plan → Tasks → Analyze → (Tests red → Implement green → Review, per story) with approval gates — each phase delegated to a dedicated agent (`specifier` / `planner` / `task-decomposer` / `test-writer` / `implementor` / `code-reviewer`), each in its own context and model tier. |
 | `clarify-spec` | After the spec draft | Surfaces spec ambiguities, asks a few targeted questions, writes answers back. |
 | `check-spec` | Before approving the spec | "Unit tests for the requirements" — complete, clear, consistent, measurable? |
 
@@ -167,9 +170,10 @@ native format — Claude `.md`, Copilot `.agent.md`, Codex `.toml`.
 | `planner` | Drafts `plan.md` (Plan phase, opus model). Reads the approved spec, runs the three constitution gates (Simplicity, Anti-abstraction, Integration-first) with stated reasoning, checks opted-in extension compliance by rule ID. |
 | `task-decomposer` | Drafts `tasks.md` (Tasks phase, mid-tier/sonnet model). Mechanical decomposition of an approved spec + plan into Setup → Foundational → per-story (tests-first, `[P]`-marked, `[US#]`-labelled) → Polish. |
 | `artifact-analyzer` | Last guide-side gate before implementation (opus model). Cross-checks spec ↔ plan ↔ tasks for coverage gaps, contradictions, orphan tasks, test-first integrity, and constitution violations. Reports findings routed to the owning phase; never edits artifacts. |
-| `code-reviewer` | Inferential review vs. spec, constitution, conventions, and baseline security. Completes the full review, then batches all Blockers and — on user approval — hands them to the `debugger` in one call. Runs a single focused re-check pass on the fixed files before issuing the final verdict. Read-only. |
-| `test-writer` | Invoked after `artifact-analyzer` clears; writes tests from acceptance criteria, runs them, and confirms each fails for the right reason before implementation begins. Also handles characterization tests for brownfield areas (Track D). |
-| `debugger` | Root-cause in its own discardable context; returns cause + minimal fix. |
+| `test-writer` | Invoked after `artifact-analyzer` clears; writes that story's tests from acceptance criteria, runs them, and confirms each fails for the right reason before implementation begins. Also handles characterization tests for brownfield areas (Track D). |
+| `implementor` | Drafts the code (Implement phase, mid-tier/sonnet model). Takes a story's confirmed-red tests and the approved plan/tasks, writes the smallest code to turn each green, refactors with tests kept green, never weakens a test, and invokes `debugger` itself on an unclear failure. |
+| `code-reviewer` | Inferential review vs. spec, constitution, conventions, and baseline security. Completes the full review, then batches all Blockers and — on user approval for the first round — hands them to the `debugger`, re-checking after each round. Loops with `debugger` until every Blocker is resolved or one stalls for two rounds, at which point it escalates just that item to the human. Read-only. |
+| `debugger` | Root-cause in its own discardable context; returns cause + minimal fix. Invoked by `implementor` on an unclear implementation failure, or by `code-reviewer` on review Blockers. |
 | `docs-writer` | Keeps docs truthful and in sync with the code. |
 
 ### 📒 Decision log
@@ -205,7 +209,7 @@ Add your own under `.agents/extensions/<category>/<pack>/` — format in
 │   ├── skills/            # develop-feature · clarify-spec · check-spec
 │   │                      #   init-project · amend-constitution · sync-agents-md · create-adr
 │   ├── agents/            # specifier · planner · task-decomposer · artifact-analyzer
-│   │                      #   code-reviewer · test-writer · debugger · docs-writer
+│   │                      #   test-writer · implementor · code-reviewer · debugger · docs-writer
 │   └── extensions/        # opt-in rule packs (e.g. security/baseline)
 │
 ├── .claude/               # Claude Code: skills/ · agents/*.md (generated)
@@ -254,9 +258,9 @@ These aren't advice buried in a doc — they're encoded in the constitution and 
 
 **Cross-artifact consistency before implementation.** The `artifact-analyzer` gate (Tracks C/D) cross-checks spec, plan, and tasks as a set before a single line of code is written: every requirement maps to at least one task, no contradictions exist between artifacts, no orphan or duplicate tasks. It reports and routes blockers back to whichever phase owns the fix; it never rewrites artifacts itself. A clean verdict is the green light for implementation.
 
-**Separate agents for separate concerns — each with its own context and model.** The coding agent implements; the `specifier` / `planner` / `task-decomposer` each draft one artifact in their own fresh context, so revising the spec never drags that back-and-forth into the plan or the tasks that follow; the `test-writer` writes tests in its own discardable context so test intent is never contaminated by implementation choices; the `debugger` isolates root cause in a throwaway context and returns only the minimal fix; the `code-reviewer` is read-only and checks the diff against spec, constitution, and conventions; the `docs-writer` keeps documentation truthful without touching code. Each agent gets only the context its role needs.
+**Separate agents for separate concerns — each with its own context and model.** The `implementor` agent turns red tests green, one story at a time, in its own fresh context so one story's review feedback never bleeds into the next story's implementation; the `specifier` / `planner` / `task-decomposer` each draft one artifact in their own fresh context, so revising the spec never drags that back-and-forth into the plan or the tasks that follow; the `test-writer` writes tests in its own discardable context so test intent is never contaminated by implementation choices; the `debugger` isolates root cause in a throwaway context and returns only the minimal fix; the `code-reviewer` is read-only and checks the diff against spec, constitution, and conventions, looping with `debugger` on its own until every Blocker clears; the `docs-writer` keeps documentation truthful without touching code. Each agent gets only the context its role needs.
 
-**Roles and model tiers — including model family.** Don't assume every agent should use the same model family as the coding agent. Different families have different strengths: a reasoning-specialist model (e.g. an o-series or thinking model) may outperform a general model for the `debugger` (root-cause analysis in unfamiliar code) and for `develop-feature` on Tracks C/D (deep requirement and design reasoning); a model with strong long-context fidelity suits `code-reviewer` and `docs-writer`; a lighter, faster model is sufficient for routine Tasks-phase implementation. Within a family, use the lightest tier that can do the job reliably. Configure the model — family and tier — in each agent's definition file (the `model:` frontmatter in `.agents/agents/*.md`) so it's enforced at invocation, not left to the calling session to decide.
+**Roles and model tiers — including model family.** Don't assume every agent should use the same model family as the coding agent. Different families have different strengths: a reasoning-specialist model (e.g. an o-series or thinking model) may outperform a general model for the `debugger` (root-cause analysis in unfamiliar code) and for `develop-feature` on Tracks C/D (deep requirement and design reasoning); a model with strong long-context fidelity suits `code-reviewer` and `docs-writer`; a lighter, faster model is sufficient for `task-decomposer` and routine `implementor` work. Within a family, use the lightest tier that can do the job reliably. Configure the model — family and tier — in each agent's definition file (the `model:` frontmatter in `.agents/agents/*.md`) so it's enforced at invocation, not left to the calling session to decide.
 
 **Guides before, sensors after.** The harness has two halves: feedforward guides (AGENTS.md, constitution, specs, skills) that steer the agent before it acts, and feedback sensors (tests, linters, hooks, CI, code-reviewer) that catch it after.
 
@@ -286,4 +290,17 @@ These aren't advice buried in a doc — they're encoded in the constitution and 
 
 - [Distilled AI-Assisted Development Guidelines](https://medium.com/@sapbasu/distilled-ai-assisted-development-guidelines-351ac9ab0154) — the companion article
 - [Harness engineering for coding agents](https://martinfowler.com/articles/harness-engineering.html) — Martin Fowler
-- [Effective context engineering for AI agents](h
+- [Effective context engineering for AI agents](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents) — Anthropic
+- [Agent READMEs: an empirical study of context files](https://arxiv.org/abs/2511.12884) — what helps vs. hurts
+- [How to write a great AGENTS.md](https://github.blog/ai-and-ml/github-copilot/how-to-write-a-great-agents-md-lessons-from-over-2500-repositories/) — GitHub, 2,500+ repos
+- [AI-DLC — AWS Labs adaptive workflows](https://github.com/awslabs/aidlc-workflows) (MIT-0) — the methodology this kit's tracks, extensions, and decision log draw from ([methodology blog](https://aws.amazon.com/blogs/devops/ai-driven-development-life-cycle/)); shipped as agent steering/rules with adaptive workflows and human-in-the-loop oversight
+- [spec-kit](https://github.com/github/spec-kit) — GitHub's spec-driven development toolkit; a `specify` CLI covering constitution → specify → clarify → plan → tasks → implement, with integrations for many AI coding agents · [awesome-copilot](https://github.com/github/awesome-copilot)
+- [New spec types: fix bugs and build on top of existing apps](https://kiro.dev/blog/specs-bugfix-and-design-first/) — Kiro on bug-fix specs (current / expected / unchanged behavior); relevant to this kit's Track B patch flow
+
+---
+
+<div align="center">
+
+Licensed under [Apache 2.0](LICENSE) · Contributions welcome
+
+</div>

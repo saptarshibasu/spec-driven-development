@@ -100,5 +100,7 @@ Return to the caller a **short summary, not the document itself**:
   content. The caller (or the human) reads the file if it needs the text.
 - A one-line shape summary (e.g. "18 tasks across 3 user stories, 4 marked
   `[P]`") so the caller has something concrete to relay without opening the
-  file it
+  file itself.
+- Any extension-compliance notes — each opted-in rule's verification work
+  represented as an explicit task, or the gap called out.
 '''

@@ -7,14 +7,17 @@ description: >-
   right-sizes the work by proposing a workflow track (direct fix / patch /
   feature / architecture) for human approval, then scaffolds
   specs/<NNN-feature-slug>/ from this project's templates/ folder and walks
-  Specify -> Plan -> Tasks -> Analyze -> Tests (red) at the chosen depth, asking
-  for explicit approval before each phase. Specify/Plan/Tasks are each
-  delegated to a dedicated agent (specifier/planner/task-decomposer) invoked
-  fresh, so this skill orchestrates and gates rather than drafting itself. The
-  Analyzer gate (Tracks C/D) cross-checks the artifacts for coverage and
-  consistency; the test-writer gate then writes and confirms failing tests
-  before implementation begins. Handles trivial changes too — they route to
-  the lightweight track rather than being turned away.
+  Specify -> Plan -> Tasks -> Analyze -> (Tests red -> Implement green ->
+  Review) per story, at the chosen depth, asking for explicit approval before
+  each phase. Specify/Plan/Tasks are each delegated to a dedicated agent
+  (specifier/planner/task-decomposer) invoked fresh, so this skill orchestrates
+  and gates rather than drafting itself. The Analyzer gate (Tracks C/D)
+  cross-checks the artifacts for coverage and consistency; then, one user
+  story at a time, the test-writer agent writes and confirms failing tests,
+  the implementor agent makes them pass, and the code-reviewer agent (looping
+  with the debugger agent on any Blocker) reviews the result before the next
+  story starts. Handles trivial changes too — they route to the lightweight
+  track rather than being turned away.
 ---
 
 # Spec-Driven Feature
@@ -144,25 +147,34 @@ instead of scaffolding. Only scaffold once you've confirmed this is genuinely
 new. When in doubt, ask; a wrong guess either duplicates or overwrites intent.
 
 Then run the scaffold script with the feature description as a single argument.
-Two byte-equivalent versions — use the one matching the current OS:
+**Path matters**: the script lives next to *this* file, not at the repo root.
+Don't run a bare `scripts/start-feature.sh` relative path — your shell's
+current directory is usually the repo root (or something else entirely), not
+this skill's folder, and that lookup will fail with "no such file or
+directory." Instead, build the full path yourself from where you read this
+SKILL.md: `.claude/skills/develop-feature/`, `.codex/skills/develop-feature/`,
+`.github/skills/develop-feature/`, and `.agents/skills/develop-feature/` are
+byte-identical mirrors (ADR-0001) — take whichever prefix matches the copy you
+loaded, and append `scripts/start-feature.sh` (or `.ps1`). Run the command
+with your shell's cwd at the **repo root** — these paths are repo-root-relative,
+not relative to the skill folder. Two byte-equivalent versions — use the one
+matching the current OS:
 
 ```bash
-# macOS / Linux (bash):
-bash scripts/start-feature.sh "<feature description>"
+# macOS / Linux (bash) — substitute the tool prefix you're running under:
+bash .claude/skills/develop-feature/scripts/start-feature.sh "<feature description>"
 ```
 
 ```powershell
-# Windows (PowerShell):
-pwsh scripts/start-feature.ps1 "<feature description>"
-# (on Windows PowerShell, equivalently: powershell -File scripts/start-feature.ps1 "<feature description>")
+# Windows (PowerShell) — substitute the tool prefix you're running under:
+pwsh .claude/skills/develop-feature/scripts/start-feature.ps1 "<feature description>"
+# (on Windows PowerShell, equivalently: powershell -File .claude/skills/develop-feature/scripts/start-feature.ps1 "<feature description>")
 ```
 
 Prefer `.ps1` on Windows, `.sh` on macOS/Linux. Unsure? Try one and fall back.
 
-(Claude Code: `${CLAUDE_SKILL_DIR}/scripts/start-feature.{sh,ps1}`. Other
-tools: use whatever path they give for this skill's folder.)
-
-If neither script runs, do it by hand: find the highest `NNN-` prefix under
+If neither script runs (path genuinely doesn't resolve, no shell available,
+etc.), do it by hand: find the highest `NNN-` prefix under
 `specs/`, increment, slugify to kebab-case, create `specs/<NNN>-<slug>/`, copy
 the four templates as `spec.md`, `plan.md`, `tasks.md`, `decision-log.md`.
 
@@ -289,11 +301,14 @@ cheapest place to catch a requirement that never became a task. Invoke the
 - **Track D** — default-on, extended: also reconcile `research.md` /
   `data-model.md` / `contracts/`, the ADR, and characterization-test ordering.
 
-On C/D analyze runs **by default**, but it is a gate the human controls, not a
-hard requirement: the user may **explicitly skip** it. Don't skip silently —
-offer to run it, and if the user declines, **record the skip** (and that it was
-their call) in `decision-log.md` before proceeding to implementation. Skipping a
-gate is the user's decision to make knowingly, exactly as with review.
+On C/D analyze runs **by default**, but starting it is a gate the human
+controls, not a hard requirement: the user may **explicitly skip** it —
+*before it ever runs*. Don't skip silently — offer to run it, and if the user
+declines, **record the skip** (and that it was their call) in
+`decision-log.md` before proceeding to implementation. Skipping is the user's
+decision to make knowingly, exactly as with review. But this decision is only
+available up front: once analyze has been invoked once for a feature, there is
+no mid-loop bailout — see step 2.
 
 `analyze` **reports, it does not edit.** It checks requirement→task coverage,
 spec/plan/tasks contradictions, orphan/duplicate/ambiguous tasks, test-first
@@ -304,16 +319,25 @@ or Tasks** (a missing task is a `tasks.md` fix; a spec/plan contradiction is a
 alone) and the `code-reviewer` agent (reviews the diff later).
 
 1. Offer to run analyze at the depth for the track. If the user declines on C/D,
-   log the skip (step 4) and proceed.
-2. **Blockers** (coverage gap, contradiction, unmet opted-in verification,
-   constitution violation): loop back to whichever phase owns the fix (Specify /
-   Plan / Tasks) — not always Tasks — fix there, then **re-run analyze**. Don't
-   start implementation on an unresolved blocker.
-3. A human may knowingly accept a finding instead of fixing it — record that
-   acceptance in `decision-log.md`.
-4. On a clean verdict, a knowingly-accepted finding, **or an explicit skip**,
-   append an **Analyze** row to `decision-log.md` (verdict, or "skipped — user's
-   call") and tell the user implementation can begin story by story.
+   log the skip (step 4) and proceed — this is the only exit that doesn't
+   require a clean verdict.
+2. **Any finding, at any severity** (Blocker, Should-fix, or Note): loop back
+   to whichever phase owns the fix (Specify / Plan / Tasks) — not always Tasks
+   — fix there, then **re-run analyze**. Repeat until a run comes back with
+   zero findings across all severities. There is no accepting a finding in
+   place of fixing it once analyze has run — a deliberate scope call (e.g.
+   "not covering FR-004 this iteration") is resolved by writing it into the
+   owning artifact (e.g. `spec.md`'s Out-of-Scope section) so analyze no
+   longer flags it, not by logging acceptance and moving on. Don't start
+   implementation while any finding is open.
+3. Each iteration still goes through the normal per-phase approval gate: the
+   owning agent (`specifier` / `planner` / `task-decomposer`) proposes the
+   fix, the human approves it, then analyze re-runs. This is human-approved at
+   every step, just never human-skippable mid-loop.
+4. On a clean verdict, **or an explicit skip decided in step 1**, append an
+   **Analyze** row to `decision-log.md` (verdict, or "skipped — user's call",
+   plus how many loop iterations it took) and tell the user implementation can
+   begin story by story.
 
 ## Phase 3.7 — Write failing tests (test-writer gate)
 
@@ -332,4 +356,109 @@ Conditioned on track — mirrors the Analyze pattern:
   scenarios before implementation of that story begins.
 - **Track D** — default-on, plus characterization tests for any brownfield area
   identified in `AGENTS.md` or the plan must be written *before* any changes to
-  that code. The test-writer handles this in its characterizat
+  that code. The test-writer handles this in its characterization mode —
+  those land in `tests/characterization/` and pin *current* behaviour, not
+  desired behaviour.
+
+**Tests are written and confirmed red one user story at a time, immediately
+before that story's implementation** — not all upfront for the whole feature.
+Phases 3.7, 4, and 5 therefore form one loop that repeats per story, in the
+priority order `tasks.md` lays out (P1 first): test-writer writes and
+confirms that story's tests red (3.7), implementor makes them green (4),
+code-reviewer reviews and the human commits (5) — then the loop starts over
+at 3.7 for the next story. It only stops once the last story clears Phase 5.
+This keeps test intent close to the implementation it drives and lets each
+story's review happen while the work is still fresh.
+
+1. For the next user story in priority order, invoke the `test-writer` agent.
+   Pass it: the approved `spec.md` (that story's acceptance scenarios), the
+   approved `tasks.md` (that story's test tasks), and any opted-in extension
+   rules. On Track D, if the story touches a brownfield area named in
+   `AGENTS.md` or the plan, tell it to write characterization tests for that
+   area first. It writes each test, runs it, confirms it fails for the right
+   reason (assertion failure or missing implementation — not an import error
+   or typo), and returns a report rather than the test code itself.
+2. Relay the test-writer's report as-is: each test's tier, path, and
+   confirmed-failing output; which acceptance criteria are covered and which
+   aren't (with reason for any gap). A confirmed-red report is the pass
+   condition here — there's no separate human approval gate for "is this
+   correctly red," since that's a fact the test-writer already verified by
+   running it, not a judgment call.
+3. Append a **Tests (red)** row to `decision-log.md` for this story (or "skipped
+   — user's call" per the track table above), then continue to Phase 4 for the
+   same story.
+
+## Phase 4 — Implement (implementor gate)
+
+Delegates the actual red→green→refactor work to the `implementor` agent —
+mid-tier model, since the expensive design reasoning already happened in
+Specify/Plan and this phase is mechanical execution of an already-ordered
+task list (see `docs/model-selection-and-token-optimization-in-sdd.md`).
+Invoked once per story, in its own fresh context, so one story's review
+back-and-forth never bleeds into the next story's implementation.
+
+**Track A** — no `implementor` invocation: Step R already routes trivial
+changes straight to a direct change plus `code-reviewer` on the diff; this
+phase does not apply.
+
+**Tracks B/C/D**, once the current story's tests are confirmed red (Phase 3.7
+above):
+
+1. Invoke the `implementor` agent. Pass it: the approved `tasks.md` and
+   `plan.md`/`spec.md`, the current story's scope (which task IDs), and the
+   test-writer's confirmed-red report for this story. It implements the
+   smallest change that makes each test pass, task by task, running the full
+   story-level suite (not just the one test) before calling a task done, then
+   refactors with tests kept green throughout. It never writes a new test and
+   never weakens or deletes a failing one — an apparently-wrong test is
+   flagged back to you, not silently edited. When a failure's root cause
+   isn't obvious after one focused look, it escalates to the `debugger` agent
+   itself rather than guessing.
+2. Relay its report: tasks completed, tests now green, any `debugger`
+   escalation and outcome, any uncovered case it found but didn't add a test
+   for (that's a `test-writer` follow-up, not something implementor should
+   have added silently), and any deviation from `plan.md` it had to make.
+3. If the report shows a task left incomplete, a `[NEEDS CLARIFICATION]`
+   marker, or a flagged-wrong test: resolve it with the human first — loop
+   back to whichever phase owns the fix (the test itself → `test-writer`;
+   `plan.md` → `planner`; `tasks.md` → `task-decomposer`) before continuing.
+   Don't proceed to review on a partially-green story.
+4. Once every test for this story is green and the story-level suite passes,
+   append an **Implement** row to `decision-log.md` for this story and
+   continue to Phase 5.
+
+## Phase 5 — Review & commit (code-reviewer gate)
+
+Once a story is fully green, invoke the `code-reviewer` agent on that story's
+diff before moving to the next story's Phase 3.7 (or batch several stories
+into one review pass if the human explicitly asks for that — record the
+choice in `decision-log.md`; the default is one review per story so diffs
+stay small and issues surface early).
+
+1. Invoke `code-reviewer`. Pass it: the diff (or the files `implementor`
+   touched), the spec path, and the feature's `decision-log.md` (for opted-in
+   extension packs). It runs the full review against spec, constitution,
+   conventions, performance idioms, boundaries, and security, and reports
+   findings grouped by severity with a verdict.
+2. If the verdict has Blockers, `code-reviewer` runs its own review↔debugger
+   loop internally (see the Debugger handoff section of `.agents/agents/code-reviewer.md`)
+   — it asks the human to approve the first `debugger` round, then repeats
+   fix→re-check on its own until every Blocker is resolved or a Blocker stops
+   making forward progress across two rounds, in which case it stops and
+   escalates that specific Blocker to the human instead of looping further.
+   This skill does not re-implement that loop — just relay `code-reviewer`'s
+   prompts and its final report.
+3. On a clean verdict (`approve` or `approve-with-nits`): append a **Review**
+   row to `decision-log.md`, let the human commit (the `.githooks/pre-commit`
+   hook runs its own checks), and move on to the next story's Phase 3.7 — or,
+   if this was the last story, the feature is done.
+4. On `request-changes` with a Blocker `code-reviewer` escalated to the human
+   (not resolved by its internal loop): resolve it together. If the root
+   cause turns out to be a spec or plan bug rather than an implementation
+   bug, loop back to `specifier` or `planner` instead of forcing another
+   `implementor` pass on an already-correct implementation. Once resolved,
+   re-run Phase 5 for this story.
+
+When the last story clears Phase 5, the feature is complete. If any doc
+(`README.md`, `AGENTS.md`, a glossary) now describes something inaccurately,
+offer the `docs-writer` agent — it edits docs only, never application code.

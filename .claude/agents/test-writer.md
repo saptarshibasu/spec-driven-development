@@ -63,4 +63,7 @@ yet covered, any skipped (with reason). Hand off — do not proceed to green.
 > - `tests/contract/test_orders_api.py::test_duplicate_order_409` — **fails**: `AssertionError: expected 409, got 404`
 > - `tests/unit/test_order_total.py::test_total_sums_line_items` — **fails**: `AssertionError`
 >
-> Covered: FR-001, FR-004. Not covered: FR-005 — spec ambiguous on partia
+> Covered: FR-001, FR-004. Not covered: FR-005 — spec ambiguous on partial
+> refunds; flagged for `clarify-spec` rather than encoding a guess.
+>
+> All three confirmed red. Handing off — green is the implementor's job.

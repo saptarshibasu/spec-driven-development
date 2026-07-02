@@ -89,22 +89,53 @@ Only after completing this table, write the grouped findings and verdict.
 >
 > **Verdict:** request-changes (1 Blocker).
 
-## Debugger handoff
+## Debugger handoff — loop until clean, not a single round-trip
 
 Complete the **full review** before any handoff — never send Blockers piecemeal.
+This is a **loop**: review → debugger → re-check, repeating until every Blocker
+is resolved (verdict `approve`/`approve-with-nits`) or a round produces no
+forward progress and must escalate to the human. One debugger call that
+"fixes everything" is the common case, not a guarantee — treat round 1 as a
+hypothesis, not the end state.
 
-If the verdict is `request-changes` and there are Blockers:
+If the verdict is `request-changes` and there are Blockers, start round 1:
 
 1. Present the complete findings (all Blockers, Should-fixes, Nits) to the user.
 2. List each Blocker by number with its file:line and one-line description.
-3. Ask: *"Invoke the debugger on all [N] Blockers above?"* — wait for explicit approval.
-4. On approval, invoke the `debugger` agent once, passing:
-   - All Blockers as a numbered list (file:line, description, suggested fix).
+3. Ask: *"Invoke the debugger on all [N] Blockers above?"* — wait for explicit
+   approval before the **first** round. Subsequent rounds in the same loop
+   don't re-ask — the user already approved fixing "all open Blockers,"
+   and re-prompting after every partial fix just adds friction.
+4. Invoke the `debugger` agent once for this round, passing:
+   - All **currently open** Blockers as a numbered list (file:line,
+     description, suggested fix). Resolved Blockers from a prior round are
+     not resent.
    - The spec path (if known).
-5. When the debugger returns, run a **single re-check pass**:
-   - Re-read only the files touched by the debugger's fixes.
-   - Verify each Blocker is resolved and no new issues were introduced by the fixes.
-   - Should-fixes and Nits from the original review are carried forward unchanged — do not re-run the full review.
-6. Issue the final verdict. If all Blockers are resolved: `approve` or `approve-with-nits`. If any remain open: `request-changes` listing only the outstanding items.
+   - On round 2+: which Blockers from the prior round are still open and the
+     debugger's own report of what it already tried, so it doesn't repeat a
+     fix that didn't hold.
+5. When the debugger returns, run a **re-check pass** scoped to this round:
+   - Re-read only the files touched by this round's fixes.
+   - Verify each targeted Blocker is resolved and no new issue was
+     introduced by the fix (a new issue found here is added to the open list,
+     not silently carried as a Should-fix).
+   - Should-fixes and Nits from the original review are carried forward
+     unchanged across every round — never re-run the full review from scratch.
+6. **Decide whether to loop again:**
+   - **All Blockers resolved** → exit the loop, go to step 7.
+   - **Some Blockers still open, and this round resolved at least one** →
+     start another round at step 4 with the still-open list.
+   - **No forward progress this round** (the same Blocker survives two
+     consecutive rounds, or the debugger reports it as a spec bug rather than
+     an implementation bug) → **stop looping.** Present the stuck Blocker(s)
+     to the human with both rounds' findings — this needs a human decision
+     (accept the risk, revise the spec, or redesign), not a third automated
+     attempt at the same fix.
+7. Issue the final verdict. If every Blocker is resolved: `approve` or
+   `approve-with-nits`. If the loop stopped on unresolved items: `request-changes`
+   listing only the outstanding items and why looping further won't help.
 
-**Do not send Blockers to the debugger one at a time.** A fix for one Blocker may interact with another; the re-check pass catches that.
+**Do not send Blockers to the debugger one at a time within a round.** A fix
+for one Blocker may interact with another; the re-check pass catches that.
+**Do not loop indefinitely on a Blocker that isn't moving** — two stalled
+rounds is the signal to escalate, not to try a third variation of the same fix.

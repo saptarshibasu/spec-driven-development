@@ -92,5 +92,6 @@ Return to the caller a **short summary, not the document itself**:
 - Every `[NEEDS CLARIFICATION]` marker still open, listed separately.
 - Whether the Spec Completeness Checklist passed cleanly, and any item that
   didn't.
-- Extension-comp
+- Extension-compliance notes, per rule ID, including any unmet
+  **Verification** condition — never silently omitted.
 '''

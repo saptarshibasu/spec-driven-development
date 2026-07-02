@@ -102,4 +102,5 @@ Return to the caller a **short summary, not the document itself**:
 - The three gate verdicts, each with its stated reasoning.
 - Any Complexity Tracking entries.
 - Research findings, if any were needed.
-- Extension
+- Extension-compliance results, per rule ID, including any unmet
+  **Verification** condition — never silently omitted.

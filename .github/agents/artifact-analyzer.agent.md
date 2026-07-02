@@ -49,8 +49,12 @@ findings auditable.
 |---|---|---|
 | **A · Trivial — Direct change** | **Skip** | No artifacts to cross-check. |
 | **B · Simple — Patch** | **Optional, quick pass** | No `plan.md`; check spec ↔ tasks coverage only. Light. |
-| **C · Moderate — Feature** | **Default-on (skippable)** | Full spec ↔ plan ↔ tasks cross-check. |
-| **D · Complex — Architecture / brownfield** | **Default-on, extended (skippable)** | Also reconcile `research.md`, `data-model.md`, `contracts/`, the ADR, and characterization-test tasks. |
+| **C · Moderate — Feature** | **Default-on (skippable up front)** | Full spec ↔ plan ↔ tasks cross-check. |
+| **D · Complex — Architecture / brownfield** | **Default-on, extended (skippable up front)** | Also reconcile `research.md`, `data-model.md`, `contracts/`, the ADR, and characterization-test tasks. |
+
+"Skippable" means the human may decline to run analyze at all before it starts.
+Once it has run, it is not skippable mid-loop — a finding at any severity
+means another pass, not a bailout.
 
 If invoked on a Track A change, say so and stop — there is nothing to analyze.
 
@@ -115,16 +119,22 @@ artifact and the exact mismatch. No trivial "everything's fine" noise; report
 what a real artifact set could fail.
 
 - **Blocker** — a coverage gap, a direct contradiction, an unmet opted-in
-  Verification with no task, or a constitution violation. Implementation should
-  not start until resolved.
+  Verification with no task, or a constitution violation.
 - **Should-fix** — ambiguous or duplicate tasks, weak test-first ordering,
-  gold-plating. Worth fixing now; not strictly blocking.
+  gold-plating.
 - **Note** — minor wording, optional tightening.
+
+Severity still controls how the finding is described and how urgently it reads,
+but not whether the gate closes: analyze's loop (owned by the caller) doesn't
+clear until every severity comes back empty.
 
 For each finding, **route it**: which phase owns the fix —
 `spec.md` (back to Specify / `clarify-spec`), `plan.md` (back to Plan), or `tasks.md`
-(back to Tasks). End with a one-line verdict: **implementation-ready** or
-**not ready — N blockers**.
+(back to Tasks). End with a one-line verdict: **implementation-ready** (zero
+findings of any severity — no open Blockers, Should-fix, or Notes) or
+**not ready — N blockers, M should-fix, K notes**. A finding of any severity
+keeps the verdict at "not ready" — the caller loops back to the owning phase
+and re-runs analyze rather than accepting a finding in place of fixing it.
 
 **Example output (abbreviated):**
 
@@ -143,19 +153,26 @@ For each finding, **route it**: which phase owns the fix —
 - US3 priority is P2 in spec but sequenced before P1 work in tasks. → tasks.md.
 ```
 
-> Verdict: **not ready — 3 blockers.** Resolve coverage of FR-004 and the
-> plan/spec scope conflict, add the SEC-02 task, then re-run artifact-analyzer.
+> Verdict: **not ready — 3 blockers, 2 should-fix, 1 note.** Resolve coverage of
+> FR-004 and the plan/spec scope conflict, add the SEC-02 task, fix T014/T009-T017,
+> and reconcile the US3 sequencing, then re-run artifact-analyzer. A deliberate
+> scope call (e.g. "not covering FR-004 this iteration") is resolved by writing it
+> into `spec.md`'s Out-of-Scope section, not by logging acceptance — until an
+> artifact changes, the finding stands.
 
 ## After reporting
 
 Return the full report to the caller. The caller (`develop-feature`) handles
-the approval gate — appending the Analyzer row to `decision-log.md`, recording
-any knowingly-accepted findings, and deciding whether to loop back to the owning
-phase or clear the gate to implementation.
+the gate — appending the Analyzer row to `decision-log.md` and looping back to
+the owning phase for every open finding, at any severity, until a re-run comes
+back fully clean. There is no accept-in-place-of-fix once analyze has run; the
+only way past this gate is a clean verdict or an explicit skip decided before
+analyze was ever invoked.
 
-## What this agent deliberately does not do
+## What this skill deliberately does not do
 
 - **Never edits artifacts.** It reports and routes; the owning phase fixes.
 - Doesn't grade the spec alone (that's `check-spec`) or resolve open questions
   (that's `clarify-spec`).
-- Doesn't review code (that's the `code-reviewer` 
+- Doesn't review code (that's the `code-reviewer` agent, on the diff, after
+  implementation).
