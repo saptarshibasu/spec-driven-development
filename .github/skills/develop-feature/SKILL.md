@@ -11,12 +11,12 @@ description: >-
   Review) per story, at the chosen depth, asking for explicit approval before
   each phase. Specify/Plan/Tasks are each delegated to a dedicated agent
   (specifier/planner/task-decomposer) invoked fresh, so this skill orchestrates
-  and gates rather than drafting itself. The Analyzer gate (Tracks C/D)
-  cross-checks the artifacts for coverage and consistency; then, one user
+  and gates rather than drafting itself. The Analyzer gate (default-on for
+  Tracks C/D, optional quick pass on Track B) cross-checks the artifacts for coverage and consistency; then, one user
   story at a time, the test-writer agent writes and confirms failing tests,
-  the implementor agent makes them pass, and the code-reviewer agent (looping
-  with the debugger agent on any Blocker) reviews the result before the next
-  story starts. Handles trivial changes too — they route to the lightweight
+  the implementor agent makes them pass, and the code-reviewer agent reviews the
+  result — with this skill driving the reviewer↔debugger fix loop on any
+  Blocker — before the next story starts. Handles trivial changes too — they route to the lightweight
   track rather than being turned away.
 ---
 
@@ -37,8 +37,8 @@ never skip a gate, and never merge two phases into one turn.
 
 ## Behavioral guardrails (apply throughout this skill session)
 
-These rules are active from Step 0 through Phase 3 and during any
-implementation that follows.
+These rules are active from Step R through Phase 5 — routing, drafting,
+analysis, and implementation alike.
 
 - **No guessing.** Where input leaves something unspecified, write
   `[NEEDS CLARIFICATION: specific question]` and surface it — never silently
@@ -115,8 +115,9 @@ Propose exactly one track with a one-line rationale and the artifacts you'll pro
 - **Track D · Complex — Architecture / brownfield.** A new service, a cross-cutting change,
   or modifying untested legacy code. Full pipeline at maximum depth: add
   `research.md` and/or `data-model.md` as needed, use the strongest model
-  (see `AGENTS.md` Model Routing), write **characterization tests first** for any
-  legacy area, and record the cross-cutting decision as an **ADR** under
+  (see `AGENTS.md` Model Routing), offer **characterization tests first** for any
+  legacy area (ask-first — the human decides at Phase 3.7, never auto-run),
+  and record the cross-cutting decision as an **ADR** under
   `docs/adr/` (the decision log gets a one-line pointer to it).
 
 In the same turn:
@@ -324,7 +325,9 @@ alone) and the `code-reviewer` agent (reviews the diff later).
 2. **Any finding, at any severity** (Blocker, Should-fix, or Note): loop back
    to whichever phase owns the fix (Specify / Plan / Tasks) — not always Tasks
    — fix there, then **re-run analyze**. Repeat until a run comes back with
-   zero findings across all severities. There is no accepting a finding in
+   zero findings across all severities. When re-running, tell the analyzer
+   which artifact(s) changed since the last pass — it focuses the re-check
+   there while still re-verifying cross-artifact consistency. There is no accepting a finding in
    place of fixing it once analyze has run — a deliberate scope call (e.g.
    "not covering FR-004 this iteration") is resolved by writing it into the
    owning artifact (e.g. `spec.md`'s Out-of-Scope section) so analyze no
@@ -333,7 +336,10 @@ alone) and the `code-reviewer` agent (reviews the diff later).
 3. Each iteration still goes through the normal per-phase approval gate: the
    owning agent (`specifier` / `planner` / `task-decomposer`) proposes the
    fix, the human approves it, then analyze re-runs. This is human-approved at
-   every step, just never human-skippable mid-loop.
+   every step, just never human-skippable mid-loop. If a finding survives two
+   consecutive runs unchanged, say so explicitly at that approval gate — that
+   is where the human notices a stuck loop and redirects the fix (ADR-0004
+   deliberately adds no separate iteration cap).
 4. On a clean verdict, **or an explicit skip decided in step 1**, append an
    **Analyze** row to `decision-log.md` (verdict, or "skipped — user's call",
    plus how many loop iterations it took) and tell the user implementation can
@@ -354,11 +360,15 @@ Conditioned on track — mirrors the Analyze pattern:
   proceeding.
 - **Track C** — default-on: write tests for every user story's acceptance
   scenarios before implementation of that story begins.
-- **Track D** — default-on, plus characterization tests for any brownfield area
-  identified in `AGENTS.md` or the plan must be written *before* any changes to
-  that code. The test-writer handles this in its characterization mode —
-  those land in `tests/characterization/` and pin *current* behaviour, not
-  desired behaviour.
+- **Track D** — default-on for the story's acceptance tests. Characterization
+  tests are **ask-first, never auto-run**: when a story touches an untested
+  brownfield area identified in `AGENTS.md` or the plan, offer a
+  characterization pass *before* any changes to that code and let the human
+  decide — record the choice either way in `decision-log.md`. If accepted,
+  the test-writer handles it in its characterization mode — those land in
+  `tests/characterization/` and pin *current* behaviour, not desired
+  behaviour. If declined, proceed without them: the logged row is the human's
+  accepted risk, and the analyzer and reviewer treat it as such.
 
 **Tests are written and confirmed red one user story at a time, immediately
 before that story's implementation** — not all upfront for the whole feature.
@@ -374,8 +384,9 @@ story's review happen while the work is still fresh.
    Pass it: the approved `spec.md` (that story's acceptance scenarios), the
    approved `tasks.md` (that story's test tasks), and any opted-in extension
    rules. On Track D, if the story touches a brownfield area named in
-   `AGENTS.md` or the plan, tell it to write characterization tests for that
-   area first. It writes each test, runs it, confirms it fails for the right
+   `AGENTS.md` or the plan *and* the human accepted the characterization
+   offer for that area (never assume — ask now if it hasn't been decided,
+   and log the answer), tell it to write those characterization tests first. It writes each test, runs it, confirms it fails for the right
    reason (assertion failure or missing implementation — not an import error
    or typo), and returns a report rather than the test code itself.
 2. Relay the test-writer's report as-is: each test's tier, path, and
@@ -412,18 +423,24 @@ above):
    refactors with tests kept green throughout. It never writes a new test and
    never weakens or deletes a failing one — an apparently-wrong test is
    flagged back to you, not silently edited. When a failure's root cause
-   isn't obvious after one focused look, it escalates to the `debugger` agent
-   itself rather than guessing.
+   isn't obvious after one focused look, it stops and returns an escalation
+   request rather than guessing — sub-agents can't invoke each other, so this
+   skill runs the `debugger` round (step 3 below).
 2. Relay its report: tasks completed, tests now green, any `debugger`
-   escalation and outcome, any uncovered case it found but didn't add a test
+   escalation request, any uncovered case it found but didn't add a test
    for (that's a `test-writer` follow-up, not something implementor should
    have added silently), and any deviation from `plan.md` it had to make.
-3. If the report shows a task left incomplete, a `[NEEDS CLARIFICATION]`
+3. If the report contains a `debugger` escalation request: invoke the
+   `debugger` agent with the failing test, the exact error and stack trace,
+   the spec path, and what `implementor` already tried; then re-invoke
+   `implementor` with the debugger's report so it confirms green and finishes
+   the story's remaining tasks.
+4. If the report shows a task left incomplete, a `[NEEDS CLARIFICATION]`
    marker, or a flagged-wrong test: resolve it with the human first — loop
    back to whichever phase owns the fix (the test itself → `test-writer`;
    `plan.md` → `planner`; `tasks.md` → `task-decomposer`) before continuing.
    Don't proceed to review on a partially-green story.
-4. Once every test for this story is green and the story-level suite passes,
+5. Once every test for this story is green and the story-level suite passes,
    append an **Implement** row to `decision-log.md` for this story and
    continue to Phase 5.
 
@@ -440,14 +457,24 @@ stay small and issues surface early).
    extension packs). It runs the full review against spec, constitution,
    conventions, performance idioms, boundaries, and security, and reports
    findings grouped by severity with a verdict.
-2. If the verdict has Blockers, `code-reviewer` runs its own review↔debugger
-   loop internally (see the Debugger handoff section of `.agents/agents/code-reviewer.md`)
-   — it asks the human to approve the first `debugger` round, then repeats
-   fix→re-check on its own until every Blocker is resolved or a Blocker stops
-   making forward progress across two rounds, in which case it stops and
-   escalates that specific Blocker to the human instead of looping further.
-   This skill does not re-implement that loop — just relay `code-reviewer`'s
-   prompts and its final report.
+2. If the verdict has Blockers, **this skill runs the review↔debugger loop**
+   — sub-agents can't invoke each other or pause for approval, so the loop
+   lives here, not inside `code-reviewer`:
+   - Relay the complete findings, then ask the human: *"Invoke the debugger
+     on all [N] Blockers above?"* Wait for explicit approval before the
+     **first** round only; later rounds in the same loop don't re-ask.
+   - Invoke the `debugger` agent once per round, passing every currently-open
+     Blocker as a numbered list (file:line, description, suggested fix); on
+     round 2+, note which Blockers are still open and what the debugger
+     already tried, so it doesn't repeat a failed fix.
+   - Re-invoke `code-reviewer` for a **re-check pass**, passing the prior
+     findings, the debugger's report, and the files it touched (see the
+     Debugger handoff section of `.agents/agents/code-reviewer.md`).
+   - Decide from the re-check verdict: all Blockers resolved → step 3; some
+     resolved, some still open → another round; **no forward progress** (the
+     same Blocker survives two consecutive rounds, or the debugger calls it a
+     spec bug) → stop looping and take that Blocker to the human — accept the
+     risk, revise the spec, or redesign (step 4).
 3. On a clean verdict (`approve` or `approve-with-nits`): append a **Review**
    row to `decision-log.md`, let the human commit (the `.githooks/pre-commit`
    hook runs its own checks), and move on to the next story's Phase 3.7 — or,

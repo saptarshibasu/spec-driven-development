@@ -191,4 +191,24 @@ repeat the summary; do not paste the revised draft into chat.
 
 ---
 
-## Writing files (after both are approv
+## Writing files (after both are approved)
+
+1. **AGENTS.md** — move/rename `AGENTS.md.draft` to the project root as
+   `AGENTS.md`, replacing the stub.
+2. **constitution.md** — confirm save path (default: `memory/constitution.md`);
+   create `memory/` if needed, then move/rename `constitution.md.draft` there.
+3. Delete any leftover `.draft` file once its final copy is written.
+4. Verify AGENTS.md's Specs section references the correct constitution path.
+
+Then confirm to the user:
+- Both files written and their paths
+- Constitution version and ratification date
+- Reminder: run `mirror-agents.sh` (or `.ps1`) to sync AGENTS.md to
+  `.agents/` and `.codex/` format files
+
+## What this skill does not do
+
+- Doesn't run `develop-feature` — that's a separate workflow for individual
+  features.
+- Doesn't fabricate values — unresolvable facts get `[NEEDS CLARIFICATION]`.
+- Never writes either file until the user explicitly approves both drafts.

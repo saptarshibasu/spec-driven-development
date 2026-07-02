@@ -71,6 +71,24 @@ jobs:
             exit 1
           fi
 
+      - name: No truncated files (canonical sources must end with a newline)
+        run: |
+          # A text file that stops without a trailing newline is the signature
+          # of a truncated write — agent prompts have shipped cut off
+          # mid-sentence before. Canonical sources only: the drift guard above
+          # already covers the generated mirrors (.codex .toml files end with
+          # ''' by design and are generated, so they're not scanned here).
+          bad=0
+          while IFS= read -r f; do
+            [ -s "$f" ] || continue
+            if [ -n "$(tail -c 1 "$f")" ]; then
+              echo "::error::$f does not end with a newline — truncated?"
+              bad=1
+            fi
+          done < <(find .agents templates docs README.md AGENTS.md CLAUDE.md \
+                     -type f \( -name '*.md' -o -name '*.sh' -o -name '*.ps1' \) 2>/dev/null)
+          exit "$bad"
+
       # ── Your stack's controls — UNCOMMENT and fill in ─────────────────────
       # The commands here MUST match the ones named in AGENTS.md's Commands
       # section, so local and CI enforcement are identical.

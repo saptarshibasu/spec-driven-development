@@ -24,8 +24,9 @@ secret_re='(AKIA[0-9A-Z]{16}|-----BEGIN [A-Z ]*PRIVATE KEY-----|xox[baprs]-[0-9A
 for f in $staged; do
   [ -f "$f" ] || continue
   case "$f" in
-    *.example|*.md|.githooks/*) continue ;;  # examples/docs may show placeholder patterns
-  esac
+    *.example|.githooks/*) continue ;;                 # examples/hooks show patterns
+    docs/*|templates/*|README.md|AGENTS.md) continue ;; # prose that legitimately quotes patterns
+  esac                                                 # note: specs/ and memory/ ARE scanned
   if git show ":$f" | grep -nEi "$secret_re" >/dev/null 2>&1; then
     echo "✖ Possible secret in $f — remove it or use an env var (constitution: no secrets in VCS)."
     fail=1

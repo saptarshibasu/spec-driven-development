@@ -267,14 +267,3 @@ to use isn't in that glossary, ask rather than guessing at its meaning.
   fine.
 - Quick edits, file search, formatting, lint fixes: fast/cheap tier, or
   auto-selection.
-- Characterization tests on legacy code: treat like Plan, not like ordinary
-  test-writing — use **[your strongest available model]**.
-- Code review / verification: prefer a different model or model family than
-  whatever generated the code under review, where available.
-
-## Out of Scope for Agents
-
-<!-- Anything you want a human to always do, full stop. -->
-
-- [e.g., "Production deploys — always require a human to trigger these"]
-- [e.g., "Customer-data migrations"]

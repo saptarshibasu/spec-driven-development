@@ -78,4 +78,4 @@ On approval, append a **Review** row to `decision-log.md` (verdict + model used)
 
 ## Dependencies
 
-- Setup → Foundational → (User stories, parallel or priority order) → 
+- Setup → Foundational → (User stories, parallel or priority order) → Polish

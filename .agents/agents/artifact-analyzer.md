@@ -68,8 +68,10 @@ task list, not a blank one. This agent reads only; it makes no changes.
 
 ## What it checks
 
-Read `spec.md`, `plan.md` (if present), `tasks.md`, and any `research.md` /
-`data-model.md` / `contracts/` and the feature ADR on Track D. Then evaluate:
+Read `spec.md`, `plan.md` (if present), `tasks.md`, the feature's
+`decision-log.md` (approved track, extension opt-ins, and any logged
+characterization decision), and any `research.md` / `data-model.md` /
+`contracts/` and the feature ADR on Track D. Then evaluate:
 
 1. **Requirement coverage.** For each Functional Requirement, Non-Functional
    Requirement, and Acceptance Scenario in `spec.md`, re-state its ID and
@@ -88,7 +90,9 @@ Read `spec.md`, `plan.md` (if present), `tasks.md`, and any `research.md` /
 4. **Test-first integrity.** For any story where tests were requested, the test
    tasks precede their implementation tasks and are marked write-then-fail. On
    Track D, every untested legacy area being changed has a characterization-test
-   task **before** the change.
+   task **before** the change — unless the feature's `decision-log.md` records
+   that the human explicitly declined characterization coverage for that area
+   (a logged decision, not silence; silence is still a finding).
 5. **Constitution alignment.** Nothing in plan or tasks violates a standing
    principle in `memory/constitution.md` (e.g. simplicity/anti-abstraction, the
    TDD article). Re-check, don't assume Plan's gate caught everything — tasks can
@@ -161,6 +165,15 @@ and re-runs analyze rather than accepting a finding in place of fixing it.
 > scope call (e.g. "not covering FR-004 this iteration") is resolved by writing it
 > into `spec.md`'s Out-of-Scope section, not by logging acceptance — until an
 > artifact changes, the finding stands.
+
+## Re-runs
+
+On a re-run after a fix, the caller may name which artifact(s) changed since
+the last pass. Focus the re-check there, but still re-verify the
+cross-artifact checks — a `tasks.md` fix can introduce a new contradiction
+with `plan.md`. Report in the same format, and note explicitly any finding
+that is unchanged from the previous run, so a stuck loop is visible to the
+human at the next approval gate.
 
 ## After reporting
 
