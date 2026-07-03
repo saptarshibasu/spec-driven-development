@@ -36,7 +36,10 @@ phase does not apply.
    the report includes a proposed `AGENTS.md` correction, relay it and ask
    for approval; on approval, apply the one-line fix directly (or hand it to
    `docs-writer` if it's bigger than a single line) — don't apply it
-   unapproved, and don't let it block the rest of the story's progress.
+   unapproved, and don't let it block the rest of the story's progress. Note
+   (don't act yet) which `learnings.md` entry, if any, documented the
+   now-fixed command — it's a candidate to drop at this story's Phase 5
+   compaction offer, not something to edit out of the file right now.
 3. If the report contains a `debugger` escalation request: invoke the
    `debugger` agent with the failing test, the exact error and stack trace,
    the spec path, what `implementor` already tried, and the same

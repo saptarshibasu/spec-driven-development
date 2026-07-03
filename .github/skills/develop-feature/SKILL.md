@@ -74,7 +74,10 @@ refuses to overwrite by design.
 3. Cross-check `decision-log.md` — it carries one committed row per approved gate.
 4. If `learnings.md` has entries, skim it before re-invoking `implementor` or
    `debugger` — it may already record why a prior attempt at this story went
-   sideways.
+   sideways. If it's grown large or repetitive across many prior stories and
+   no compaction pass has run recently, this is also a good moment to offer
+   one (see `references/phase-5-review.md`'s compaction step) before it's
+   handed, unread in full, into another fresh sub-agent context.
 
 ## Approval status (the resume signal)
 
@@ -173,7 +176,7 @@ that phase, even late in a multi-day session).
 | 3.5 — Analyze | `artifact-analyzer` cross-checks; loops to clean verdict or logged skip | `references/phase-3.5-analyze.md` |
 | 3.7 — Tests (red) | `test-writer` writes failing tests per story | `references/phase-3.7-tests.md` |
 | 4 — Implement (green) | `implementor` (+ `debugger` on escalation) | `references/phase-4-implement.md` |
-| 5 — Review & commit | `code-reviewer` (+ `debugger` loop on Blockers); human commits | `references/phase-5-review.md` |
+| 5 — Review & commit | `code-reviewer` (+ `debugger` loop on Blockers); human commits; offers a `learnings.md` compaction pass | `references/phase-5-review.md` |
 
 Phases 3.7 → 4 → 5 repeat **per user story**, in `tasks.md`'s priority order,
 until the last story clears Phase 5 — see `phase-3.7-tests.md` for how that

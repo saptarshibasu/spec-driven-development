@@ -181,7 +181,7 @@ native format — Claude `.md`, Copilot `.agent.md`, Codex `.toml`.
 
 Every gate approval — and every explicit skip — is appended to `specs/<NNN>/decision-log.md` as a committed audit trail. The log records who approved what, and when; skipped gates are noted alongside the reason. This makes the reasoning behind each feature permanently inspectable.
 
-Alongside it, `specs/<NNN>/learnings.md` is an **ungated** append-only scratchpad — no Status, no approval, no decision-log row. `implementor` and `debugger` read it before a story and append discoveries (a wrong-turn command, a component that lived somewhere the plan didn't expect) as they go, so a fresh-context re-invocation on the next story — or a resumed session — doesn't have to re-learn it.
+Alongside it, `specs/<NNN>/learnings.md` is an **ungated** append-only scratchpad — no Status, no approval, no decision-log row. `implementor` and `debugger` read it before a story and append discoveries (a wrong-turn command, a component that lived somewhere the plan didn't expect) as they go, so a fresh-context re-invocation on the next story — or a resumed session — doesn't have to re-learn it. Because it only ever grows, `develop-feature` offers a human-approved **compaction pass** at each story's Phase 5 checkpoint (and on resuming a long-running feature) — dedupes repeated gotchas and drops entries an approved `AGENTS.md` correction already fixed, never unattended (ADR-0006).
 
 ### 🧩 Extensions — opt-in rule packs *(canonical in `.agents/extensions/`, loaded on demand)*
 
