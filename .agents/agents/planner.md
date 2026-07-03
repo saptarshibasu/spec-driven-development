@@ -56,7 +56,9 @@ unstable spec just gets redone.
    or narrow it.
 2. `AGENTS.md` (stack, conventions, structure) and `memory/constitution.md`
    (standing principles).
-3. The text of any opted-in extension pack rules the caller passes.
+3. The rule-file path(s) of any opted-in extension pack(s) the caller passes
+   — the caller passes the path and pack ID only, never the rule text, so
+   read the file(s) yourself with your own `Read` tool before drafting.
 4. On a revision pass: the prior draft plus the caller's specific feedback.
 
 ## How to draft
@@ -85,10 +87,10 @@ unstable spec just gets redone.
 
 3. If the plan depends on a rapidly-changing library, run parallel research
    for version-sensitive questions before finalising — never guess.
-4. If any extension pack was opted in, verify the plan against its rules and
-   report compliance per rule ID (e.g. "SEC-03: secrets sourced from env,
-   not committed — PASS"). Note any unmet **Verification** condition
-   explicitly — never silently omit it.
+4. If any extension pack was opted in, read its rules file (path given by the
+   caller), verify the plan against its rules, and report compliance per rule
+   ID (e.g. "SEC-03: secrets sourced from env, not committed — PASS"). Note
+   any unmet **Verification** condition explicitly — never silently omit it.
 5. Strip `plan.md`'s instructional comments and unused bracketed
    placeholders.
 6. Write the filled `plan.md` to disk. Leave its **Status** as `Draft` — you

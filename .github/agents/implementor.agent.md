@@ -179,4 +179,5 @@ with: ready for `code-reviewer` on this story's diff, or blocked and on what.
 > re-invocation confirmed the test green.
 >
 > No deviations from `plan.md`. Appended one entry to `learnings.md`: the
-> idempotency check lives in `idempotency.py
+> idempotency check lives in `idempotency.py`, not `orders/service.py` as
+> `plan.md` assumed. No `AGENTS.md` corrections. Ready for `code-reviewer`.

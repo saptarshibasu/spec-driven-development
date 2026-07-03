@@ -60,8 +60,10 @@ file, it does not create the feature folder.
    caller's specific feedback) passed by the caller.
 2. The existing codebase, read-only, where relevant to the feature — locate
    precisely (grep/glob for the relevant area) rather than reading broadly.
-3. The text of any opted-in extension pack rules the caller passes (e.g.
-   Security Baseline `SEC-01`/`SEC-02`).
+3. The rule-file path(s) of any opted-in extension pack(s) the caller passes
+   (e.g. `.agents/extensions/security/baseline/security-baseline.md`) — the
+   caller passes the path and pack ID only, never the rule text, so read the
+   file yourself with your own `Read` tool before drafting.
 
 ## How to draft
 
@@ -78,10 +80,11 @@ file, it does not create the feature folder.
 4. Strip all instructional HTML comments (`<!-- ... -->`) and unused
    bracketed placeholders — delete whole unused sections, never leave them
    half-filled.
-5. If any extension pack was opted in, verify the spec against its rules now
-   (e.g. Security Baseline `SEC-01`/`SEC-02` shape what the requirements must
-   cover for inputs and access). Note any unmet **Verification** condition
-   explicitly in your report — never silently omit it.
+5. If any extension pack was opted in, read its rules file (path given by the
+   caller) and verify the spec against its rules now (e.g. Security Baseline
+   `SEC-01`/`SEC-02` shape what the requirements must cover for inputs and
+   access). Note any unmet **Verification** condition explicitly in your
+   report — never silently omit it.
 6. Write the filled `spec.md` to disk. Leave its **Status** as `Draft` — you
    never mark your own work approved; that's the caller's gate.
 

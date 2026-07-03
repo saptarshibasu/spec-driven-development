@@ -18,6 +18,14 @@ context, and each can be pinned to the model tier its phase actually needs
 `docs/model-selection-and-token-optimization-in-sdd.md`). Three gated phases —
 never skip a gate, and never merge two phases into one turn.
 
+This file is intentionally short: it covers routing and the rules that apply
+throughout the whole session. **Each phase's actual protocol lives in its own
+file under `references/`, read only when you reach that phase** — see
+"Phases" below. A feature commonly spans days across many separate
+conversation turns; re-reading the phase file at the point of use, rather
+than relying on one big upfront read, is what keeps the protocol from
+decaying as the session grows.
+
 ## Behavioral guardrails (apply throughout this skill session)
 
 These rules are active from Step R through Phase 5 — routing, drafting,
@@ -35,6 +43,12 @@ analysis, and implementation alike.
 - **No over-engineering.** Only specify, plan, and build what is directly
   requested — no abstractions, extra projects, or flexibility for hypothetical
   future requirements unless the user explicitly asks.
+- **Don't reprint drafted documents in chat.** Every drafting phase (1, 2, 3)
+  ends the same way: an agent already wrote the document to disk, so tell the
+  human the file path and the agent's summary — retyping the content doubles
+  output-token cost for no benefit. If the human asks to see it inline
+  ("show me", "print it"), read the file and relay it then; otherwise let them
+  review it in the file directly.
 
 ## Before starting
 
@@ -54,7 +68,9 @@ refuses to overwrite by design.
    document still full of placeholders hasn't been started.
 2. Resume at the first phase whose document is not `Approved`; honour the
    approval gate before moving on. Any `[NEEDS CLARIFICATION]` markers still in
-   the documents are the open questions left to settle.
+   the documents are the open questions left to settle. **Read that phase's
+   reference file (below) before acting** — don't resume from memory of an
+   earlier read.
 3. Cross-check `decision-log.md` — it carries one committed row per approved gate.
 4. If `learnings.md` has entries, skim it before re-invoking `implementor` or
    `debugger` — it may already record why a prior attempt at this story went
@@ -113,384 +129,55 @@ In the same turn:
    `.agents/extensions/`, present each opt-in question. Don't load full rules
    yet — only the small prompts. No `*.opt-in.md` = always enforced; note it.
 2. **Stop for route approval.** Present: track + rationale, artifacts, extension
-   opt-in choices. Wait for confirmation before scaffolding or loading rules.
-3. After approval, read each opted-in pack's rules and treat them as **blocking
-   constraints** for every subsequent gate and review.
+   opt-in choices. Wait for confirmation before scaffolding.
+3. After approval, record only the opted-in **pack IDs and their rule-file
+   paths** (e.g. `security/baseline` →
+   `.agents/extensions/security/baseline/security-baseline.md`) — never read
+   the full pack rules into this skill's own context. This orchestrator routes
+   extensions, it does not enforce them: each downstream agent (`specifier`,
+   `planner`, `task-decomposer`, `test-writer`, `artifact-analyzer`,
+   `code-reviewer`) has its own `Read` tool and is passed the pack path(s), not
+   the rule text, so it loads and checks the rules itself, in its own context,
+   at its own phase.
 
-Record the approved track and extension choices as the first entries in
-`decision-log.md` immediately after scaffolding.
+Record the approved track and extension choices (pack IDs + paths, not rule
+text) as the first entries in `decision-log.md` immediately after
+scaffolding — every later phase resolves the full rules from that log entry,
+not from anything carried in this session's context.
 
 **Track A**: no folder, no further phases — implement, then invoke `code-reviewer` on the diff.
 **Tracks B/C/D**: continue to Step 0.
 
 ## Step 0 — Scaffold (mechanical — don't use judgment here)
 
-**First, check for an existing feature — don't blind-scaffold.** The script
-always mints a *new* incremented folder, so running it for work that already
-has one creates a duplicate. Before running it: list `specs/` and compare
-against the user's request. If a folder plausibly matches (by slug or topic),
-**stop and confirm** with the user — "resume `specs/<NNN>-<slug>/` or start a
-new feature?" — and on resume, follow "Resuming an in-progress feature" above
-instead of scaffolding. Only scaffold once you've confirmed this is genuinely
-new. When in doubt, ask; a wrong guess either duplicates or overwrites intent.
+Before running the scaffold script, check whether a matching feature folder
+already exists under `specs/` — don't blind-scaffold a duplicate. **Read
+`references/step-0-scaffold.md` now** for the existing-feature check, the
+exact scaffold-script invocation (path pitfalls, OS variants, manual fallback),
+and the immediately-after-scaffolding checklist (decision-log rows, Track B's
+`plan.md` deletion, `learnings.md`).
 
-Then run the scaffold script with the feature description as a single argument.
-**Path matters**: the script lives next to *this* file, not at the repo root.
-Don't run a bare `scripts/start-feature.sh` relative path — your shell's
-current directory is usually the repo root (or something else entirely), not
-this skill's folder, and that lookup will fail with "no such file or
-directory." Instead, build the full path yourself from where you read this
-SKILL.md: `.claude/skills/develop-feature/`, `.codex/skills/develop-feature/`,
-`.github/skills/develop-feature/`, and `.agents/skills/develop-feature/` are
-byte-identical mirrors (ADR-0001) — take whichever prefix matches the copy you
-loaded, and append `scripts/start-feature.sh` (or `.ps1`). Run the command
-with your shell's cwd at the **repo root** — these paths are repo-root-relative,
-not relative to the skill folder. Two byte-equivalent versions — use the one
-matching the current OS:
+## Phases (read the reference file at phase entry)
 
-```bash
-# macOS / Linux (bash) — substitute the tool prefix you're running under:
-bash .claude/skills/develop-feature/scripts/start-feature.sh "<feature description>"
-```
+Each row below is a one-line map, not the protocol. **Before starting a
+phase, `Read` its reference file in `references/`** — the full step-by-step
+detail lives there, not here, so it stays out of context until the moment
+it's actually needed (and gets a fresh, undecayed read every time you re-enter
+that phase, even late in a multi-day session).
 
-```powershell
-# Windows (PowerShell) — substitute the tool prefix you're running under:
-pwsh .claude/skills/develop-feature/scripts/start-feature.ps1 "<feature description>"
-# (on Windows PowerShell, equivalently: powershell -File .claude/skills/develop-feature/scripts/start-feature.ps1 "<feature description>")
-```
+| Phase | Gate | Reference file |
+|---|---|---|
+| 1 — Specify | `specifier` drafts `spec.md`; human approves | `references/phase-1-specify.md` |
+| 2 — Plan | `planner` drafts `plan.md`; human approves | `references/phase-2-plan.md` |
+| 3 — Tasks | `task-decomposer` drafts `tasks.md`; human approves | `references/phase-3-tasks.md` |
+| 3.5 — Analyze | `artifact-analyzer` cross-checks; loops to clean verdict or logged skip | `references/phase-3.5-analyze.md` |
+| 3.7 — Tests (red) | `test-writer` writes failing tests per story | `references/phase-3.7-tests.md` |
+| 4 — Implement (green) | `implementor` (+ `debugger` on escalation) | `references/phase-4-implement.md` |
+| 5 — Review & commit | `code-reviewer` (+ `debugger` loop on Blockers); human commits | `references/phase-5-review.md` |
 
-Prefer `.ps1` on Windows, `.sh` on macOS/Linux. Unsure? Try one and fall back.
-
-If neither script runs (path genuinely doesn't resolve, no shell available,
-etc.), do it by hand: find the highest `NNN-` prefix under
-`specs/`, increment, slugify to kebab-case, create `specs/<NNN>-<slug>/`, copy
-the five templates as `spec.md`, `plan.md`, `tasks.md`, `decision-log.md`,
-`learnings.md`.
-
-**Immediately after scaffolding:**
-
-- Fill `decision-log.md`'s first two rows (**Route** and **Extensions**) from
-  the Step R decisions. This file is committed — the feature's durable audit trail.
-- **Track B** does not use `plan.md`: delete the scaffolded `plan.md` and note
-  "plan skipped (Track B)" in the decision log, unless a design decision later
-  forces a promotion to Track C (record that promotion in the log too).
-- `learnings.md` is scaffolded but ungated — unlike the other three, it never
-  gets a `decision-log.md` row or a Status flip. `implementor` and `debugger`
-  read and append to it directly once Phase 4 starts; nothing to do here.
-
-## Phase 1 — Specify
-
-Delegates the drafting to the `specifier` agent, pinned to the strongest
-available model, invoked in its own fresh context so it never carries this
-session's routing/scaffolding chatter into the draft.
-
-1. Invoke the `specifier` agent. Pass it: the user's feature description, the
-   path to the newly-scaffolded `spec.md`, and the text of any opted-in
-   extension rules from Step R (e.g. Security Baseline). It investigates the
-   codebase read-only, fills in `spec.md` per `templates/spec.template.md`,
-   applies the No-guessing guardrail (`[NEEDS CLARIFICATION: ...]` for
-   anything unstated), runs the Spec Completeness Checklist itself, strips
-   instructional comments, and writes the file with Status still `Draft`.
-2. The agent returns a short summary — not the document text — covering any
-   open `[NEEDS CLARIFICATION]` markers, the Completeness Checklist result,
-   and extension-compliance notes. Relay all of it — don't summarize away an
-   unmet **Verification** condition; surface it before approval, same as if
-   you'd drafted it yourself.
-3. **Stop.** Tell the human the file path (`specs/<NNN>/spec.md`) and the
-   summary from step 2 — **don't reprint the drafted document in chat**; the
-   content was already generated once for the file, and retyping it doubles
-   output-token cost for no benefit. If the human asks to see it inline
-   ("show me", "print it"), read the file and relay it then — otherwise let
-   them review it in the file directly. **Offer the optional sharpeners
-   before approval** — they aren't auto-run, so name them or the human won't
-   know they exist: if any `[NEEDS CLARIFICATION]` markers remain, recommend
-   the `clarify-spec` skill; for a high-stakes, security-sensitive, or ambiguous
-   spec, offer the `check-spec` skill (a requirements-quality or domain pass).
-   Both are optional — surface them and let the human choose; don't run them
-   unprompted. Then ask for explicit approval or resolution of any
-   `[NEEDS CLARIFICATION]` markers before touching `plan.md`. Don't proceed
-   on your own judgment. On approval, set `spec.md`'s **Status** to
-   `Approved — <who>, <date>` and append a **Specify** row to
-   `decision-log.md`.
-4. If the human requests substantive changes instead of approving, re-invoke
-   `specifier` with the specific feedback (it re-reads its own prior draft
-   from disk) rather than hand-editing `spec.md` yourself — the drafting
-   agent stays responsible for spec quality, not the orchestrator. Small
-   wording fixes you can make directly.
-
-## Phase 2 — Plan
-
-Only after the user has approved Phase 1. Delegates the drafting to the
-`planner` agent — also pinned to the strongest available model, since a wrong
-architecture decision here is as expensive to reverse as a wrong requirement.
-
-1. Invoke the `planner` agent. Pass it: the path to the now-approved
-   `spec.md`, and any opted-in extension rules. It reads `AGENTS.md` and
-   `memory/constitution.md` itself, fills `plan.md`'s Technical Context and
-   Project Structure, runs the three constitution check gates (Simplicity,
-   Anti-abstraction, Integration-first) with stated reasoning before each
-   verdict — for each gate, name the concrete design choice, don't just
-   assert pass/fail — fills Complexity Tracking on any gate fail, runs
-   version-sensitive research where the plan depends on a rapidly-changing
-   library, checks extension compliance by rule ID, strips instructional
-   comments, and writes `plan.md` with Status still `Draft`.
-2. The agent returns a short summary — not the document text — covering the
-   three gate verdicts with their reasoning, any Complexity Tracking entries,
-   research findings, and extension-compliance notes. Relay all of it — a
-   gate fail or an unmet **Verification** condition is a blocker unless a
-   human explicitly accepts the risk, recorded in `decision-log.md`; don't
-   summarize it away.
-3. **Stop.** Tell the human the file path (`specs/<NNN>/plan.md`) and the
-   gate/extension/research summary from step 2 — **don't reprint the drafted
-   plan in chat**; the content was already generated once for the file, and
-   retyping it doubles output-token cost for no benefit. If the human asks to
-   see it inline, read the file and relay it then. Ask for explicit approval
-   before touching `tasks.md`. On approval, set `plan.md`'s **Status** to
-   `Approved — <who>, <date>` and append a **Plan** row to `decision-log.md`.
-4. On requested changes, re-invoke `planner` with the specific feedback rather
-   than hand-editing `plan.md` yourself, for the same reason as Phase 1.
-
-## Phase 3 — Tasks
-
-Only after the user has approved Phase 2. Delegates the drafting to the
-`task-decomposer` agent — mid-tier model is fine here (Model Routing):
-decomposition from an already-good plan is mechanical, and errors are visible
-and local rather than propagating.
-
-1. Invoke the `task-decomposer` agent. Pass it: the paths to the approved
-   `spec.md` and `plan.md`, and any opted-in extension rules. It generates
-   `tasks.md` grouped as Setup, Foundational (marked a hard blocker), one
-   phase per user story in priority order (P1 first, tests-first within each
-   story when requested, `[P]` for parallelizable tasks, `[US#]` labels,
-   exact file paths, a Checkpoint per story), then Polish; represents any
-   opted-in extension's verification work as explicit tasks; strips
-   instructional comments; and writes `tasks.md` with Status still `Draft`.
-2. The agent returns a short summary — not the document text — a task/story
-   count and shape (e.g. "18 tasks across 3 user stories, 4 marked `[P]`")
-   plus any extension-compliance notes. Relay it.
-3. **Stop.** Tell the human the file path (`specs/<NNN>/tasks.md`) and the
-   summary from step 2 — **don't reprint the task list in chat**; the content
-   was already generated once for the file, and retyping it doubles
-   output-token cost for no benefit. If the human asks to see it inline, read
-   the file and relay it then. Get explicit approval. On approval, set
-   `tasks.md`'s **Status** to `Approved — <who>, <date>` and append a **Tasks**
-   row to `decision-log.md`. Don't tell the user to start implementing yet — on
-   Tracks C/D the analyzer gate (Phase 3.5) runs first.
-4. On requested changes, re-invoke `task-decomposer` with the specific
-   feedback rather than hand-editing `tasks.md` yourself, for the same reason
-   as Phase 1.
-
-## Phase 3.5 — Analyze (gate, non-destructive)
-
-The last guide-side gate before implementation: cross-check the artifacts
-against each other and the constitution **while no code yet exists** — the
-cheapest place to catch a requirement that never became a task. Invoke the
-`artifact-analyzer` agent (full detail there). It is **conditional on the track**:
-
-- **Track A** — skip (no artifacts to cross-check).
-- **Track B** — optional quick pass: spec ↔ tasks coverage only (no `plan.md`).
-- **Track C** — default-on: full spec ↔ plan ↔ tasks cross-check.
-- **Track D** — default-on, extended: also reconcile `research.md` /
-  `data-model.md` / `contracts/`, the ADR, and characterization-test ordering.
-
-On C/D analyze runs **by default**, but starting it is a gate the human
-controls, not a hard requirement: the user may **explicitly skip** it —
-*before it ever runs*. Don't skip silently — offer to run it, and if the user
-declines, **record the skip** (and that it was their call) in
-`decision-log.md` before proceeding to implementation. Skipping is the user's
-decision to make knowingly, exactly as with review. But this decision is only
-available up front: once analyze has been invoked once for a feature, there is
-no mid-loop bailout — see step 2.
-
-`analyze` **reports, it does not edit.** It checks requirement→task coverage,
-spec/plan/tasks contradictions, orphan/duplicate/ambiguous tasks, test-first
-integrity, constitution alignment, and any opted-in extension's verification
-tasks; each finding is routed to **the phase that owns the fix — Specify, Plan,
-or Tasks** (a missing task is a `tasks.md` fix; a spec/plan contradiction is a
-`spec.md` or `plan.md` fix). It is distinct from `check-spec` (grades the spec
-alone) and the `code-reviewer` agent (reviews the diff later).
-
-1. Offer to run analyze at the depth for the track. If the user declines on C/D,
-   log the skip (step 4) and proceed — this is the only exit that doesn't
-   require a clean verdict.
-2. **Any finding, at any severity** (Blocker, Should-fix, or Note): loop back
-   to whichever phase owns the fix (Specify / Plan / Tasks) — not always Tasks
-   — fix there, then **re-run analyze**. Repeat until a run comes back with
-   zero findings across all severities. When re-running, tell the analyzer
-   which artifact(s) changed since the last pass — it focuses the re-check
-   there while still re-verifying cross-artifact consistency. There is no accepting a finding in
-   place of fixing it once analyze has run — a deliberate scope call (e.g.
-   "not covering FR-004 this iteration") is resolved by writing it into the
-   owning artifact (e.g. `spec.md`'s Out-of-Scope section) so analyze no
-   longer flags it, not by logging acceptance and moving on. Don't start
-   implementation while any finding is open.
-3. Each iteration still goes through the normal per-phase approval gate: the
-   owning agent (`specifier` / `planner` / `task-decomposer`) proposes the
-   fix, the human approves it, then analyze re-runs. This is human-approved at
-   every step, just never human-skippable mid-loop. If a finding survives two
-   consecutive runs unchanged, say so explicitly at that approval gate — that
-   is where the human notices a stuck loop and redirects the fix (ADR-0004
-   deliberately adds no separate iteration cap).
-4. On a clean verdict, **or an explicit skip decided in step 1**, append an
-   **Analyze** row to `decision-log.md` (verdict, or "skipped — user's call",
-   plus how many loop iterations it took) and tell the user implementation can
-   begin story by story.
-
-## Phase 3.7 — Write failing tests (test-writer gate)
-
-After the Analyze gate clears (or is explicitly skipped), invoke the
-`test-writer` agent to write failing tests **before any implementation begins**.
-This is the point where TDD becomes mechanical rather than advisory.
-
-Conditioned on track — mirrors the Analyze pattern:
-
-- **Track A** — skip (trivial changes; still test-first if behaviour changes,
-  but enforced in the commit message, not here).
-- **Track B** — default-on: write a regression test for the bug and one test
-  per acceptance scenario. Confirm each fails for the right reason before
-  proceeding.
-- **Track C** — default-on: write tests for every user story's acceptance
-  scenarios before implementation of that story begins.
-- **Track D** — default-on for the story's acceptance tests. Characterization
-  tests are **ask-first, never auto-run**: when a story touches an untested
-  brownfield area identified in `AGENTS.md` or the plan, offer a
-  characterization pass *before* any changes to that code and let the human
-  decide — record the choice either way in `decision-log.md`. If accepted,
-  the test-writer handles it in its characterization mode — those land in
-  `tests/characterization/` and pin *current* behaviour, not desired
-  behaviour. If declined, proceed without them: the logged row is the human's
-  accepted risk, and the analyzer and reviewer treat it as such.
-
-**Tests are written and confirmed red one user story at a time, immediately
-before that story's implementation** — not all upfront for the whole feature.
-Phases 3.7, 4, and 5 therefore form one loop that repeats per story, in the
-priority order `tasks.md` lays out (P1 first): test-writer writes and
-confirms that story's tests red (3.7), implementor makes them green (4),
-code-reviewer reviews and the human commits (5) — then the loop starts over
-at 3.7 for the next story. It only stops once the last story clears Phase 5.
-This keeps test intent close to the implementation it drives and lets each
-story's review happen while the work is still fresh.
-
-1. For the next user story in priority order, invoke the `test-writer` agent.
-   Pass it: the approved `spec.md` (that story's acceptance scenarios), the
-   approved `tasks.md` (that story's test tasks), and any opted-in extension
-   rules. On Track D, if the story touches a brownfield area named in
-   `AGENTS.md` or the plan *and* the human accepted the characterization
-   offer for that area (never assume — ask now if it hasn't been decided,
-   and log the answer), tell it to write those characterization tests first. It writes each test, runs it, confirms it fails for the right
-   reason (assertion failure or missing implementation — not an import error
-   or typo), and returns a report rather than the test code itself.
-2. Relay the test-writer's report as-is: each test's tier, path, and
-   confirmed-failing output; which acceptance criteria are covered and which
-   aren't (with reason for any gap). A confirmed-red report is the pass
-   condition here — there's no separate human approval gate for "is this
-   correctly red," since that's a fact the test-writer already verified by
-   running it, not a judgment call.
-3. Append a **Tests (red)** row to `decision-log.md` for this story (or "skipped
-   — user's call" per the track table above), then continue to Phase 4 for the
-   same story.
-
-## Phase 4 — Implement (implementor gate)
-
-Delegates the actual red→green→refactor work to the `implementor` agent —
-mid-tier model, since the expensive design reasoning already happened in
-Specify/Plan and this phase is mechanical execution of an already-ordered
-task list (see `docs/model-selection-and-token-optimization-in-sdd.md`).
-Invoked once per story, in its own fresh context, so one story's review
-back-and-forth never bleeds into the next story's implementation.
-
-**Track A** — no `implementor` invocation: Step R already routes trivial
-changes straight to a direct change plus `code-reviewer` on the diff; this
-phase does not apply.
-
-**Tracks B/C/D**, once the current story's tests are confirmed red (Phase 3.7
-above):
-
-1. Invoke the `implementor` agent. Pass it: the approved `tasks.md` and
-   `plan.md`/`spec.md`, the current story's scope (which task IDs), the
-   test-writer's confirmed-red report for this story, and the path to this
-   feature's `learnings.md`. It reads any prior entries first (discoveries
-   from earlier stories, in this or a previous session) and appends its own
-   as it works — not just at the end — so nothing found mid-story is lost if
-   the session ends before the report is written. It implements the
-   smallest change that makes each test pass, task by task, running the full
-   story-level suite (not just the one test) before calling a task done, then
-   refactors with tests kept green throughout. It never writes a new test and
-   never weakens or deletes a failing one — an apparently-wrong test is
-   flagged back to you, not silently edited. When a failure's root cause
-   isn't obvious after one focused look, it stops and returns an escalation
-   request rather than guessing — sub-agents can't invoke each other, so this
-   skill runs the `debugger` round (step 3 below).
-2. Relay its report: tasks completed, tests now green, any `debugger`
-   escalation request, any uncovered case it found but didn't add a test
-   for (that's a `test-writer` follow-up, not something implementor should
-   have added silently), and any deviation from `plan.md` it had to make. If
-   the report includes a proposed `AGENTS.md` correction, relay it and ask
-   for approval; on approval, apply the one-line fix directly (or hand it to
-   `docs-writer` if it's bigger than a single line) — don't apply it
-   unapproved, and don't let it block the rest of the story's progress.
-3. If the report contains a `debugger` escalation request: invoke the
-   `debugger` agent with the failing test, the exact error and stack trace,
-   the spec path, what `implementor` already tried, and the same
-   `learnings.md` path (it reads prior entries and appends its own root-cause
-   findings the same way `implementor` does); then re-invoke `implementor`
-   with the debugger's report so it confirms green and finishes the story's
-   remaining tasks.
-4. If the report shows a task left incomplete, a `[NEEDS CLARIFICATION]`
-   marker, or a flagged-wrong test: resolve it with the human first — loop
-   back to whichever phase owns the fix (the test itself → `test-writer`;
-   `plan.md` → `planner`; `tasks.md` → `task-decomposer`) before continuing.
-   Don't proceed to review on a partially-green story.
-5. Once every test for this story is green and the story-level suite passes,
-   append an **Implement** row to `decision-log.md` for this story and
-   continue to Phase 5.
-
-## Phase 5 — Review & commit (code-reviewer gate)
-
-Once a story is fully green, invoke the `code-reviewer` agent on that story's
-diff before moving to the next story's Phase 3.7 (or batch several stories
-into one review pass if the human explicitly asks for that — record the
-choice in `decision-log.md`; the default is one review per story so diffs
-stay small and issues surface early).
-
-1. Invoke `code-reviewer`. Pass it: the diff (or the files `implementor`
-   touched), the spec path, and the feature's `decision-log.md` (for opted-in
-   extension packs). It runs the full review against spec, constitution,
-   conventions, performance idioms, boundaries, and security, and reports
-   findings grouped by severity with a verdict.
-2. If the verdict has Blockers, **this skill runs the review↔debugger loop**
-   — sub-agents can't invoke each other or pause for approval, so the loop
-   lives here, not inside `code-reviewer`:
-   - Relay the complete findings, then ask the human: *"Invoke the debugger
-     on all [N] Blockers above?"* Wait for explicit approval before the
-     **first** round only; later rounds in the same loop don't re-ask.
-   - Invoke the `debugger` agent once per round, passing every currently-open
-     Blocker as a numbered list (file:line, description, suggested fix) and
-     this feature's `learnings.md` path; on round 2+, note which Blockers are
-     still open and what the debugger already tried, so it doesn't repeat a
-     failed fix.
-   - Re-invoke `code-reviewer` for a **re-check pass**, passing the prior
-     findings, the debugger's report, and the files it touched (see the
-     Debugger handoff section of `.agents/agents/code-reviewer.md`).
-   - Decide from the re-check verdict: all Blockers resolved → step 3; some
-     resolved, some still open → another round; **no forward progress** (the
-     same Blocker survives two consecutive rounds, or the debugger calls it a
-     spec bug) → stop looping and take that Blocker to the human — accept the
-     risk, revise the spec, or redesign (step 4).
-   - If any round's debugger report includes a proposed `AGENTS.md`
-     correction, relay it and get approval the same way Phase 4 step 2 does —
-     apply directly if approved, don't let it block the Blocker loop itself.
-3. On a clean verdict (`approve` or `approve-with-nits`): append a **Review**
-   row to `decision-log.md`, let the human commit (the `.githooks/pre-commit`
-   hook runs its own checks), and move on to the next story's Phase 3.7 — or,
-   if this was the last story, the feature is done.
-4. On `request-changes` with a Blocker `code-reviewer` escalated to the human
-   (not resolved by its internal loop): resolve it together. If the root
-   cause turns out to be a spec or plan bug rather than an implementation
-   bug, loop back to `specifier` or `planner` instead of forcing another
-   `implementor` pass on an already-correct implementation. Once resolved,
-   re-run Phase 5 for this story.
-
-When the last story clears Phase 5, the feature is complete. If any doc
-(`README.md`, `AGENTS.md`, a glossary) now describes something inaccurately,
-offer the `docs-writer` agent — it edits docs only, never application code.
+Phases 3.7 → 4 → 5 repeat **per user story**, in `tasks.md`'s priority order,
+until the last story clears Phase 5 — see `phase-3.7-tests.md` for how that
+loop is sequenced. When the last story clears Phase 5, the feature is
+complete. If any doc (`README.md`, `AGENTS.md`, a glossary) now describes
+something inaccurately, offer the `docs-writer` agent — it edits docs only,
+never application code.

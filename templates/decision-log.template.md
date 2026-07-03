@@ -30,7 +30,7 @@ deviation from the spec or plan made during implementation.
 | Date | Stage | Decision | Rationale | Approved by |
 |---|---|---|---|---|
 | [DATE] | Route | Track [A/B/C/D] — [name] | [why this track fits the change's scope/risk] | [human] |
-| [DATE] | Extensions | Opted in: [pack-ids or "none"] | [why these packs apply / don't] | [human] |
+| [DATE] | Extensions | Opted in: [pack-id → rule-file path, or "none"] | [why these packs apply / don't] | [human] |
 | [DATE] | Specify | spec.md approved | [one line: what was settled, e.g. clarifications resolved] | [human] |
 | [DATE] | Plan | plan.md approved | [constitution gate results; any complexity justified] | [human] |
 | [DATE] | Tasks | tasks.md approved | [one line] | [human] |

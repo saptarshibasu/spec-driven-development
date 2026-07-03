@@ -56,7 +56,9 @@ yet, stop and say so.
 
 1. The approved `spec.md` — user stories and their priorities (P1, P2, ...).
 2. The approved `plan.md` — structure, stack, and any data model/contracts.
-3. The text of any opted-in extension pack rules the caller passes.
+3. The rule-file path(s) of any opted-in extension pack(s) the caller passes
+   — the caller passes the path and pack ID only, never the rule text, so
+   read the file(s) yourself with your own `Read` tool before drafting.
 4. On a revision pass: the prior draft plus the caller's specific feedback.
 
 ## How to draft
@@ -78,10 +80,10 @@ yet, stop and say so.
    - Include the exact file path in every task description
    - End the phase with a Checkpoint describing how to verify the story
      works in isolation
-3. If any extension pack was opted in, ensure the relevant verification work
-   is represented as explicit tasks (e.g. an authz test for `SEC-02`, an
-   input-validation test for `SEC-01`) so compliance is checkable, not
-   assumed.
+3. If any extension pack was opted in, read its rules file (path given by the
+   caller) and ensure the relevant verification work is represented as
+   explicit tasks (e.g. an authz test for `SEC-02`, an input-validation test
+   for `SEC-01`) so compliance is checkable, not assumed.
 4. Strip `tasks.md`'s instructional comments and unused bracketed
    placeholders.
 5. Write the filled `tasks.md` to disk. Leave its **Status** as `Draft` — you
@@ -96,4 +98,5 @@ Return to the caller a **short summary, not the document itself**:
 - A one-line shape summary (e.g. "18 tasks across 3 user stories, 4 marked
   `[P]`") so the caller has something concrete to relay without opening the
   file itself.
-- Any extension-compliance n
+- Any extension-compliance notes — each opted-in rule's verification work
+  represented as an explicit task, or the gap called out.

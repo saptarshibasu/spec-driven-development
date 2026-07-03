@@ -62,9 +62,16 @@ authoring format live in `.agents/extensions/README.md`; the short version:
 - Each pack is a rules file (`<pack>.md`, rules with stable IDs like `SEC-01` and
   a **Verification** section) plus a tiny `<pack>.opt-in.md` question.
 - At feature start the skill scans only the `*.opt-in.md` prompts and asks the
-  human. Opting in loads the full rules and makes them **blocking** at every gate
-  and at review; opting out (also recorded) loads nothing. A pack with no opt-in
-  file is always enforced.
+  human. Opting in makes the pack's rules **blocking** at every gate and at
+  review; opting out (also recorded) loads nothing. A pack with no opt-in file
+  is always enforced.
+- The orchestrating skill never loads the full rules text itself and never
+  enforces a pack — it only records the opted-in pack **ID and rule-file
+  path** in `decision-log.md` and passes that path (not the rule text) into
+  each phase's sub-agent invocation. Every agent that touches an opted-in
+  pack — `specifier`, `planner`, `task-decomposer`, `test-writer`,
+  `artifact-analyzer`, `code-reviewer` — has its own `Read` tool and loads
+  and enforces the rules itself, in its own context.
 - The `code-reviewer` agent re-checks opted-in rules by ID; an unmet
   Verification condition is a Blocker unless the decision log shows a human
   accepted the risk.

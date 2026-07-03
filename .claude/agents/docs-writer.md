@@ -35,4 +35,6 @@ A documentation agent. It edits docs; it does not change application behaviour.
 
 ## Scope
 
-In: README, AGENTS.md, glossary, ADRs, doc comments, `docs/`. Out: so
+In: README, AGENTS.md, glossary, ADRs, doc comments, `docs/`. Out: source
+logic, tests, CI config, dependency changes (route those elsewhere). See
+`AGENTS.md` for boundaries.

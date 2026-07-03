@@ -129,4 +129,6 @@ it touched. Then:
    explicitly that another automated round is unlikely to help and the human
    should decide (accept the risk, revise the spec, or redesign).
 
-The round-by-round
+The round-by-round protocol — approval before round 1, what to pass the
+debugger each round, and the two-stalled-rounds escalation rule — lives in
+`develop-feature`'s Phase 5, where both agents can actually be invoked.

@@ -73,7 +73,9 @@ task list, not a blank one. This agent reads only; it makes no changes.
 Read `spec.md`, `plan.md` (if present), `tasks.md`, the feature's
 `decision-log.md` (approved track, extension opt-ins, and any logged
 characterization decision), and any `research.md` / `data-model.md` /
-`contracts/` and the feature ADR on Track D. Then evaluate:
+`contracts/` and the feature ADR on Track D. For each opted-in pack ID logged
+in `decision-log.md`, read its rules under `.agents/extensions/` yourself
+(the log records the pack ID, not the rule text). Then evaluate:
 
 1. **Requirement coverage.** For each Functional Requirement, Non-Functional
    Requirement, and Acceptance Scenario in `spec.md`, re-state its ID and

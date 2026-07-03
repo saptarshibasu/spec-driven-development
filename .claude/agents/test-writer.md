@@ -32,6 +32,12 @@ at red — green is the implementer's job. Mixing the two defeats test-first.
 2. `AGENTS.md` — test locations, framework, idioms, the single-test command.
 3. `memory/constitution.md` — Articles III (Test-First) and IV (Integration).
 4. Existing tests in the relevant directory — match their structure and style.
+5. If the caller passes the pack ID(s) and rule-file path(s) of any opted-in
+   extension(s) (e.g. `.agents/extensions/security/baseline/security-baseline.md`)
+   — never the rule text itself — read the file(s) yourself with your own
+   `Read` tool and write a test for each rule's **Verification** condition
+   that this story's code touches (e.g. an authz test for `SEC-02`), so the
+   pack's compliance is checkable rather than assumed.
 
 ## How to work
 
@@ -80,7 +86,9 @@ for the human.
 ## Report
 
 Each test: tier, path, confirmed-failing output. Then: criteria covered, not
-yet covered, any skipped (with reason). Hand off — do not proceed to green.
+yet covered, any skipped (with reason). If an extension pack was opted in,
+note which rule IDs now have a covering test and any that don't (never
+silently omitted). Hand off — do not proceed to green.
 
 **Example report:**
 
@@ -91,4 +99,6 @@ yet covered, any skipped (with reason). Hand off — do not proceed to green.
 > - `tests/unit/test_order_total.py::test_total_sums_line_items` — **fails**: `AssertionError`
 >
 > Covered: FR-001, FR-004. Not covered: FR-005 — spec ambiguous on partial
-> refunds; flagged for `clarify-spec` r
+> refunds; flagged for `clarify-spec` rather than encoding a guess.
+>
+> All three confirmed red. Handing off — green is the implementor's job.
