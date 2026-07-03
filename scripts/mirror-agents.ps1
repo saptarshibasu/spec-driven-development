@@ -80,7 +80,11 @@ foreach ($src in $srcs) {
     if ($codexTools -notcontains $ct) { $codexTools += $ct }
   }
   $toolsCsv = ($codexTools | ForEach-Object { "`"$_`"" }) -join ', '
-  $escDesc = $desc -replace '\\', '\\' -replace '"', '\"'
+  # YAML double-quoted scalar: strip the outer quotes - its \" and \\ escapes
+  # are already valid TOML basic-string escapes, so the inner text passes
+  # through verbatim. Plain (unquoted) scalar: escape it for TOML.
+  if ($desc -match '^"(.*)"$') { $escDesc = $Matches[1] }
+  else { $escDesc = $desc -replace '\\', '\\' -replace '"', '\"' }
   $toml = @"
 # Codex custom agent - generated from .agents/agents/$($src.Name) by mirror-agents.
 # Do not hand-edit; edit the canonical .md and re-run the mirror (ADR-0001).

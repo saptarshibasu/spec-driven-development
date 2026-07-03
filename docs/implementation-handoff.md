@@ -29,21 +29,29 @@ you — so begin from a task list whose blockers were resolved, not a raw draft.
   (what's done, what's next, any open decisions) to a scratch file before
   stopping so the session can resume cleanly.
 
-## Review gate (after all tasks complete)
+## Review gate (per story by default)
 
-When every task in `tasks.md` is done and all story-phase Checkpoints have
-passed, invoke the `code-reviewer` agent before considering the feature
-complete:
+Inside `develop-feature`, review runs once per completed story (its Phase 5),
+so diffs stay small and issues surface early — batching several stories into
+one pass is the exception, chosen explicitly by the human and recorded in
+`decision-log.md`. If you are executing `tasks.md` outside that skill, close
+the same gate yourself when a story (or the batch) is green:
 
-1. Pass the full diff (`git diff main` or equivalent) and the spec path
+1. Pass the diff (`git diff main` or equivalent) and the spec path
    (`specs/<NNN>/spec.md`).
 2. Also pass the feature's `decision-log.md` so the reviewer knows which
    extension packs were opted in.
 3. The reviewer produces a verdict — `approve`, `approve-with-nits`, or
-   `request-changes`.
-4. If the verdict is `request-changes`, the reviewer handles the Debugger
-   handoff (see `code-reviewer` agent). Do not manually patch Blockers —
-   let the reviewer orchestrate the fix cycle.
+   `request-changes` — ending with any Blockers as a numbered list.
+4. On `request-changes`, **you drive the fix loop — the reviewer cannot**:
+   sub-agents don't invoke each other, so `code-reviewer` never runs the
+   `debugger` itself. Get the human's approval (first round only), invoke the
+   `debugger` agent on all open Blockers as one batch, then re-invoke
+   `code-reviewer` for a re-check pass scoped to the files the debugger
+   touched. Repeat until clean; if a Blocker survives two consecutive rounds,
+   or is really a spec bug, stop and escalate it to the human (the full
+   protocol lives in `develop-feature`'s Phase 5 and the `code-reviewer`
+   agent's "Debugger handoff" section).
 5. On approval, append a **Review** row to `decision-log.md` (verdict +
    reviewer model used).
 

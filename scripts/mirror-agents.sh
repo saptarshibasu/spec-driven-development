@@ -58,9 +58,9 @@ codex_tool() {
   esac
 }
 
-# Read a single-line front-matter scalar ("key: value"). Strips surrounding
-# quotes. Errors if the key is declared but has no inline value (e.g. a YAML
-# block list), since this parser only supports single-line scalars.
+# Read a single-line front-matter scalar ("key: value"). Returns the raw
+# value, surrounding quotes included. Errors if the key is declared but has no
+# inline value (e.g. a YAML block list) — single-line scalars only.
 frontmatter_value() {
   local file="$1" key="$2"
   awk -v key="$key" '
@@ -132,7 +132,13 @@ for src in "$CANON"/*.md; do
          seen="$seen$ct " ;;
     esac
   done
-  esc_desc="$(printf '%s' "$desc" | sed 's/\\/\\\\/g; s/"/\\"/g')"
+  # YAML double-quoted scalar: strip the outer quotes — its \" and \\ escapes
+  # are already valid TOML basic-string escapes, so the inner text passes
+  # through verbatim. Plain (unquoted) scalar: escape it for TOML.
+  case "$desc" in
+    \"*\") esc_desc="${desc#\"}"; esc_desc="${esc_desc%\"}" ;;
+    *)     esc_desc="$(printf '%s' "$desc" | sed 's/\\/\\\\/g; s/"/\\"/g')" ;;
+  esac
   {
     printf '# Codex custom agent - generated from .agents/agents/%s by mirror-agents.\n' "$base"
     printf '# Do not hand-edit; edit the canonical .md and re-run the mirror (ADR-0001).\n\n'

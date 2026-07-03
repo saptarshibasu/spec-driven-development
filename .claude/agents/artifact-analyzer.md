@@ -184,7 +184,7 @@ back fully clean. There is no accept-in-place-of-fix once analyze has run; the
 only way past this gate is a clean verdict or an explicit skip decided before
 analyze was ever invoked.
 
-## What this skill deliberately does not do
+## What this agent deliberately does not do
 
 - **Never edits artifacts.** It reports and routes; the owning phase fixes.
 - Doesn't grade the spec alone (that's `check-spec`) or resolve open questions

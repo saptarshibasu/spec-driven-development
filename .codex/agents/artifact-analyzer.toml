@@ -3,7 +3,7 @@
 
 [agent]
 name = "artifact-analyzer"
-description = "\"Use after tasks.md is drafted and before implementation begins — triggers on phrases like \\\"analyze the spec/plan/tasks\\\", \\\"check the artifacts line up\\\", \\\"is this ready to implement\\\", \\\"cross-check coverage\\\", or \\\"run the artifact-analyzer gate\\\". Performs a NON-DESTRUCTIVE, read-only consistency and coverage check ACROSS spec.md + plan.md + tasks.md (and research/data-model/contracts on Track D): every requirement maps to a task, no contradictions between artifacts, no orphan/duplicate/ambiguous tasks, no constitution violations. Reports findings for a human to act on — it never rewrites the artifacts itself. Do not use to grade the spec in isolation (that's check-spec), to resolve open questions (that's clarify-spec), or to review written code (that's the code-reviewer agent).\""
+description = "Use after tasks.md is drafted and before implementation begins — triggers on phrases like \"analyze the spec/plan/tasks\", \"check the artifacts line up\", \"is this ready to implement\", \"cross-check coverage\", or \"run the artifact-analyzer gate\". Performs a NON-DESTRUCTIVE, read-only consistency and coverage check ACROSS spec.md + plan.md + tasks.md (and research/data-model/contracts on Track D): every requirement maps to a task, no contradictions between artifacts, no orphan/duplicate/ambiguous tasks, no constitution violations. Reports findings for a human to act on — it never rewrites the artifacts itself. Do not use to grade the spec in isolation (that's check-spec), to resolve open questions (that's clarify-spec), or to review written code (that's the code-reviewer agent)."
 # Canonical model tier "opus" - set to your Codex model name.
 model = "opus"
 tools = ["read", "grep"]
@@ -189,7 +189,7 @@ back fully clean. There is no accept-in-place-of-fix once analyze has run; the
 only way past this gate is a clean verdict or an explicit skip decided before
 analyze was ever invoked.
 
-## What this skill deliberately does not do
+## What this agent deliberately does not do
 
 - **Never edits artifacts.** It reports and routes; the owning phase fixes.
 - Doesn't grade the spec alone (that's `check-spec`) or resolve open questions

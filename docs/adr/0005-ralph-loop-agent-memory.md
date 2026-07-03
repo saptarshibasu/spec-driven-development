@@ -115,7 +115,7 @@ as a skill-specific addition, alongside the existing ones.
 
 This is explicitly framed as the internal-code twin of the constitution's
 existing "cross-repo contracts — never guess, always verify" rule
-(`memory/constitution.template.md`'s Additional Constraints, resolved via
+(`templates/constitution.template.md`'s Additional Constraints, resolved via
 `AGENTS.md`'s Multi-Repo section): that rule stops an agent from fabricating
 an external dependency's shape; this one stops it from fabricating an
 absence inside the repo it can already see in full. Unlike Ralph's original

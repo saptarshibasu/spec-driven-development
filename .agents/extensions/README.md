@@ -17,22 +17,25 @@ the human opts that pack in*. A pack you don't use costs zero context.
 
 ## How a pack is structured
 
-Each pack lives in its own directory under a **category**, and is two files:
+Each pack lives in its own directory under a **category**, and is two files
+paired by base name — `<name>` need not match the pack directory (the shipped
+example is `security/baseline/security-baseline.md` +
+`security-baseline.opt-in.md`):
 
 ```
 .agents/extensions/
 └── <category>/                     # e.g. security, testing, compliance
     └── <pack>/                     # e.g. baseline, property-based
-        ├── <pack>.md               # the rules (loaded only when opted in)
-        └── <pack>.opt-in.md        # the opt-in question (always scanned)
+        ├── <name>.md               # the rules (loaded only when opted in)
+        └── <name>.opt-in.md        # the opt-in question (always scanned)
 ```
 
-- **`<pack>.opt-in.md`** — a single, structured multiple-choice question shown to
+- **`<name>.opt-in.md`** — a single, structured multiple-choice question shown to
   the human during the Route/Specify stage ("Does this feature touch
   authentication, user data, or external input?"). Small on purpose: it is the
   only part read when a pack is *not* used.
-- **`<pack>.md`** — the actual rules. Loaded **only** when the human opts in
-  (derived by naming convention: strip `.opt-in.md`, the sibling `<pack>.md` is
+- **`<name>.md`** — the actual rules. Loaded **only** when the human opts in
+  (derived by naming convention: strip `.opt-in.md`, the sibling `<name>.md` is
   the rules). Each rule is a heading `## Rule <PREFIX-NN>: <Title>` with a
   **Rule** section (the requirement) and a **Verification** section (concrete,
   checkable conditions). IDs (`SEC-01`, …) are stable and are cited in the
@@ -64,11 +67,11 @@ one. Mechanize what you can; infer what you must.
 ## Adding your own pack
 
 1. Create `<category>/<pack>/` (reuse a category or start a new one).
-2. Write `<pack>.md`. Give every rule a unique ID `## Rule <PREFIX-NN>: <Title>`
+2. Write `<name>.md`. Give every rule a unique ID `## Rule <PREFIX-NN>: <Title>`
    — the prefix is a short category tag (`SEC`, `A11Y`, `COMPLIANCE`), `NN` is
    sequential. IDs must be unique across *all* packs, since they appear in audit
    logs. Each rule needs a **Rule** section and a **Verification** section.
-3. Write `<pack>.opt-in.md` (copy `security/baseline/security-baseline.opt-in.md`
+3. Write `<name>.opt-in.md` (copy `security/baseline/security-baseline.opt-in.md`
    for the format). Omit this file only if the pack must always apply.
 4. Keep it short and high-signal — an extension is subject to the same
    token-budget discipline as everything else here.

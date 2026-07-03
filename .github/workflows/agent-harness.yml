@@ -18,10 +18,11 @@ on:
     branches: [main]
 
 # Cancel superseded runs on the same ref to save CI minutes (token efficiency
-# applies to CI too).
+# applies to CI too) — but never cancel a run on main, so breakage there is
+# always surfaced, not masked by a newer push.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 permissions:
   contents: read
@@ -33,11 +34,11 @@ jobs:
       - uses: actions/checkout@v4
 
       # ── Repo-hygiene sensors (stack-agnostic — safe to keep on) ───────────
-      - name: No leftover template placeholders in committed docs
+      - name: No unresolved clarification markers in committed specs
         run: |
-          # Fails if a real (non-template) doc still contains unresolved
-          # [bracketed placeholders] or NEEDS CLARIFICATION markers.
-          # Adjust the path excludes to match where your templates live.
+          # Fails if a committed spec still contains an unresolved
+          # [NEEDS CLARIFICATION] marker. (Extend the pattern if you also want
+          # to block generic [bracketed placeholders] — templates/ is exempt.)
           if grep -rnE '\[NEEDS CLARIFICATION' --include='*.md' \
                specs/ 2>/dev/null; then
             echo "::error::Unresolved [NEEDS CLARIFICATION] marker in a spec."
@@ -85,8 +86,10 @@ jobs:
               echo "::error::$f does not end with a newline — truncated?"
               bad=1
             fi
-          done < <(find .agents templates docs README.md AGENTS.md CLAUDE.md \
-                     -type f \( -name '*.md' -o -name '*.sh' -o -name '*.ps1' \) 2>/dev/null)
+          done < <(find .agents templates docs scripts .githooks \
+                     README.md AGENTS.md CLAUDE.md \
+                     -type f \( -name '*.md' -o -name '*.sh' -o -name '*.ps1' \
+                                -o -name 'pre-commit' \) 2>/dev/null)
           exit "$bad"
 
       # ── Your stack's controls — UNCOMMENT and fill in ─────────────────────

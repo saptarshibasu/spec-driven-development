@@ -203,8 +203,9 @@ repeat the summary; do not paste the revised draft into chat.
 Then confirm to the user:
 - Both files written and their paths
 - Constitution version and ratification date
-- Reminder: run `mirror-agents.sh` (or `.ps1`) to sync AGENTS.md to
-  `.agents/` and `.codex/` format files
+- Note: `AGENTS.md` needs no mirroring — `CLAUDE.md` and
+  `.github/copilot-instructions.md` are static pointers to it (ADR-0001);
+  the mirror scripts propagate agents/skills, not this file.
 
 ## What this skill does not do
 

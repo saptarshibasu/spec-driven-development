@@ -27,6 +27,10 @@ $cmdLine = $Command -join ' '
 & $Command[0] @($Command | Select-Object -Skip 1) 2>&1 |
   ForEach-Object { "$_" } | Out-File -FilePath $log -Encoding utf8
 $status = $LASTEXITCODE
+# $LASTEXITCODE is only set by native executables; wrapping a cmdlet or
+# script function leaves it $null — treat that as failure rather than
+# letting `exit $null` silently report success.
+if ($null -eq $status) { $status = 1 }
 
 $all = @(Get-Content $log)
 $lines = $all.Count

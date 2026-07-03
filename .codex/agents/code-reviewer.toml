@@ -3,7 +3,7 @@
 
 [agent]
 name = "code-reviewer"
-description = "\"Use to review a diff or a set of changed files before they are committed or opened as a PR. Acts as an inferential feedback control in the harness — it judges what a linter cannot: spec/constitution conformance, naming, abstraction creep, test integrity, and common security vulnerabilities. Invoke after a feature increment is implemented, or on request (\\\"review my changes\\\").\""
+description = "Use to review a diff or a set of changed files before they are committed or opened as a PR. Acts as an inferential feedback control in the harness — it judges what a linter cannot: spec/constitution conformance, naming, abstraction creep, test integrity, and common security vulnerabilities. Invoke after a feature increment is implemented, or on request (\"review my changes\")."
 # Canonical model tier "opus" - set to your Codex model name.
 model = "opus"
 tools = ["read", "grep", "shell"]
