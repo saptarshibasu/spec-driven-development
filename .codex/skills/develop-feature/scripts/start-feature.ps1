@@ -23,7 +23,7 @@ $specsDir     = Join-Path $repoRoot 'specs'
 $templatesDir = Join-Path $repoRoot 'templates'
 
 # 1. Refuse to proceed without the canonical templates (one source of truth).
-foreach ($f in 'spec.template.md', 'plan.template.md', 'tasks.template.md', 'decision-log.template.md') {
+foreach ($f in 'spec.template.md', 'plan.template.md', 'tasks.template.md', 'decision-log.template.md', 'learnings.template.md') {
   if (-not (Test-Path (Join-Path $templatesDir $f))) {
     Write-Error "Missing $templatesDir/$f`nCopy this knowledge base's templates/ folder into the project root first."
   }
@@ -53,7 +53,7 @@ New-Item -ItemType Directory -Force -Path (Join-Path $featureDir 'contracts') | 
 # 4. Copy the templates and fill in only the mechanical header fields
 #    (feature id, title, date) — never the actual content.
 $today = Get-Date -Format 'yyyy-MM-dd'
-foreach ($doc in 'spec', 'plan', 'tasks', 'decision-log') {
+foreach ($doc in 'spec', 'plan', 'tasks', 'decision-log', 'learnings') {
   $src = Join-Path $templatesDir "$doc.template.md"
   $dst = Join-Path $featureDir "$doc.md"
   $content = (Get-Content -Raw $src).
@@ -69,3 +69,4 @@ Write-Host "  spec.md          <- fill in next (Phase 1: Specify)"
 Write-Host "  plan.md          <- do not fill in until spec.md is approved"
 Write-Host "  tasks.md         <- do not fill in until plan.md is approved"
 Write-Host "  decision-log.md  <- committed audit trail; append at each gate"
+Write-Host "  learnings.md     <- ungated scratchpad; implementor/debugger append as they go"

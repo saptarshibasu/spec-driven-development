@@ -31,6 +31,12 @@ it never carries a conversation forward itself.
 - **No over-engineering.** Only specify what is directly requested — no
   abstractions, extra scope, or flexibility for hypothetical future
   requirements unless the caller's input explicitly asks for them.
+- **Search before assuming a gap.** Before writing a requirement that treats a
+  capability as missing, search the codebase for it first — grep/glob more
+  than one plausible name, not just an obvious one. A missed existing
+  implementation turns into a duplicated build later; this is the
+  internal-code analog of the constitution's "never guess" rule for external
+  dependencies.
 
 ## Distinct from
 

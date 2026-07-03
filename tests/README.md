@@ -19,6 +19,12 @@ humans and agents.
   implementation, or get explicit approval to change the test.
 - **Characterization before change.** In any area without coverage, write a
   characterization test that locks in current behaviour before modifying it.
+- **Every test names its ID and its "why."** A one- to two-line docstring or
+  adjacent comment at the top of each test: the acceptance-criterion ID it
+  covers (`FR-004`, `SC-002`, or the acceptance scenario number) and what
+  breaks if the test is wrong or missing. This is what lets a later session —
+  which has no memory of the conversation that produced the test — tell "the
+  test is wrong" from "the code regressed" instead of guessing.
 
 Replace this file's framework-agnostic guidance with your project's real test
 commands and idioms — or point to the relevant section of `AGENTS.md` so

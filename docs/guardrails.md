@@ -26,6 +26,11 @@ Each skill may extend these with its own guardrails — for example:
   and accurate beats long and generic).
 - `sync-agents-md` adds **Evidence or nothing** (every claim must trace to a
   file you read) and several file-scoping guardrails.
+- `implementor` and `specifier` add **Search before creating** / **Search
+  before assuming a gap** — search the codebase broadly, more than one
+  plausible name or location, before concluding a capability doesn't already
+  exist. The internal-code analog of the constitution's "never guess, always
+  verify" rule for external dependencies.
 
 ## Maintenance
 

@@ -107,6 +107,9 @@ formatting, and the idioms you actually want repeated.]
 - [e.g., "Modifying the database schema"]
 - [e.g., "Adding a new dependency"]
 - [e.g., "Changing CI/CD configuration"]
+- Applying an `implementor`/`debugger`-proposed `AGENTS.md` correction —
+  they propose (a command that turned out wrong), a human approves, only
+  then does the file change. Never auto-applied.
 
 **🚫 Never** — hard stops, no exceptions:
 - [e.g., "Edit `node_modules/` or `vendor/`"]
@@ -184,6 +187,11 @@ to use isn't in that glossary, ask rather than guessing at its meaning.
   `templates/tasks.template.md`) — do not invent a different structure for
   any of the three, not just the spec.** Mark anything ambiguous with
   `[NEEDS CLARIFICATION: ...]` rather than guessing.
+- Each feature also gets `specs/<NNN>/learnings.md` (from
+  `templates/learnings.template.md`) — an append-only, ungated scratchpad,
+  not a fourth gated document. `implementor` and `debugger` read it before
+  starting a story and append discoveries as they go, so a gotcha found mid-
+  story survives the fresh-context boundary into the next story or session.
 - To start a new feature, use the `develop-feature` skill rather than
   creating `specs/<NNN>/` by hand — it scaffolds the folder and templates
   for you and enforces the Specify → Plan → Tasks approval gates.

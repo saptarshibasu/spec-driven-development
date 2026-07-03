@@ -167,19 +167,21 @@ native format — Claude `.md`, Copilot `.agent.md`, Codex `.toml`.
 
 | Agent | Role |
 |---|---|
-| `specifier` | Drafts `spec.md` (Specify phase, opus model). Investigates the codebase read-only, applies No-guessing (`[NEEDS CLARIFICATION]`), runs the Spec Completeness Checklist itself, writes the file. Never seeks approval — that's `develop-feature`'s gate. |
+| `specifier` | Drafts `spec.md` (Specify phase, opus model). Investigates the codebase read-only, searches broadly before treating a capability as missing, applies No-guessing (`[NEEDS CLARIFICATION]`), runs the Spec Completeness Checklist itself, writes the file. Never seeks approval — that's `develop-feature`'s gate. |
 | `planner` | Drafts `plan.md` (Plan phase, opus model). Reads the approved spec, runs the three constitution gates (Simplicity, Anti-abstraction, Integration-first) with stated reasoning, checks opted-in extension compliance by rule ID. |
 | `task-decomposer` | Drafts `tasks.md` (Tasks phase, mid-tier/sonnet model). Mechanical decomposition of an approved spec + plan into Setup → Foundational → per-story (tests-first, `[P]`-marked, `[US#]`-labelled) → Polish. |
 | `artifact-analyzer` | Last guide-side gate before implementation (opus model). Cross-checks spec ↔ plan ↔ tasks for coverage gaps, contradictions, orphan tasks, test-first integrity, and constitution violations. Reports findings routed to the owning phase; never edits artifacts. |
-| `test-writer` | Invoked after `artifact-analyzer` clears; writes that story's tests from acceptance criteria, runs them, and confirms each fails for the right reason before implementation begins. Also writes characterization tests for brownfield areas (Track D) — ask-first: only when the human accepts the offer, never automatically. |
-| `implementor` | Drafts the code (Implement phase, mid-tier/sonnet model). Takes a story's confirmed-red tests and the approved plan/tasks, writes the smallest code to turn each green, refactors with tests kept green, never weakens a test, and returns a `debugger` escalation request on an unclear failure (the orchestrator runs the round). |
-| `code-reviewer` | Inferential review vs. spec, constitution, conventions, and baseline security. Completes the full review, then returns all Blockers as a numbered list; `develop-feature` runs the review↔debugger loop (user approval before round 1) and re-invokes the reviewer for a re-check scoped to each round's touched files, until every Blocker is resolved or one stalls for two rounds and is escalated to the human. Read-only. |
-| `debugger` | Root-cause in its own discardable context; returns cause + minimal fix. Invoked by the orchestrator — on an implementor's escalation request, or on a reviewer's batched Blockers. |
+| `test-writer` | Invoked after `artifact-analyzer` clears; writes that story's tests from acceptance criteria, runs them, and confirms each fails for the right reason before implementation begins. Every test carries a docstring naming its acceptance-criterion ID and why it matters. Also writes characterization tests for brownfield areas (Track D) — ask-first: only when the human accepts the offer, never automatically. |
+| `implementor` | Drafts the code (Implement phase, mid-tier/sonnet model). Searches broadly before assuming code doesn't exist, takes a story's confirmed-red tests and the approved plan/tasks, writes the smallest code to turn each green, refactors with tests kept green, never weakens a test, and returns a `debugger` escalation request on an unclear failure (the orchestrator runs the round). Reads/appends `learnings.md`; may propose (never write) an `AGENTS.md` correction. |
+| `code-reviewer` | Inferential review vs. spec, constitution, conventions, and baseline security — including whether each test carries its acceptance-criterion docstring. Completes the full review, then returns all Blockers as a numbered list; `develop-feature` runs the review↔debugger loop (user approval before round 1) and re-invokes the reviewer for a re-check scoped to each round's touched files, until every Blocker is resolved or one stalls for two rounds and is escalated to the human. Read-only. |
+| `debugger` | Root-cause in its own discardable context; returns cause + minimal fix. Invoked by the orchestrator — on an implementor's escalation request, or on a reviewer's batched Blockers. Reads/appends `learnings.md`; may propose (never write) an `AGENTS.md` correction. |
 | `docs-writer` | Keeps docs truthful and in sync with the code. |
 
 ### 📒 Decision log
 
 Every gate approval — and every explicit skip — is appended to `specs/<NNN>/decision-log.md` as a committed audit trail. The log records who approved what, and when; skipped gates are noted alongside the reason. This makes the reasoning behind each feature permanently inspectable.
+
+Alongside it, `specs/<NNN>/learnings.md` is an **ungated** append-only scratchpad — no Status, no approval, no decision-log row. `implementor` and `debugger` read it before a story and append discoveries (a wrong-turn command, a component that lived somewhere the plan didn't expect) as they go, so a fresh-context re-invocation on the next story — or a resumed session — doesn't have to re-learn it.
 
 ### 🧩 Extensions — opt-in rule packs *(canonical in `.agents/extensions/`, loaded on demand)*
 
@@ -227,9 +229,9 @@ Add your own under `.agents/extensions/<category>/<pack>/` — format in
 │   └── constitution.md    # project-wide principles; governs every phase
 │
 ├── templates/             # spec · plan · tasks · agents · constitution
-│                          #   decision-log · checklist · research · data-model · quickstart
+│                          #   decision-log · learnings · checklist · research · data-model · quickstart
 ├── specs/
-│   └── <NNN-feature>/     # spec.md · plan.md · tasks.md · decision-log.md
+│   └── <NNN-feature>/     # spec.md · plan.md · tasks.md · decision-log.md · learnings.md
 │       └── contracts/     # API/event contracts
 │
 ├── docs/

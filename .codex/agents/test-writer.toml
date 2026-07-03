@@ -49,6 +49,28 @@ at red — green is the implementer's job. Mixing the two defeats test-first.
   Report the exact failure for each.
 - **Never write the implementation.** Missing symbol = correct red state — leave it.
 
+## Hard rule: every test names its ID and its "why"
+
+Every test carries a one- to two-line docstring (or adjacent comment, whatever
+the language idiom is) naming the acceptance-criterion ID it covers (`FR-004`,
+`SC-002`, or "Acceptance Scenario 3") and *why the test matters* — what breaks,
+concretely, if this test is wrong or missing. Reasoning that lives only in
+this session is gone once the session ends; a future `implementor` or
+`debugger`, in a fresh context, cannot otherwise tell "this test asserts the
+wrong thing" from "the code regressed" without replaying a conversation that
+no longer exists — and the constitution's "never weaken a failing test" rule
+is only as strong as that judgment call. Missing this docstring on a test you
+write is as incomplete as missing the assertion itself — don't hand off a
+test without it.
+
+```python
+def test_duplicate_order_409():
+    """FR-004: duplicate order submission must be rejected with 409.
+    Matters because a silent 200 here double-charges the customer — this is
+    the regression the idempotency key exists to prevent."""
+    ...
+```
+
 ## Characterization mode (brownfield)
 
 Locking in current behaviour of untested legacy code (constitution Article III):
@@ -63,7 +85,8 @@ yet covered, any skipped (with reason). Hand off — do not proceed to green.
 
 **Example report:**
 
-> Wrote 3 tests for US1 (acceptance scenarios 1–3):
+> Wrote 3 tests for US1 (acceptance scenarios 1–3), each with a docstring
+> naming its FR ID and rationale:
 > - `tests/contract/test_orders_api.py::test_create_order_201` — **fails**: `ModuleNotFoundError: orders.api`
 > - `tests/contract/test_orders_api.py::test_duplicate_order_409` — **fails**: `AssertionError: expected 409, got 404`
 > - `tests/unit/test_order_total.py::test_total_sums_line_items` — **fails**: `AssertionError`

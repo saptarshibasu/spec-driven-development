@@ -56,9 +56,10 @@ analysis, and implementation alike.
 ## Before starting
 
 Confirm `templates/spec.template.md`, `templates/plan.template.md`,
-`templates/tasks.template.md`, and `templates/decision-log.template.md` exist at
-the project root. If not, **stop** — tell the user to copy `templates/` from
-this kit first. One source of truth: the project root, not this skill.
+`templates/tasks.template.md`, `templates/decision-log.template.md`, and
+`templates/learnings.template.md` exist at the project root. If not, **stop**
+— tell the user to copy `templates/` from this kit first. One source of
+truth: the project root, not this skill.
 
 ## Resuming an in-progress feature
 
@@ -72,6 +73,9 @@ refuses to overwrite by design.
    approval gate before moving on. Any `[NEEDS CLARIFICATION]` markers still in
    the documents are the open questions left to settle.
 3. Cross-check `decision-log.md` — it carries one committed row per approved gate.
+4. If `learnings.md` has entries, skim it before re-invoking `implementor` or
+   `debugger` — it may already record why a prior attempt at this story went
+   sideways.
 
 ## Approval status (the resume signal)
 
@@ -177,7 +181,8 @@ Prefer `.ps1` on Windows, `.sh` on macOS/Linux. Unsure? Try one and fall back.
 If neither script runs (path genuinely doesn't resolve, no shell available,
 etc.), do it by hand: find the highest `NNN-` prefix under
 `specs/`, increment, slugify to kebab-case, create `specs/<NNN>-<slug>/`, copy
-the four templates as `spec.md`, `plan.md`, `tasks.md`, `decision-log.md`.
+the five templates as `spec.md`, `plan.md`, `tasks.md`, `decision-log.md`,
+`learnings.md`.
 
 **Immediately after scaffolding:**
 
@@ -186,6 +191,9 @@ the four templates as `spec.md`, `plan.md`, `tasks.md`, `decision-log.md`.
 - **Track B** does not use `plan.md`: delete the scaffolded `plan.md` and note
   "plan skipped (Track B)" in the decision log, unless a design decision later
   forces a promotion to Track C (record that promotion in the log too).
+- `learnings.md` is scaffolded but ungated — unlike the other three, it never
+  gets a `decision-log.md` row or a Status flip. `implementor` and `debugger`
+  read and append to it directly once Phase 4 starts; nothing to do here.
 
 ## Phase 1 — Specify
 
@@ -416,8 +424,12 @@ phase does not apply.
 above):
 
 1. Invoke the `implementor` agent. Pass it: the approved `tasks.md` and
-   `plan.md`/`spec.md`, the current story's scope (which task IDs), and the
-   test-writer's confirmed-red report for this story. It implements the
+   `plan.md`/`spec.md`, the current story's scope (which task IDs), the
+   test-writer's confirmed-red report for this story, and the path to this
+   feature's `learnings.md`. It reads any prior entries first (discoveries
+   from earlier stories, in this or a previous session) and appends its own
+   as it works — not just at the end — so nothing found mid-story is lost if
+   the session ends before the report is written. It implements the
    smallest change that makes each test pass, task by task, running the full
    story-level suite (not just the one test) before calling a task done, then
    refactors with tests kept green throughout. It never writes a new test and
@@ -429,12 +441,18 @@ above):
 2. Relay its report: tasks completed, tests now green, any `debugger`
    escalation request, any uncovered case it found but didn't add a test
    for (that's a `test-writer` follow-up, not something implementor should
-   have added silently), and any deviation from `plan.md` it had to make.
+   have added silently), and any deviation from `plan.md` it had to make. If
+   the report includes a proposed `AGENTS.md` correction, relay it and ask
+   for approval; on approval, apply the one-line fix directly (or hand it to
+   `docs-writer` if it's bigger than a single line) — don't apply it
+   unapproved, and don't let it block the rest of the story's progress.
 3. If the report contains a `debugger` escalation request: invoke the
    `debugger` agent with the failing test, the exact error and stack trace,
-   the spec path, and what `implementor` already tried; then re-invoke
-   `implementor` with the debugger's report so it confirms green and finishes
-   the story's remaining tasks.
+   the spec path, what `implementor` already tried, and the same
+   `learnings.md` path (it reads prior entries and appends its own root-cause
+   findings the same way `implementor` does); then re-invoke `implementor`
+   with the debugger's report so it confirms green and finishes the story's
+   remaining tasks.
 4. If the report shows a task left incomplete, a `[NEEDS CLARIFICATION]`
    marker, or a flagged-wrong test: resolve it with the human first — loop
    back to whichever phase owns the fix (the test itself → `test-writer`;
@@ -464,9 +482,10 @@ stay small and issues surface early).
      on all [N] Blockers above?"* Wait for explicit approval before the
      **first** round only; later rounds in the same loop don't re-ask.
    - Invoke the `debugger` agent once per round, passing every currently-open
-     Blocker as a numbered list (file:line, description, suggested fix); on
-     round 2+, note which Blockers are still open and what the debugger
-     already tried, so it doesn't repeat a failed fix.
+     Blocker as a numbered list (file:line, description, suggested fix) and
+     this feature's `learnings.md` path; on round 2+, note which Blockers are
+     still open and what the debugger already tried, so it doesn't repeat a
+     failed fix.
    - Re-invoke `code-reviewer` for a **re-check pass**, passing the prior
      findings, the debugger's report, and the files it touched (see the
      Debugger handoff section of `.agents/agents/code-reviewer.md`).
@@ -475,6 +494,9 @@ stay small and issues surface early).
      same Blocker survives two consecutive rounds, or the debugger calls it a
      spec bug) → stop looping and take that Blocker to the human — accept the
      risk, revise the spec, or redesign (step 4).
+   - If any round's debugger report includes a proposed `AGENTS.md`
+     correction, relay it and get approval the same way Phase 4 step 2 does —
+     apply directly if approved, don't let it block the Blocker loop itself.
 3. On a clean verdict (`approve` or `approve-with-nits`): append a **Review**
    row to `decision-log.md`, let the human commit (the `.githooks/pre-commit`
    hook runs its own checks), and move on to the next story's Phase 3.7 — or,

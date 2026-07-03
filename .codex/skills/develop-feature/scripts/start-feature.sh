@@ -25,7 +25,7 @@ TEMPLATES_DIR="$REPO_ROOT/templates"
 # 1. Refuse to proceed without the canonical templates. This script does
 #    not carry its own fallback copies — one source of truth, at the
 #    project root, per the reasoning in DISTILLED-GUIDELINES.md Part 3.
-for f in spec.template.md plan.template.md tasks.template.md decision-log.template.md; do
+for f in spec.template.md plan.template.md tasks.template.md decision-log.template.md learnings.template.md; do
   if [ ! -f "$TEMPLATES_DIR/$f" ]; then
     echo "Missing $TEMPLATES_DIR/$f" >&2
     echo "Copy this knowledge base's templates/ folder into the project root first." >&2
@@ -73,7 +73,7 @@ TODAY="$(date +%Y-%m-%d)"
 # date are [a-z0-9-]/digits and need no escaping. (The .ps1 twin uses a literal
 # string Replace, so it is exact without this step.)
 DESC_ESC=$(printf '%s' "$DESCRIPTION" | sed -e 's/[\&/]/\\&/g')
-for doc in spec plan tasks decision-log; do
+for doc in spec plan tasks decision-log learnings; do
   cp "$TEMPLATES_DIR/${doc}.template.md" "$FEATURE_DIR/${doc}.md"
   sed -i.bak \
     -e "s/\[###-feature-name\]/${FEATURE_SLUG}/g" \
@@ -89,3 +89,4 @@ echo "  spec.md          <- fill in next (Phase 1: Specify)"
 echo "  plan.md          <- do not fill in until spec.md is approved"
 echo "  tasks.md         <- do not fill in until plan.md is approved"
 echo "  decision-log.md  <- committed audit trail; append at each gate"
+echo "  learnings.md     <- ungated scratchpad; implementor/debugger append as they go"

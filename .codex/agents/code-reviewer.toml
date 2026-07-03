@@ -44,7 +44,11 @@ switch this agent can flip at runtime.
 ## What to check (report findings, do not fix silently)
 
 - **Test integrity (highest priority).** Tests written first and made to fail?
-  Any failing test deleted or weakened? Flag either — constitution violations.
+  Any failing test deleted or weakened? Does each test carry a docstring/
+  comment naming its acceptance-criterion ID and why it matters (constitution)
+  — a test missing this is easier to weaken unnoticed later, since the next
+  session has no way to tell "wrong test" from "regression" without it. Flag
+  any of these — constitution violations.
 - **Spec conformance.** Satisfies acceptance criteria and nothing beyond? Flag
   scope creep vs. Out of Scope.
 - **Boundaries.** Anything AGENTS.md marks "Ask first" or "Never"? Any
