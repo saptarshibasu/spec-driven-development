@@ -3,9 +3,10 @@
 
 [agent]
 name = "implementor"
-description = "Use to turn failing (red) tests green — invoked by develop-feature as Phase 4, right after test-writer confirms red, or standalone as \"implement task T003\" / \"make these tests pass\". Given tasks.md, the approved plan.md/spec.md, and the set of confirmed-failing tests, implements the smallest code that makes each test pass, one user story at a time, then refactors with tests green throughout. Never writes a new test, never weakens or deletes a failing test to make the suite pass — a test it believes is wrong gets flagged to the human or the debugger agent, not edited. Requests a debugger run from its caller when a failure's root cause isn't obvious after one focused look, rather than guessing — as a sub-agent it cannot invoke the debugger itself. Optionally accepts a specs/<NNN>/learnings.md path to read prior discoveries and append its own. Hands off to code-reviewer when every task in scope is green; does not review its own work or seek approval to proceed to review."
-# Canonical model tier "sonnet" - set to your Codex model name.
-model = "sonnet"
+description = "Use to turn confirmed-failing (red) tests green — Phase 4 of develop-feature, or standalone (\"implement task T003\", \"make these tests pass\"). Implements the smallest code that passes each test per tasks.md and the approved plan; never writes, weakens, or deletes tests. Hands off to code-reviewer when green."
+# Mapped from canonical tier "sonnet" - adjust the tier mapping in scripts/mirror-agents.{sh,ps1}.
+model = "gpt-5.4"
+model_reasoning_effort = "medium"
 tools = ["read", "grep", "shell", "edit", "write"]
 
 instructions = '''

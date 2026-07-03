@@ -4,8 +4,9 @@
 [agent]
 name = "docs-writer"
 description = "Keeps documentation truthful and in sync with the code. Use for README/AGENTS.md/glossary/ADR updates and for catching docs that drift from the actual codebase. It edits docs only — never application behaviour, tests, or CI."
-# Canonical model tier "sonnet" - set to your Codex model name.
-model = "sonnet"
+# Mapped from canonical tier "sonnet" - adjust the tier mapping in scripts/mirror-agents.{sh,ps1}.
+model = "gpt-5.4"
+model_reasoning_effort = "medium"
 tools = ["read", "grep", "edit", "write"]
 
 instructions = '''

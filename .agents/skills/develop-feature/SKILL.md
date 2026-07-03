@@ -1,23 +1,6 @@
 ---
 name: develop-feature
-description: >-
-  Use when starting spec-driven development on a new feature — triggers on
-  phrases like "create a spec for X", "let's spec out Y", "start a new
-  feature: Z", "use SDD for this", or "write a spec before we code". First
-  right-sizes the work by proposing a workflow track (direct fix / patch /
-  feature / architecture) for human approval, then scaffolds
-  specs/<NNN-feature-slug>/ from this project's templates/ folder and walks
-  Specify -> Plan -> Tasks -> Analyze -> (Tests red -> Implement green ->
-  Review) per story, at the chosen depth, asking for explicit approval before
-  each phase. Specify/Plan/Tasks are each delegated to a dedicated agent
-  (specifier/planner/task-decomposer) invoked fresh, so this skill orchestrates
-  and gates rather than drafting itself. The Analyzer gate (default-on for
-  Tracks C/D, optional quick pass on Track B) cross-checks the artifacts for coverage and consistency; then, one user
-  story at a time, the test-writer agent writes and confirms failing tests,
-  the implementor agent makes them pass, and the code-reviewer agent reviews the
-  result — with this skill driving the reviewer↔debugger fix loop on any
-  Blocker — before the next story starts. Handles trivial changes too — they route to the lightweight
-  track rather than being turned away.
+description: "Use when starting spec-driven development on any change, large or trivial — triggers: \"create a spec for X\", \"start a new feature: Z\", \"use SDD for this\", \"write a spec before we code\". Proposes a right-sized workflow track for approval, then orchestrates Specify -> Plan -> Tasks -> Analyze -> (Tests red -> Implement green -> Review) through dedicated agents, gating each phase on human approval."
 ---
 
 # Spec-Driven Feature

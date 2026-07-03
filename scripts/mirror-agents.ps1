@@ -4,7 +4,7 @@
 # Generates the per-tool agent file from each canonical definition in
 # .agents/agents/<name>.md (YAML front-matter + Markdown body):
 #   -> .claude/agents/<name>.md         Claude Code  (verbatim)
-#   -> .github/agents/<name>.agent.md   Copilot      (name+description + body)
+#   -> .github/agents/<name>.agent.md   Copilot      (name+description+model + body)
 #   -> .codex/agents/<name>.toml        Codex        ([agent] table + instructions)
 #
 # Run after adding or editing an agent under .agents/agents/. Never hand-edit a
@@ -44,6 +44,43 @@ function Convert-CodexTool($t) {
   }
 }
 
+function Convert-CopilotModel($m) {
+  # Copilot doesn't understand Claude Code's tier aliases (opus/sonnet); it wants
+  # model-picker names, and accepts an array tried in order until an available
+  # model is found - so entries your org hasn't enabled degrade gracefully.
+  # EDIT the values below to match your org's enabled models
+  # (https://docs.github.com/en/copilot/reference/ai-models/supported-models).
+  # Keep in sync with copilot_model() in mirror-agents.sh.
+  switch ($m) {
+    'opus'   { "['Claude Opus 4.8', 'Claude Sonnet 5']" }
+    'sonnet' { "['Claude Sonnet 5', 'Claude Sonnet 4.6']" }
+    'haiku'  { "['Claude Haiku 4.5', 'Claude Sonnet 5']" }
+    default  { throw "unknown model tier '$m' (add it to Convert-CopilotModel in mirror-agents.{sh,ps1})" }
+  }
+}
+
+function Convert-CodexModel($m) {
+  # Codex runs OpenAI models, so the tier's intent (strong reasoning vs fast
+  # execution) maps to model choice + reasoning effort. EDIT to match the
+  # models your Codex plan offers
+  # (https://developers.openai.com/codex/config-reference). Keep in sync with
+  # codex_model()/codex_effort() in mirror-agents.sh.
+  switch ($m) {
+    'opus'   { 'gpt-5.4' }
+    'sonnet' { 'gpt-5.4' }
+    'haiku'  { 'gpt-5.4-mini' }
+    default  { throw "unknown model tier '$m' (add it to Convert-CodexModel in mirror-agents.{sh,ps1})" }
+  }
+}
+function Convert-CodexEffort($m) {
+  switch ($m) {
+    'opus'   { 'high' }
+    'sonnet' { 'medium' }
+    'haiku'  { 'medium' }
+    default  { throw "unknown model tier '$m' (add it to Convert-CodexEffort in mirror-agents.{sh,ps1})" }
+  }
+}
+
 $q3 = "'''"
 $count = 0
 foreach ($src in $srcs) {
@@ -68,8 +105,8 @@ foreach ($src in $srcs) {
   # 1) Claude - verbatim copy.
   Copy-Item -Force $src.FullName (Join-Path $claudeDir "$name.md")
 
-  # 2) Copilot - name + description front-matter, then body.
-  $copilot = "---`nname: $name`ndescription: $desc`n---`n$body"
+  # 2) Copilot - name + description + mapped model front-matter, then body.
+  $copilot = "---`nname: $name`ndescription: $desc`nmodel: $(Convert-CopilotModel $model)`n---`n$body"
   Set-Content -NoNewline -Path (Join-Path $copilotDir "$name.agent.md") -Value $copilot
 
   # 3) Codex - TOML table; tools mapped + de-duplicated; body as instructions.
@@ -92,8 +129,9 @@ foreach ($src in $srcs) {
 [agent]
 name = "$name"
 description = "$escDesc"
-# Canonical model tier "$model" - set to your Codex model name.
-model = "$model"
+# Mapped from canonical tier "$model" - adjust the tier mapping in scripts/mirror-agents.{sh,ps1}.
+model = "$(Convert-CodexModel $model)"
+model_reasoning_effort = "$(Convert-CodexEffort $model)"
 tools = [$toolsCsv]
 
 instructions = $q3

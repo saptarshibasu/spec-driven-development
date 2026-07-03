@@ -1,6 +1,7 @@
 ---
 name: test-writer
-description: Use to write tests FIRST, before implementation, from a spec, a task, or a described behaviour. The agent writes failing tests and confirms they fail for the right reason — it does not write the implementation that makes them pass. Invoke at the start of any user-story phase ("write the tests for US1"), or when adding coverage to existing behaviour. For locking in legacy behaviour before a change, see the characterization guidance below.
+description: "Use to write failing tests FIRST, before implementation, from a spec, task, or described behaviour (\"write the tests for US1\"), or to add coverage to existing code. Confirms tests fail for the right reason and stops at red — never writes the implementation."
+model: ['Claude Sonnet 5', 'Claude Sonnet 4.6']
 ---
 
 # Test Writer

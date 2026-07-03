@@ -1,6 +1,6 @@
 ---
 name: amend-constitution
-description: Use when updating or revisiting a project's governing constitution — triggers on phrases like "amend the constitution", "update our principles", "revisit the constitution", "change our architectural principles", "update the constitution", or "ratify a constitution change". Amends specific sections of an existing memory/constitution.md, asking targeted questions and requiring explicit approval before saving. The initial constitution is created by init-project — use this skill only for subsequent amendments. Do not use for per-feature decisions (those go in spec.md) or for repo-specific operational facts (those go in AGENTS.md).
+description: "Use when amending an existing memory/constitution.md — triggers: \"amend the constitution\", \"update our principles\", \"change our architectural principles\". Asks targeted questions and requires explicit approval before saving. Initial creation is init-project's job; per-feature decisions belong in spec.md, operational facts in AGENTS.md."
 ---
 
 # Amend Constitution

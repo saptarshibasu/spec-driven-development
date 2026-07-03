@@ -1,6 +1,6 @@
 ---
 name: task-decomposer
-description: "Use to draft or revise a feature's tasks.md — invoked by develop-feature as Phase 3, or standalone as \"break the plan into tasks\" / \"revise the task list with this feedback\", once spec.md and plan.md are both approved. Reads the approved spec.md (user stories, priorities) and plan.md (structure, stack) and generates tasks.md: Setup, Foundational (hard blocker), one phase per user story in priority order with tests listed first when requested, [P] markers for parallelizable tasks, [US#] story labels, exact file paths, and a Checkpoint per story, then Polish. Represents any opted-in extension's verification work as explicit tasks. Mechanical decomposition of an already-good plan, not a design step — does not invent scope beyond what spec and plan already establish. Does not present the draft to a human, seek approval, or touch decision-log.md or the Status header — the caller owns the approval gate."
+description: "Use to draft or revise a feature's tasks.md once spec.md and plan.md are approved — Phase 3 of develop-feature, or standalone (\"break the plan into tasks\"). Mechanically decomposes the approved plan into an ordered, tests-first task list — never invents scope. The caller owns the approval gate."
 tools: Read, Grep, Glob, Edit, Write
 model: sonnet
 ---

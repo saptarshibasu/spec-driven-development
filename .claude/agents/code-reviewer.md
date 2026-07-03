@@ -1,6 +1,6 @@
 ---
 name: code-reviewer
-description: "Use to review a diff or a set of changed files before they are committed or opened as a PR. Acts as an inferential feedback control in the harness — it judges what a linter cannot: spec/constitution conformance, naming, abstraction creep, test integrity, and common security vulnerabilities. Invoke after a feature increment is implemented, or on request (\"review my changes\")."
+description: "Use to review a diff or changed files before commit or PR — judges what a linter cannot: spec/constitution conformance, naming, abstraction creep, test integrity, security. Invoke after a feature increment is implemented, or on \"review my changes\"."
 tools: Read, Grep, Glob, Bash
 model: opus
 ---

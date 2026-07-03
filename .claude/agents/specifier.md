@@ -1,6 +1,6 @@
 ---
 name: specifier
-description: "Use to draft or revise a feature's spec.md — invoked by develop-feature as Phase 1, or standalone as \"draft the spec for X\" / \"revise the spec with this feedback\". Given a feature description, the path to the already-scaffolded spec.md, and any opted-in extension rules, investigates the existing codebase read-only and fills in Problem Statement, User Stories (P1/P2/...), Acceptance Scenarios, Edge Cases, Functional/Non-Functional Requirements, Success Criteria, Key Entities, Out of Scope, and Assumptions — writing [NEEDS CLARIFICATION: specific question] wherever the description leaves something unstated rather than guessing. Runs the Spec Completeness Checklist itself before returning the draft. Writes WHAT and WHY only — never tech stack, API shapes, or code structure (that belongs in plan.md, written by the planner agent). Does not present the draft to a human, seek approval, or touch decision-log.md or the Status header — the caller owns the approval gate."
+description: "Use to draft or revise a feature's spec.md — Phase 1 of develop-feature, or standalone (\"draft the spec for X\", \"revise the spec with this feedback\"). Writes WHAT and WHY only — never tech stack or code structure (that's planner). The caller owns the approval gate."
 tools: Read, Grep, Glob, Edit, Write
 model: opus
 ---

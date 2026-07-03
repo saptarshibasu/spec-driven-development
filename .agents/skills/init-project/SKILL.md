@@ -1,6 +1,6 @@
 ---
 name: init-project
-description: Use when setting up a project's AI agent configuration from scratch — triggers on phrases like "initialize the project", "set up AGENTS.md", "bootstrap project config", "create project constitution", "set up the project for agents", "initialize agent config", "let's configure the project", or any request to fill in the project's AGENTS.md or create its constitution. Reads the codebase first, then produces both a filled-in AGENTS.md and memory/constitution.md in a single gated session with explicit approval before writing either file. This is the one-time project setup step that should happen before any develop-feature work.
+description: "Use when setting up a project's AI agent configuration from scratch — triggers: \"initialize the project\", \"set up AGENTS.md\", \"bootstrap project config\", \"create project constitution\". Reads the codebase, then produces a filled-in AGENTS.md and memory/constitution.md with explicit approval before writing. One-time setup that precedes any develop-feature work."
 ---
 
 # Init Project
@@ -211,5 +211,4 @@ Then confirm to the user:
 
 - Doesn't run `develop-feature` — that's a separate workflow for individual
   features.
-- Doesn't fabricate values — unresolvable facts get `[NEEDS CLARIFICATION]`.
-- Never writes either file until the user explicitly approves both drafts.
+- Doesn't fabricate values — unresolvable facts get `[NEEDS CLARIF

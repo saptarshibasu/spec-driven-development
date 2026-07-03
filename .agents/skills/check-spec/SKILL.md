@@ -1,6 +1,6 @@
 ---
 name: check-spec
-description: Use to generate a requirements-quality checklist for a feature — "unit tests for the spec." Triggers on phrases like "make a checklist for this spec", "is this spec ready", "review requirements quality", "security checklist for X", or before planning a high-stakes feature. Produces a filled-in checklist from templates/checklist.template.md that tests whether the REQUIREMENTS are complete/clear/consistent/measurable — not whether the code works. Do not use to test implementation (that's the test suite) or to resolve ambiguity (use clarify-spec).
+description: "Use to generate a requirements-quality checklist for a feature spec — \"unit tests for the spec\". Triggers: \"is this spec ready\", \"make a checklist for this spec\", \"review requirements quality\", or before planning a high-stakes feature. Tests whether the requirements are complete, clear, consistent, and measurable — not whether code works, and not for resolving ambiguity (clarify-spec)."
 ---
 
 # Check Spec

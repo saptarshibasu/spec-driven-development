@@ -1,6 +1,7 @@
 ---
 name: debugger
-description: Use to investigate a failure — a failing test, an exception, a stack trace, or behaviour that doesn't match the spec. Runs in its own context so the (often messy, discardable) investigation doesn't pollute the main session. Returns root cause and the minimal fix, not a rewrite. Invoke proactively whenever an error or test failure appears ("why is this test failing?", "debug this exception"). Optionally accepts a spec path (e.g. specs/042-checkout/spec.md) to check intended behaviour, and a specs/<NNN>/learnings.md path to read prior discoveries and append its own.
+description: "Use to investigate a failure — a failing test, exception, stack trace, or behaviour that doesn't match the spec (\"why is this test failing?\"). Runs in its own context and returns root cause plus the minimal fix, not a rewrite. Optionally accepts a spec path and a specs/<NNN>/learnings.md path."
+model: ['Claude Sonnet 5', 'Claude Sonnet 4.6']
 ---
 
 # Debugger

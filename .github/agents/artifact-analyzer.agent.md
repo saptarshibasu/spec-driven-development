@@ -1,6 +1,7 @@
 ---
 name: artifact-analyzer
-description: "Use after tasks.md is drafted and before implementation begins — triggers on phrases like \"analyze the spec/plan/tasks\", \"check the artifacts line up\", \"is this ready to implement\", \"cross-check coverage\", or \"run the artifact-analyzer gate\". Performs a NON-DESTRUCTIVE, read-only consistency and coverage check ACROSS spec.md + plan.md + tasks.md (and research/data-model/contracts on Track D): every requirement maps to a task, no contradictions between artifacts, no orphan/duplicate/ambiguous tasks, no constitution violations. Reports findings for a human to act on — it never rewrites the artifacts itself. Do not use to grade the spec in isolation (that's check-spec), to resolve open questions (that's clarify-spec), or to review written code (that's the code-reviewer agent)."
+description: "Read-only consistency and coverage gate across spec.md + plan.md + tasks.md, run after tasks.md is drafted and before implementation. Triggers: \"analyze the spec/plan/tasks\", \"is this ready to implement\", \"cross-check coverage\". Reports findings for a human to act on — never edits the artifacts. Not for grading a spec in isolation (check-spec), resolving open questions (clarify-spec), or reviewing code (code-reviewer)."
+model: ['Claude Opus 4.8', 'Claude Sonnet 5']
 ---
 
 # Artifact Analyzer

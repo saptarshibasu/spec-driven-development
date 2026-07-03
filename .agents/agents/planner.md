@@ -1,6 +1,6 @@
 ---
 name: planner
-description: "Use to draft or revise a feature's plan.md — invoked by develop-feature as Phase 2, or standalone as \"draft the plan for X\" / \"revise the plan with this feedback\", once spec.md is approved. Reads the approved spec.md, AGENTS.md, and memory/constitution.md, fills plan.md's Technical Context and Project Structure, runs the three constitution-check gates (Simplicity, Anti-abstraction, Integration-first) with stated reasoning before each verdict, runs version-sensitive research when the plan depends on a rapidly-changing library, and checks any opted-in extension rules by ID. Writes HOW only, never re-deriving or contradicting the spec's WHAT/WHY. Does not present the draft to a human, seek approval, or touch decision-log.md or the Status header — the caller owns the approval gate."
+description: "Use to draft or revise a feature's plan.md once spec.md is approved — Phase 2 of develop-feature, or standalone (\"draft the plan for X\", \"revise the plan with this feedback\"). Writes HOW only, never contradicting the spec's WHAT/WHY, and runs the constitution-check gates. The caller owns the approval gate."
 tools: Read, Grep, Glob, Edit, Write
 model: opus
 ---

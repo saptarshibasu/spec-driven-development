@@ -1,6 +1,6 @@
 ---
 name: clarify-spec
-description: Use after a draft spec exists but before planning, to surface and resolve ambiguity — triggers on phrases like "clarify the spec", "are there gaps in this spec", "what's ambiguous here", "review my spec for missing details", or when about to run plan on a spec that still has open questions. Asks a small number of targeted questions one at a time, then writes the answers back into spec.md. Do not use to write a spec from scratch (use develop-feature) or for plan/tasks-level questions.
+description: "Use after a draft spec exists but before planning, to surface and resolve ambiguity — triggers: \"clarify the spec\", \"what's ambiguous here\", \"are there gaps in this spec\". Asks a few targeted questions one at a time, then writes the answers back into spec.md. Not for writing a spec from scratch (develop-feature)."
 ---
 
 # Clarify Spec

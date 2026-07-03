@@ -7,7 +7,7 @@
 #
 #   .agents/agents/<name>.md   (canonical: YAML front-matter + Markdown body)
 #     → .claude/agents/<name>.md         Claude Code   (verbatim — same format)
-#     → .github/agents/<name>.agent.md   Copilot       (name+description front-matter + body)
+#     → .github/agents/<name>.agent.md   Copilot       (name+description+model front-matter + body)
 #     → .codex/agents/<name>.toml        Codex         ([agent] table + instructions)
 #
 # Run this AFTER you add or edit an agent under .agents/agents/. Never hand-edit a
@@ -55,6 +55,45 @@ codex_tool() {
     Edit)  echo edit ;;
     Write) echo write ;;
     *)     die "unknown tool '$1' (add it to codex_tool() in mirror-agents.{sh,ps1})" ;;
+  esac
+}
+
+# Map a canonical model tier to Copilot's `model` front-matter value.
+# Copilot doesn't understand Claude Code's tier aliases (opus/sonnet); it wants
+# model-picker names, and accepts an array tried in order until an available
+# model is found — so entries your org hasn't enabled degrade gracefully.
+# EDIT the values below to match your org's enabled models
+# (https://docs.github.com/en/copilot/reference/ai-models/supported-models).
+# Keep in sync with Convert-CopilotModel in mirror-agents.ps1.
+copilot_model() {
+  case "$1" in
+    opus)   echo "['Claude Opus 4.8', 'Claude Sonnet 5']" ;;
+    sonnet) echo "['Claude Sonnet 5', 'Claude Sonnet 4.6']" ;;
+    haiku)  echo "['Claude Haiku 4.5', 'Claude Sonnet 5']" ;;
+    *)      die "unknown model tier '$1' (add it to copilot_model() in mirror-agents.{sh,ps1})" ;;
+  esac
+}
+
+# Map a canonical model tier to a Codex model + reasoning effort. Codex runs
+# OpenAI models, so the tier's intent (strong reasoning vs fast execution) maps
+# to model choice + model_reasoning_effort rather than a name-alike. EDIT to
+# match the models your Codex plan offers
+# (https://developers.openai.com/codex/config-reference). Keep in sync with
+# Convert-CodexModel/Convert-CodexEffort in mirror-agents.ps1.
+codex_model() {
+  case "$1" in
+    opus)   echo "gpt-5.4" ;;
+    sonnet) echo "gpt-5.4" ;;
+    haiku)  echo "gpt-5.4-mini" ;;
+    *)      die "unknown model tier '$1' (add it to codex_model() in mirror-agents.{sh,ps1})" ;;
+  esac
+}
+codex_effort() {
+  case "$1" in
+    opus)   echo "high" ;;
+    sonnet) echo "medium" ;;
+    haiku)  echo "medium" ;;
+    *)      die "unknown model tier '$1' (add it to codex_effort() in mirror-agents.{sh,ps1})" ;;
   esac
 }
 
@@ -110,11 +149,12 @@ for src in "$CANON"/*.md; do
   # 1) Claude — canonical format, copied verbatim.
   cp "$src" "$CLAUDE_DIR/$name.md"
 
-  # 2) Copilot — keep only name + description in front-matter, then the body.
+  # 2) Copilot — name + description + mapped model in front-matter, then the body.
   {
     printf -- '---\n'
     printf 'name: %s\n' "$name"
     printf 'description: %s\n' "$desc"
+    printf 'model: %s\n' "$(copilot_model "$model")"
     printf -- '---\n'
     body_after_frontmatter "$src"
   } > "$COPILOT_DIR/$name.agent.md"
@@ -145,8 +185,9 @@ for src in "$CANON"/*.md; do
     printf '[agent]\n'
     printf 'name = "%s"\n' "$name"
     printf 'description = "%s"\n' "$esc_desc"
-    printf '# Canonical model tier "%s" - set to your Codex model name.\n' "$model"
-    printf 'model = "%s"\n' "$model"
+    printf '# Mapped from canonical tier "%s" - adjust the tier mapping in scripts/mirror-agents.{sh,ps1}.\n' "$model"
+    printf 'model = "%s"\n' "$(codex_model "$model")"
+    printf 'model_reasoning_effort = "%s"\n' "$(codex_effort "$model")"
     printf 'tools = [%s]\n\n' "$codex_tools"
     printf 'instructions = %s\n' "$Q3"
     body_after_frontmatter "$src"
