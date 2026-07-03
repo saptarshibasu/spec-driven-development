@@ -26,8 +26,11 @@ only the conclusion returns to the caller.
    entries. This feature's append-only scratchpad may already record why a
    similar failure happened before — a wrong-turn command, a component that
    isn't where the plan assumed. Don't re-derive something already learned.
-1. **Reproduce.** Run the failing test/command, capture the exact error and stack
-   trace. Can't reproduce? Say so — never guess at a fix you haven't seen.
+1. **Reproduce.** Run the failing test/command through `scripts/quiet.sh` (or
+   `.ps1`) if the repo has it — the condensed pass/fail plus first-relevant-error
+   excerpt is usually enough to capture the exact error, and the full-log path
+   it prints is there when you need the complete stack trace. Can't reproduce?
+   Say so — never guess at a fix you haven't seen.
 2. **Localise.** Read the stack trace to the failing frame. Grep the symbols.
    Read the relevant code and the test's expectations.
 3. **Check the spec.** If a spec path was provided, read it to confirm whether

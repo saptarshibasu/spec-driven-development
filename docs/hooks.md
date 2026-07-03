@@ -22,7 +22,10 @@ change, so they protect the repo from humans and agents alike. This kit ships a
 - keeps `CLAUDE.md` / `copilot-instructions.md` thin (ADR-0001), and
 - has a commented slot for your stack's lint + fast tests — fill it with the
   *same* commands named in `AGENTS.md` so local, hook, and CI checks are
-  identical.
+  identical. Route each through `scripts/quiet.sh`/`.ps1` (see
+  `token-efficiency.md`) — hook output is read by agents too, and the wrapper
+  keeps a failing run to pass/fail + the first relevant error instead of a
+  raw log dump.
 
 Enable it once per clone (hooks aren't installed automatically, by design):
 

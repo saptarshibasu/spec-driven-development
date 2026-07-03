@@ -225,6 +225,9 @@ Add your own under `.agents/extensions/<category>/<pack>/` — format in
 │   ├── pre-commit         # secret scan · ambiguity block · thin-pointer guard · lint/test slot
 │   └── pre-commit.ps1
 │
+├── scripts/
+│   └── quiet.sh/.ps1      # backpressure wrapper: build/test output → pass/fail + first error
+│
 ├── memory/
 │   └── constitution.md    # project-wide principles; governs every phase
 │

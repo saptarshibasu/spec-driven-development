@@ -62,9 +62,13 @@ done
 # ── 4. Your stack's lint + fast tests — UNCOMMENT and match AGENTS.md ─────────
 # Use the SAME commands named in AGENTS.md's Commands section so local, hook,
 # and CI enforcement are identical. Keep these fast; slow suites belong in CI.
+# Route them through scripts/quiet.sh: hook output is read by agents too, and
+# a sensor that dumps hundreds of log lines pollutes the context it feeds —
+# quiet.sh condenses it to pass/fail + the first relevant error, with the full
+# log kept in a temp file (see docs/token-efficiency.md).
 #
-# echo "Running lint…"; <exact lint command from AGENTS.md> || fail=1
-# echo "Running fast tests…"; <exact fast-test command from AGENTS.md> || fail=1
+# echo "Running lint…"; scripts/quiet.sh <exact lint command from AGENTS.md> || fail=1
+# echo "Running fast tests…"; scripts/quiet.sh <exact fast-test command from AGENTS.md> || fail=1
 
 if [ "$fail" -ne 0 ]; then
   echo ""

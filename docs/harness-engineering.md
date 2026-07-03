@@ -99,7 +99,11 @@ order:
 
 1. **A fast test command the agent can run itself**, named exactly in
    `AGENTS.md` (single-test form too — agents iterate far faster when they can
-   run one test, not the whole suite).
+   run one test, not the whole suite). Wrap it in `scripts/quiet.sh` (shipped;
+   `.ps1` twin included): a sensor that dumps 500 log lines into the agent's
+   context degrades the loop it exists to close. The wrapper is
+   *context-efficient backpressure* — pass/fail + first relevant error to the
+   agent, full log to a file.
 2. **Lint + format + type-check in one command**, also in `AGENTS.md`, so the
    agent can self-correct style and type errors before you ever see them.
 3. **A CI workflow** that runs the above on every PR — the backstop sensor that

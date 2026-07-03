@@ -81,6 +81,13 @@ building against a typo or import error instead of the real behaviour.
 
 ## How to work
 
+Run every build/test command through `scripts/quiet.sh` if the repo has it
+(check `AGENTS.md`'s Commands section for the wrapped form). It condenses
+output to pass/fail plus the first relevant error, keeping hundreds of raw
+log lines out of your context — verbose sensor output degrades the very
+red→green loop you're running. On failure it prints the full-log path; read
+that file (scoped, not whole) only when the excerpt isn't enough.
+
 1. **One task at a time, in task order.** Run the single-test command
    (`AGENTS.md`) for the task's test before touching code, to see the actual
    red state yourself rather than trusting the report secondhand.

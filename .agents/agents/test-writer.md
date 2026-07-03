@@ -40,8 +40,11 @@ at red — green is the implementer's job. Mixing the two defeats test-first.
 - **Right tier** (see `tests/README.md`): contract for boundary/API behaviour,
   integration for user journeys against real services/DB, unit for isolated logic.
 - **Write, run, confirm FAILS for the expected reason** (assertion failure /
-  missing implementation — not an import error or typo). Errors ≠ valid red.
-  Report the exact failure for each.
+  missing implementation — not an import error or typo). Run each test through
+  `scripts/quiet.sh` (or `.ps1`) if the repo has it — its first-relevant-error
+  excerpt is enough to tell an assertion failure from an import error, and it
+  keeps the raw run out of your context. Errors ≠ valid red. Report the exact
+  failure for each.
 - **Never write the implementation.** Missing symbol = correct red state — leave it.
 
 ## Hard rule: every test names its ID and its "why"

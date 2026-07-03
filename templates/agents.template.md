@@ -47,6 +47,10 @@ these; they are never optional and are not repeated in this file.
 - Build: `[exact command]`
 - Test (all): `[exact command]`
 - Test (single file/case): `[exact command with placeholder]`
+- Test (quiet, agent-preferred): `scripts/quiet.sh [exact test command]` —
+  condenses output to pass/fail + first relevant error; agents should run
+  build/test through this form to keep raw logs out of context
+  (see docs/token-efficiency.md)
 - Lint/format: `[exact command]`
 - Run locally: `[exact command]`
 - [Anything else run routinely, e.g. migrations, codegen]

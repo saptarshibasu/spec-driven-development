@@ -52,9 +52,13 @@ foreach ($f in 'CLAUDE.md', '.github/copilot-instructions.md') {
 # ── 4. Your stack's lint + fast tests — UNCOMMENT and match AGENTS.md ─────────
 # Use the SAME commands named in AGENTS.md's Commands section so local, hook,
 # and CI enforcement are identical. Keep these fast; slow suites belong in CI.
+# Route them through scripts/quiet.ps1: hook output is read by agents too, and
+# a sensor that dumps hundreds of log lines pollutes the context it feeds —
+# quiet.ps1 condenses it to pass/fail + the first relevant error, with the
+# full log kept in a temp file (see docs/token-efficiency.md).
 #
-# & <exact lint command from AGENTS.md>;       if ($LASTEXITCODE -ne 0) { $fail = $true }
-# & <exact fast-test command from AGENTS.md>;  if ($LASTEXITCODE -ne 0) { $fail = $true }
+# pwsh scripts/quiet.ps1 <exact lint command from AGENTS.md>;       if ($LASTEXITCODE -ne 0) { $fail = $true }
+# pwsh scripts/quiet.ps1 <exact fast-test command from AGENTS.md>;  if ($LASTEXITCODE -ne 0) { $fail = $true }
 
 if ($fail) {
   Write-Host ''
