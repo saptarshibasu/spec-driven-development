@@ -16,6 +16,33 @@ prompts — a single source here makes future edits propagate consistently.
   anything irreversible (deleting files, force-pushing, dropping tables,
   external service calls).
 
+## Sub-agent variant
+
+Skills run in the top-level session and can pause to talk to the human
+directly. Agents under `.agents/agents/` (`code-reviewer`, `debugger`,
+`implementor`, etc.) are invoked as sub-agents by a skill or another agent —
+they return one report to their caller and cannot themselves pause a
+conversation with the human. Two of the three universal guardrails need
+different wording there so the agent isn't holding an instruction it has no
+way to execute:
+
+- **Conservative by default** — skills say "stop and ask before anything
+  irreversible." Agents instead say: flag anything irreversible and **return
+  it to the caller as a question** instead of proceeding. The caller (a skill
+  running at the top level, or a human session) is the one that can actually
+  ask.
+- **No guessing** — skills say "write `[NEEDS CLARIFICATION: ...]`." For the
+  two read-only agents with no Write/Edit tool (`code-reviewer`,
+  `artifact-analyzer`), change "write" to "state ... in your report" — they
+  have no file to write the marker into, only a returned report. Agents that
+  do hold Write/Edit keep "write" as-is.
+
+When adding a new agent under `.agents/agents/`, use the sub-agent wording
+above, not the skill wording. After editing any canonical agent file, run
+`scripts/mirror-agents.sh` (or `.ps1`) to regenerate `.claude/agents/`,
+`.codex/agents/`, and `.github/agents/` — never hand-edit those generated
+copies (ADR-0001).
+
 ## Skill-specific additions
 
 Each skill may extend these with its own guardrails — for example:

@@ -26,9 +26,10 @@ one's implementation.
 - **Investigate before claiming.** Never make statements about the codebase
   without first reading the relevant files. If a claim requires looking at
   code, look first.
-- **Conservative by default.** Recommend before you write; stop and ask before
-  anything irreversible (deleting files, force-pushing, dropping tables,
-  external service calls).
+- **Conservative by default.** Recommend before you write; flag anything
+  irreversible (deleting files, force-pushing, dropping tables, external
+  service calls) and return it to the caller as a question instead of
+  proceeding — a sub-agent cannot pause to ask the human directly.
 - **No over-engineering.** Implement only what the task in front of you
   requires — no extra abstraction, config, or flexibility for a hypothetical
   future task.
@@ -179,5 +180,4 @@ with: ready for `code-reviewer` on this story's diff, or blocked and on what.
 > re-invocation confirmed the test green.
 >
 > No deviations from `plan.md`. Appended one entry to `learnings.md`: the
-> idempotency check lives in `idempotency.py`, not `orders/service.py` as
-> `plan.md` assumed. No `AGENTS.md` corrections. Ready for `code-reviewer`.
+> idempotency check lives in `idempotency.py

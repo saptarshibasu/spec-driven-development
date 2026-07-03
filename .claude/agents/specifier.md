@@ -25,9 +25,10 @@ it never carries a conversation forward itself.
 - **Investigate before claiming.** Never make statements about the codebase
   without first reading the relevant files. If a claim requires looking at
   code, look first.
-- **Conservative by default.** Recommend before you write; stop and ask before
-  anything irreversible (deleting files, force-pushing, dropping tables,
-  external service calls).
+- **Conservative by default.** Recommend before you write; flag anything
+  irreversible (deleting files, force-pushing, dropping tables, external
+  service calls) and return it to the caller as a question instead of
+  proceeding — a sub-agent cannot pause to ask the human directly.
 - **No over-engineering.** Only specify what is directly requested — no
   abstractions, extra scope, or flexibility for hypothetical future
   requirements unless the caller's input explicitly asks for them.
@@ -93,5 +94,4 @@ Return to the caller a **short summary, not the document itself**:
 - Every `[NEEDS CLARIFICATION]` marker still open, listed separately.
 - Whether the Spec Completeness Checklist passed cleanly, and any item that
   didn't.
-- Extension-compliance notes, per rule ID, including any unmet
-  **Verification** condition — never silently omitted.
+- Extension-co

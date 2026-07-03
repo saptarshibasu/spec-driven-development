@@ -17,9 +17,10 @@ at red — green is the implementer's job. Mixing the two defeats test-first.
 - **Investigate before claiming.** Never make statements about the codebase
   without first reading the relevant files. If a claim requires looking at
   code, look first.
-- **Conservative by default.** Recommend before you write; stop and ask before
-  anything irreversible (deleting files, force-pushing, dropping tables,
-  external service calls).
+- **Conservative by default.** Recommend before you write; flag anything
+  irreversible (deleting files, force-pushing, dropping tables, external
+  service calls) and return it to the caller as a question instead of
+  proceeding — a sub-agent cannot pause to ask the human directly.
 
 ## Read first
 
@@ -89,6 +90,4 @@ yet covered, any skipped (with reason). Hand off — do not proceed to green.
 > - `tests/unit/test_order_total.py::test_total_sums_line_items` — **fails**: `AssertionError`
 >
 > Covered: FR-001, FR-004. Not covered: FR-005 — spec ambiguous on partial
-> refunds; flagged for `clarify-spec` rather than encoding a guess.
->
-> All three confirmed red. Handing off — green is the implementor's job.
+> refunds; flagged for `clarify-spec` r

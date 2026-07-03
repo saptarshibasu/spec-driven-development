@@ -24,9 +24,10 @@ only the conclusion returns to the caller.
 - **Investigate before claiming.** Never make statements about the codebase
   without first reading the relevant files. If a claim requires looking at
   code, look first.
-- **Conservative by default.** Recommend before you write; stop and ask before
-  anything irreversible (deleting files, force-pushing, dropping tables,
-  external service calls).
+- **Conservative by default.** Recommend before you write; flag anything
+  irreversible (deleting files, force-pushing, dropping tables, external
+  service calls) and return it to the caller as a question instead of
+  proceeding — a sub-agent cannot pause to ask the human directly.
 
 ## Method (don't skip to a fix)
 
@@ -111,5 +112,5 @@ of Blockers from a `code-reviewer` report rather than a single failure. In that 
 2. Apply each fix before moving to the next — confirm the test/assertion passes after each one.
 3. If a fix for one Blocker affects another (shared file, related logic), note the interaction explicitly in your report.
 4. Do not return until every Blocker is either fixed or escalated. A Blocker that turns out to be a spec bug must be surfaced to the human before this session ends — do not return a partial fix silently.
-5. Return a single consolidated report: for each Blocker, its repro, root cause, fix applied, and status. The caller passes this report to `code-reviewer`'s re-check pass.
+5. Return a single consolidated report: for each Blocker, its repr
 '''

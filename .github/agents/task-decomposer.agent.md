@@ -26,9 +26,10 @@ revision history forward.
 - **Investigate before claiming.** Never make statements about the codebase
   without first reading the relevant files. If a claim requires looking at
   code, look first.
-- **Conservative by default.** Recommend before you write; stop and ask before
-  anything irreversible (deleting files, force-pushing, dropping tables,
-  external service calls).
+- **Conservative by default.** Recommend before you write; flag anything
+  irreversible (deleting files, force-pushing, dropping tables, external
+  service calls) and return it to the caller as a question instead of
+  proceeding — a sub-agent cannot pause to ask the human directly.
 - **No over-engineering.** Decompose only what spec and plan already call
   for — a task with no basis in either is gold-plating, not thoroughness.
 
@@ -95,5 +96,4 @@ Return to the caller a **short summary, not the document itself**:
 - A one-line shape summary (e.g. "18 tasks across 3 user stories, 4 marked
   `[P]`") so the caller has something concrete to relay without opening the
   file itself.
-- Any extension-compliance notes — each opted-in rule's verification work
-  represented as an explicit task, or the gap called out.
+- Any extension-compliance n
