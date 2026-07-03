@@ -15,7 +15,7 @@
 # names, front-matter it can't parse as single-line scalars, or a body that would
 # break the Codex TOML string are all hard errors. See mirror-agents.sh.
 #
-# Usage:  pwsh ./mirror-agents.ps1   (or: powershell -File .\mirror-agents.ps1)
+# Usage:  pwsh ./scripts/mirror-agents.ps1   (or: powershell -File .\scripts\mirror-agents.ps1)
 
 $ErrorActionPreference = 'Stop'
 

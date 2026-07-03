@@ -136,9 +136,9 @@ cd my-project-sdd
 
 A fresh clone already carries every directory, pointer, stub, and mirror —
 there is no scaffolding step to run. (If you later edit or add a **skill** under
-`.agents/skills/`, re-mirror it with `bash mirror-skills.sh` / `pwsh ./mirror-skills.ps1`;
+`.agents/skills/`, re-mirror it with `bash scripts/mirror-skills.sh` / `pwsh ./scripts/mirror-skills.ps1`;
 if you edit or add an **agent** under `.agents/agents/`, re-generate the per-tool
-copies with `bash mirror-agents.sh` / `pwsh ./mirror-agents.ps1`.)
+copies with `bash scripts/mirror-agents.sh` / `pwsh ./scripts/mirror-agents.ps1`.)
 
 Then, in order:
 
@@ -226,7 +226,9 @@ Add your own under `.agents/extensions/<category>/<pack>/` — format in
 │   └── pre-commit.ps1
 │
 ├── scripts/
-│   └── quiet.sh/.ps1      # backpressure wrapper: build/test output → pass/fail + first error
+│   ├── quiet.sh/.ps1        # backpressure wrapper: build/test output → pass/fail + first error
+│   ├── mirror-skills.sh/.ps1  # re-mirror .agents/skills/ → tool dirs after edits
+│   └── mirror-agents.sh/.ps1  # re-generate .agents/agents/ → per-tool formats
 │
 ├── memory/
 │   └── constitution.md    # project-wide principles; governs every phase
@@ -241,10 +243,7 @@ Add your own under `.agents/extensions/<category>/<pack>/` — format in
 │   └── adr/               # architecture decision records (created by create-adr skill)
 │
 ├── src/                   # your source tree
-├── tests/                 # contract/ · integration/ · unit/ · characterization/
-│
-├── mirror-skills.sh/.ps1  # re-mirror .agents/skills/ → tool dirs after edits
-└── mirror-agents.sh/.ps1  # re-generate .agents/agents/ → per-tool formats
+└── tests/                 # contract/ · integration/ · unit/ · characterization/
 ```
 
 </details>
@@ -286,7 +285,7 @@ These aren't advice buried in a doc — they're encoded in the constitution and 
 
 **Hooks over prose.** A git hook that blocks a bad commit is more reliable than a rule that asks the agent to remember. Wire your highest-value rules into `.githooks/pre-commit` or CI so they're enforced mechanically, not by trust.
 
-**`.agents/` is the canonical source — never edit the generated copies.** Skills live in `.agents/skills/` and agents in `.agents/agents/`; the per-tool files (`.claude/`, `.github/`, `.codex/`) are generated outputs. Edit the source, then run `mirror-skills.sh` / `mirror-agents.sh` (or the `.ps1` equivalents on Windows) to propagate changes. Editing a generated copy directly means the next mirror run silently overwrites it.
+**`.agents/` is the canonical source — never edit the generated copies.** Skills live in `.agents/skills/` and agents in `.agents/agents/`; the per-tool files (`.claude/`, `.github/`, `.codex/`) are generated outputs. Edit the source, then run `scripts/mirror-skills.sh` / `scripts/mirror-agents.sh` (or the `.ps1` equivalents on Windows) to propagate changes. Editing a generated copy directly means the next mirror run silently overwrites it.
 
 **Resilient by default.** Feature progress is never lost — each document's `Status` header records what's been approved, and re-invoking `develop-feature` resumes from the first unapproved phase. A kill mid-phase leaves the document in `Draft`, so recovery is automatic at the phase level.
 

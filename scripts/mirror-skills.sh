@@ -12,7 +12,7 @@
 # carries every directory, pointer, and stub they created (see README Quickstart).
 #
 # Idempotent. Cross-platform twin: mirror-skills.ps1 (Windows/PowerShell).
-# Usage: bash mirror-skills.sh
+# Usage: bash scripts/mirror-skills.sh
 
 set -euo pipefail
 

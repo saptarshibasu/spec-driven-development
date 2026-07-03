@@ -21,7 +21,7 @@
 #
 # Idempotent. Cross-platform twin: mirror-agents.ps1 (Windows/PowerShell) — both
 # must emit byte-identical files or CI's drift guard will fail.
-# Usage: bash mirror-agents.sh
+# Usage: bash scripts/mirror-agents.sh
 # (rev: hardened with fail-loud validation)
 
 set -euo pipefail

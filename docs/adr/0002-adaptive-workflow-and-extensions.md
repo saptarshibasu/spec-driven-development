@@ -65,7 +65,7 @@ the kit's token-budget discipline.
   be customised before it is trusted — shipping it risks a false sense of cover
   if that caveat is ignored.
 - The skill is the canonical source (`.agents/skills/`); its edits propagate via
-  `mirror-skills.sh`, and the reviewer change via `mirror-agents.sh`. Editing a
+  `scripts/mirror-skills.sh`, and the reviewer change via `scripts/mirror-agents.sh`. Editing a
   generated copy still reintroduces drift (ADR-0001 unchanged).
 
 ## Alternatives considered

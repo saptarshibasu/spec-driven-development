@@ -203,7 +203,7 @@ repeat the summary; do not paste the revised draft into chat.
 Then confirm to the user:
 - Both files written and their paths
 - Constitution version and ratification date
-- Reminder: run `mirror-agents.sh` (or `.ps1`) to sync AGENTS.md to
+- Reminder: run `scripts/mirror-agents.sh` (or `.ps1`) to sync AGENTS.md to
   `.agents/` and `.codex/` format files
 
 ## What this skill does not do

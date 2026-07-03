@@ -5,7 +5,7 @@
 # .codex mirror dirs (ADR-0001). Run after adding or editing a skill under
 # .agents/skills/. Never hand-edit a mirror. See mirror-skills.sh for rationale.
 #
-# Usage:  pwsh ./mirror-skills.ps1   (or, on Windows PowerShell: powershell -File .\mirror-skills.ps1)
+# Usage:  pwsh ./scripts/mirror-skills.ps1   (or, on Windows PowerShell: powershell -File .\scripts\mirror-skills.ps1)
 
 $ErrorActionPreference = 'Stop'
 

@@ -30,7 +30,7 @@ Subagents follow the same single-source rule, with one twist: each tool reads
 agent definitions in a different format (Claude `.md` with `tools`/`model`
 front-matter, Copilot `.agent.md`, Codex `.toml`), so a byte-for-byte mirror is
 impossible. Instead the canonical agent is authored once as Markdown in
-`.agents/agents/<name>.md`, and `mirror-agents.sh` / `mirror-agents.ps1`
+`.agents/agents/<name>.md`, and `scripts/mirror-agents.sh` / `scripts/mirror-agents.ps1`
 **generate** each tool's native file from it. The rule is unchanged — edit the
 canonical copy, never a generated one — only the propagation mechanism differs
 (generate vs. copy).
@@ -41,7 +41,7 @@ canonical copy, never a generated one — only the propagation mechanism differs
 - New tools are onboarded by adding a one-line pointer, not by re-authoring
   rules.
 - The cost: skill and agent copies must be kept in sync mechanically (skills via
-  `mirror-skills.sh` / `.ps1`, agents via `mirror-agents.sh` / `.ps1`) rather than
+  `scripts/mirror-skills.sh` / `.ps1`, agents via `scripts/mirror-agents.sh` / `.ps1`) rather than
   edited in place — editing a generated copy by hand reintroduces exactly the
   drift this decision prevents.
 - `AGENTS.md` is loaded on every call, so it must stay short and specific; this

@@ -62,10 +62,10 @@ jobs:
           # exactly what mirror-skills/mirror-agents generate from the canonical
           # .agents/ sources. Regenerate, then fail if anything changed — i.e. a
           # generated copy was hand-edited, or a canonical edit wasn't mirrored.
-          bash mirror-skills.sh
-          bash mirror-agents.sh
+          bash scripts/mirror-skills.sh
+          bash scripts/mirror-agents.sh
           if [ -n "$(git status --porcelain)" ]; then
-            echo "::error::Generated skills/agents drifted from .agents/ canon. Run 'bash mirror-skills.sh && bash mirror-agents.sh' and commit the result."
+            echo "::error::Generated skills/agents drifted from .agents/ canon. Run 'bash scripts/mirror-skills.sh && bash scripts/mirror-agents.sh' and commit the result."
             git --no-pager diff
             git status --porcelain
             exit 1
