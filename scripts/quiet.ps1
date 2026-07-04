@@ -9,7 +9,10 @@
 #   pwsh scripts/quiet.ps1 <command> [args...]
 #   pwsh scripts/quiet.ps1 npm test
 #
-# Tuning (env vars): QUIET_MAX_LINES (default 40), QUIET_ERR_RE.
+# Tuning (env vars): QUIET_MAX_LINES (default 40), QUIET_ERR_RE,
+# QUIET_TIMEOUT (max seconds before the command is killed; default 300,
+# 0 disables). A hung command is the exact failure mode this wrapper exists
+# to prevent — don't let it hang the agent with zero output instead.
 
 param(
   [Parameter(Mandatory = $true, ValueFromRemainingArguments = $true)]
@@ -20,16 +23,36 @@ $max = if ($env:QUIET_MAX_LINES) { [int]$env:QUIET_MAX_LINES } else { 40 }
 $errRe = if ($env:QUIET_ERR_RE) { $env:QUIET_ERR_RE } else {
   '(FAILED|FAILURES?|\d+ (failed|errors?)|error(\[[A-Za-z0-9]+\])?:|Error:|ERROR|Exception|Traceback|AssertionError|assert(ion)? ?fail|panic:|not ok|BUILD FAILED|Compilation failed|✖|✗)'
 }
+$timeoutS = if ($env:QUIET_TIMEOUT) { [int]$env:QUIET_TIMEOUT } else { 300 }
 
 $log = Join-Path ([System.IO.Path]::GetTempPath()) ("quiet-" + [System.IO.Path]::GetRandomFileName() + ".log")
 $cmdLine = $Command -join ' '
 
-& $Command[0] @($Command | Select-Object -Skip 1) 2>&1 |
-  ForEach-Object { "$_" } | Out-File -FilePath $log -Encoding utf8
-$status = $LASTEXITCODE
-# $LASTEXITCODE is only set by native executables; wrapping a cmdlet or
-# script function leaves it $null — treat that as failure rather than
-# letting `exit $null` silently report success.
+$proc = Start-Process -FilePath $Command[0] `
+  -ArgumentList @($Command | Select-Object -Skip 1) `
+  -NoNewWindow -PassThru `
+  -RedirectStandardOutput $log `
+  -RedirectStandardError "$log.err"
+
+$timedOut = $false
+if ($timeoutS -gt 0) {
+  if (-not $proc.WaitForExit($timeoutS * 1000)) {
+    $timedOut = $true
+    try { Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue } catch {}
+  }
+}
+else {
+  $proc.WaitForExit()
+}
+
+# Merge stderr into the combined log (order isn't preserved across streams,
+# but that's true of the original 2>&1 pipe too once redirected to a file).
+if (Test-Path "$log.err") {
+  Get-Content "$log.err" -ErrorAction SilentlyContinue | Add-Content -Path $log
+  Remove-Item "$log.err" -ErrorAction SilentlyContinue
+}
+
+$status = if ($timedOut) { 124 } else { $proc.ExitCode }
 if ($null -eq $status) { $status = 1 }
 
 $all = @(Get-Content $log)
@@ -39,6 +62,13 @@ if ($status -eq 0) {
   Write-Host "PASS: $cmdLine (exit 0, $lines output lines suppressed)"
   Remove-Item $log -ErrorAction SilentlyContinue
   exit 0
+}
+
+if ($timedOut) {
+  Write-Host "FAIL (timeout): $cmdLine (exceeded ${timeoutS}s, killed) - full output: $log"
+  Write-Host "-- last $max lines before kill --"
+  $all | Select-Object -Last $max | ForEach-Object { Write-Host $_ }
+  exit $status
 }
 
 Write-Host "FAIL: $cmdLine (exit $status) - full output: $log"

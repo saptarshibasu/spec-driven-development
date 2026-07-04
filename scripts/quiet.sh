@@ -21,6 +21,10 @@
 #   QUIET_ERR_RE     extended, case-insensitive regex marking the first
 #                    "relevant" error line — override per stack if the generic
 #                    one fires early (e.g. on a "0 errors" summary line)
+#   QUIET_TIMEOUT    max seconds the command may run before being killed
+#                    (default: 300; set 0 to disable). A hung command is the
+#                    exact failure mode this wrapper exists to prevent — don't
+#                    let it hang the agent with zero output instead.
 #
 # Used by: the implementor agent (and any agent running build/test commands),
 # and the lint/test slot in .githooks/pre-commit. Name the wrapped form of your
@@ -36,10 +40,15 @@ fi
 
 max="${QUIET_MAX_LINES:-40}"
 err_re="${QUIET_ERR_RE:-(FAILED|FAILURES?|[0-9]+ (failed|errors?)|error(\[[A-Za-z0-9]+\])?:|Error:|ERROR|Exception|Traceback|AssertionError|assert(ion)? ?fail|panic:|not ok|BUILD FAILED|Compilation failed|✖|✗)}"
+timeout_s="${QUIET_TIMEOUT:-300}"
 
 log="$(mktemp "${TMPDIR:-/tmp}/quiet.XXXXXX.log")"
 
-"$@" >"$log" 2>&1
+if [ "$timeout_s" != "0" ]; then
+  timeout --kill-after=5 "$timeout_s" "$@" >"$log" 2>&1
+else
+  "$@" >"$log" 2>&1
+fi
 status=$?
 lines=$(wc -l <"$log" | tr -d ' ')
 
@@ -47,6 +56,13 @@ if [ "$status" -eq 0 ]; then
   echo "PASS: $* (exit 0, ${lines} output lines suppressed)"
   rm -f "$log"
   exit 0
+fi
+
+if [ "$timeout_s" != "0" ] && [ "$status" -eq 124 ]; then
+  echo "FAIL (timeout): $* (exceeded ${timeout_s}s, killed) — full output: ${log}"
+  echo "── last ${max} lines before kill ──"
+  tail -n "$max" "$log"
+  exit "$status"
 fi
 
 echo "FAIL: $* (exit ${status}) — full output: ${log}"
