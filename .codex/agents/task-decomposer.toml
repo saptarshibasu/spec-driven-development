@@ -4,7 +4,7 @@
 [agent]
 name = "task-decomposer"
 description = "Use to draft or revise a feature's tasks.md once spec.md and plan.md are approved — Phase 3 of develop-feature, or standalone (\"break the plan into tasks\"). Mechanically decomposes the approved plan into an ordered, tests-first task list — never invents scope. The caller owns the approval gate."
-# Mapped from canonical tier "sonnet" - adjust the tier mapping in scripts/mirror-agents.{sh,ps1}.
+# Mapped from canonical tier "sonnet" - adjust the tier mapping in .agents/model-map.conf.
 model = "gpt-5.4"
 model_reasoning_effort = "medium"
 tools = ["read", "grep", "edit", "write"]

@@ -15,6 +15,12 @@
 # canonical .md only (ADR-0001). CI re-runs this and fails if the committed files
 # drift from a fresh generation.
 #
+# Org-specific model/tool policy (which Copilot/Codex model a tier maps to,
+# which Codex tool a Claude tool maps to) lives in data, not code: see
+# .agents/model-map.conf. EDIT that file to match your org — this script and
+# its Windows twin just read it, so a config edit can't introduce logic
+# divergence between the two.
+#
 # Fails loudly (exit 1) rather than emitting a subtly-wrong file: unknown tool
 # names, front-matter it can't parse as single-line scalars, or a body that would
 # break the Codex TOML string are all hard errors.
@@ -30,10 +36,13 @@ die() { echo "✖ $*" >&2; exit 1; }
 
 ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
 CANON="$ROOT/.agents/agents"
+MODEL_MAP="$ROOT/.agents/model-map.conf"
 
 if [ ! -d "$CANON" ] || ! ls "$CANON"/*.md >/dev/null 2>&1; then
   die "$CANON has no *.md agents — nothing to mirror."
 fi
+
+[ -f "$MODEL_MAP" ] || die "$MODEL_MAP not found — org policy data is missing."
 
 CLAUDE_DIR="$ROOT/.claude/agents"
 COPILOT_DIR="$ROOT/.github/agents"
@@ -44,58 +53,40 @@ mkdir -p "$CLAUDE_DIR" "$COPILOT_DIR" "$CODEX_DIR"
 find "$CLAUDE_DIR" "$COPILOT_DIR" "$CODEX_DIR" -type f \
      \( -name '*.md' -o -name '*.toml' \) ! -name '.gitkeep' -delete 2>/dev/null || true
 
-# Map a Claude tool name to its Codex equivalent. Unknown names are a hard error
-# so a typo or a newly-introduced tool can't silently pass through mis-mapped.
-codex_tool() {
-  case "$1" in
-    Read)  echo read ;;
-    Grep)  echo grep ;;
-    Glob)  echo grep ;;
-    Bash)  echo shell ;;
-    Edit)  echo edit ;;
-    Write) echo write ;;
-    *)     die "unknown tool '$1' (add it to codex_tool() in mirror-agents.{sh,ps1})" ;;
-  esac
+# Load org policy data (model/tool mappings) from .agents/model-map.conf into
+# an associative array keyed "<namespace>.<key>". This is the ONLY place an
+# org customizes tiers/tools — edit that data file, not this script. See it
+# for the format and namespaces. Kept in sync with the loader in
+# mirror-agents.ps1 only in the sense that both read the same data file.
+declare -A MAP
+while IFS='=' read -r k v; do
+  k="$(printf '%s' "$k" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
+  [ -z "$k" ] && continue
+  case "$k" in \#*) continue ;; esac
+  v="$(printf '%s' "$v" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
+  MAP["$k"]="$v"
+done < "$MODEL_MAP"
+
+map_lookup() {
+  local ns="$1" key="$2" full="$1.$2"
+  if [ -n "${MAP[$full]+x}" ]; then
+    printf '%s\n' "${MAP[$full]}"
+  else
+    die "unknown $ns entry '$key' (add '$full=...' to $MODEL_MAP)"
+  fi
 }
+
+# Map a Claude tool name to its Codex equivalent. Unknown names are a hard
+# error so a typo or a newly-introduced tool can't silently pass through
+# mis-mapped.
+codex_tool() { map_lookup codex_tool "$1"; }
 
 # Map a canonical model tier to Copilot's `model` front-matter value.
-# Copilot doesn't understand Claude Code's tier aliases (opus/sonnet); it wants
-# model-picker names, and accepts an array tried in order until an available
-# model is found — so entries your org hasn't enabled degrade gracefully.
-# EDIT the values below to match your org's enabled models
-# (https://docs.github.com/en/copilot/reference/ai-models/supported-models).
-# Keep in sync with Convert-CopilotModel in mirror-agents.ps1.
-copilot_model() {
-  case "$1" in
-    opus)   echo "['Claude Opus 4.8', 'Claude Sonnet 5']" ;;
-    sonnet) echo "['Claude Sonnet 5', 'Claude Sonnet 4.6']" ;;
-    haiku)  echo "['Claude Haiku 4.5', 'Claude Sonnet 5']" ;;
-    *)      die "unknown model tier '$1' (add it to copilot_model() in mirror-agents.{sh,ps1})" ;;
-  esac
-}
+copilot_model() { map_lookup copilot_model "$1"; }
 
-# Map a canonical model tier to a Codex model + reasoning effort. Codex runs
-# OpenAI models, so the tier's intent (strong reasoning vs fast execution) maps
-# to model choice + model_reasoning_effort rather than a name-alike. EDIT to
-# match the models your Codex plan offers
-# (https://developers.openai.com/codex/config-reference). Keep in sync with
-# Convert-CodexModel/Convert-CodexEffort in mirror-agents.ps1.
-codex_model() {
-  case "$1" in
-    opus)   echo "gpt-5.4" ;;
-    sonnet) echo "gpt-5.4" ;;
-    haiku)  echo "gpt-5.4-mini" ;;
-    *)      die "unknown model tier '$1' (add it to codex_model() in mirror-agents.{sh,ps1})" ;;
-  esac
-}
-codex_effort() {
-  case "$1" in
-    opus)   echo "high" ;;
-    sonnet) echo "medium" ;;
-    haiku)  echo "medium" ;;
-    *)      die "unknown model tier '$1' (add it to codex_effort() in mirror-agents.{sh,ps1})" ;;
-  esac
-}
+# Map a canonical model tier to a Codex model + reasoning effort.
+codex_model() { map_lookup codex_model "$1"; }
+codex_effort() { map_lookup codex_effort "$1"; }
 
 # Read a single-line front-matter scalar ("key: value"). Returns the raw
 # value, surrounding quotes included. Errors if the key is declared but has no
@@ -185,7 +176,7 @@ for src in "$CANON"/*.md; do
     printf '[agent]\n'
     printf 'name = "%s"\n' "$name"
     printf 'description = "%s"\n' "$esc_desc"
-    printf '# Mapped from canonical tier "%s" - adjust the tier mapping in scripts/mirror-agents.{sh,ps1}.\n' "$model"
+    printf '# Mapped from canonical tier "%s" - adjust the tier mapping in .agents/model-map.conf.\n' "$model"
     printf 'model = "%s"\n' "$(codex_model "$model")"
     printf 'model_reasoning_effort = "%s"\n' "$(codex_effort "$model")"
     printf 'tools = [%s]\n\n' "$codex_tools"

@@ -4,7 +4,7 @@
 [agent]
 name = "implementor"
 description = "Use to turn confirmed-failing (red) tests green — Phase 4 of develop-feature, or standalone (\"implement task T003\", \"make these tests pass\"). Implements the smallest code that passes each test per tasks.md and the approved plan; never writes, weakens, or deletes tests. Hands off to code-reviewer when green."
-# Mapped from canonical tier "sonnet" - adjust the tier mapping in scripts/mirror-agents.{sh,ps1}.
+# Mapped from canonical tier "sonnet" - adjust the tier mapping in .agents/model-map.conf.
 model = "gpt-5.4"
 model_reasoning_effort = "medium"
 tools = ["read", "grep", "shell", "edit", "write"]

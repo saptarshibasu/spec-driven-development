@@ -33,6 +33,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # === KIT:BEGIN ===
+      # Everything down to KIT:END is kit-owned: `update-kit.sh` replaces this
+      # block verbatim on update. Add your own steps AFTER KIT:END only — see
+      # docs/KIT-MANIFEST.md.
       # ── Repo-hygiene sensors (stack-agnostic — safe to keep on) ───────────
       - name: No unresolved clarification markers in committed specs
         run: |
@@ -91,6 +95,18 @@ jobs:
                      -type f \( -name '*.md' -o -name '*.sh' -o -name '*.ps1' \
                                 -o -name 'pre-commit' \) 2>/dev/null)
           exit "$bad"
+
+      - name: VERSION matches the latest CHANGELOG entry
+        run: |
+          # Catches the kit's own release process slipping — VERSION and
+          # CHANGELOG.md are both kit-owned and must move together.
+          v="$(tr -d '[:space:]' < VERSION)"
+          [ -n "$v" ] || { echo "::error::VERSION is empty."; exit 1; }
+          if ! grep -qF "## [$v]" CHANGELOG.md; then
+            echo "::error::CHANGELOG.md has no '## [$v]' entry matching VERSION ($v)."
+            exit 1
+          fi
+      # === KIT:END ===
 
       # ── Your stack's controls — UNCOMMENT and fill in ─────────────────────
       # The commands here MUST match the ones named in AGENTS.md's Commands

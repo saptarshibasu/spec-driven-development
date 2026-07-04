@@ -8,6 +8,7 @@
 [![Agents](https://img.shields.io/badge/agents-9-2f9e44)](.agents/agents)
 [![Skills](https://img.shields.io/badge/skills-7-9c36b5)](.agents/skills)
 [![Tools](https://img.shields.io/badge/tools-Claude%20%C2%B7%20Copilot%20%C2%B7%20Codex-e8590c)](scripts)
+[![Version](https://img.shields.io/badge/kit%20version-0.1.0-1c7ed6)](CHANGELOG.md)
 [![License](https://img.shields.io/badge/license-see%20LICENSE-868e96)](LICENSE)
 
 </div>
@@ -52,6 +53,8 @@ git config core.hooksPath .githooks
 ```
 
 The two entry points are **`init-project`** (one-time setup) and **`develop-feature`** (every change after that). Everything else is invoked by those two or on demand. After editing any canonical agent or skill under `.agents/`, run `scripts/mirror-agents.sh` / `scripts/mirror-skills.sh` (`.ps1` twins included) to propagate to the per-tool directories.
+
+Already have a copy from an earlier kit version? See **[Repository map](#repository-map)** below for `scripts/update-kit.sh` — it pulls kit-owned improvements into your existing copy without touching `AGENTS.md`, the constitution, `specs/`, or your stack-specific hook/CI sections.
 
 > **Single source of truth:** edit only files under `.agents/`, `templates/`, `docs/`, and `memory/`. Never hand-edit generated files in `.claude/`, `.github/`, or `.codex/` — the mirror scripts overwrite them ([ADR-0001](docs/adr/0001-agents-md-single-source-of-truth.md)).
 
@@ -233,7 +236,21 @@ tests/              unit · integration · contract · characterization
 .githooks/          pre-commit — deterministic, zero-token sensor
 .github/workflows/  agent-harness.yml — CI backstop sensor
 AGENTS.md           always-loaded operational conventions (single source of truth)
+VERSION             installed kit version (semver)
+CHANGELOG.md        the kit's own release history
 ```
+
+> **Updating an existing copy:** `docs/KIT-MANIFEST.md` is the explicit
+> manifest of which paths above are kit-owned vs. project-owned
+> ([ADR-0007](docs/adr/0007-kit-versioning-and-update-path.md)). Point
+> `scripts/update-kit.sh` (`.ps1` twin) at a newer kit checkout to pull in
+> kit-owned changes — new agent/skill fixes, template updates, hardened
+> hook/CI checks — without touching `AGENTS.md`, `memory/`, `specs/`, or your
+> stack-specific hook/CI sections:
+> ```bash
+> git clone <this-repo> /tmp/sdd-kit && scripts/update-kit.sh /tmp/sdd-kit --dry-run
+> scripts/update-kit.sh /tmp/sdd-kit   # apply, then review the diff and commit
+> ```
 
 ---
 
@@ -275,7 +292,7 @@ AGENTS.md           always-loaded operational conventions (single source of trut
 **Governance & memory**
 
 - **Constitution** (`memory/constitution.md`) — highest-authority, always-on principles; test-first is non-negotiable.
-- **Architecture Decision Records** (`docs/adr/`) — six shipped ADRs documenting the kit's own design.
+- **Architecture Decision Records** (`docs/adr/`) — seven shipped ADRs documenting the kit's own design.
 - **Per-feature decision log** — committed audit trail of track, extension opt-ins, and each gate approval.
 - **learnings.md** — append-only cross-session agent memory (Ralph-style), with human-gated compaction.
 - **Test-intent docstrings** — every test explains *why* it exists, so a future run can tell "test is wrong" from "code regressed."
@@ -286,6 +303,7 @@ AGENTS.md           always-loaded operational conventions (single source of trut
 - **Single source of truth** — canonical `.agents/` mirrored into Claude, Copilot, and Codex formats ([ADR-0001](docs/adr/0001-agents-md-single-source-of-truth.md)).
 - **Mirror scripts** — `mirror-agents` (generates per-tool formats) + `mirror-skills` (byte-for-byte copy); CI fails if mirrors drift.
 - **Opt-in extension packs** — blocking rule packs (e.g. `security/baseline`) layered onto a feature on demand, loaded only when opted in.
+- **Kit versioning + update path** — `VERSION` + `CHANGELOG.md`, an explicit kit-owned/project-owned manifest (`docs/KIT-MANIFEST.md`), and `scripts/update-kit.sh` to pull upstream kit improvements into an existing copy without a manual three-way merge ([ADR-0007](docs/adr/0007-kit-versioning-and-update-path.md)).
 - **Templates** — canonical spec / plan / tasks / research / data-model / decision-log / learnings / constitution / checklist / quickstart / agents templates.
 - **MCP guidance** (`docs/mcp.md` + `.mcp.json.example`) — which servers to connect, the 5–7 cap, and security.
 - **Path-scoped instructions** — per-directory guidance (`.github/instructions/`).

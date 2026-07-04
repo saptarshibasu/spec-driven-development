@@ -7,11 +7,17 @@
 # PowerShell-based hook manager): point a one-line `.githooks/pre-commit` wrapper
 # at it, or invoke it from your hook runner. Keep the two checks in sync.
 # See docs/harness-engineering.md and docs/hooks.md.
+#
+# Everything between the KIT:BEGIN/KIT:END markers is kit-owned: `update-kit.ps1`
+# replaces that block verbatim on update and leaves everything outside it
+# (section 4) alone. See docs/KIT-MANIFEST.md. Don't remove or reorder the
+# markers, and don't add stack-specific checks above KIT:END.
 
 $ErrorActionPreference = 'Stop'
 $fail = $false
 $staged = @(git diff --cached --name-only --diff-filter=ACM) | Where-Object { $_ }
 
+# === KIT:BEGIN ===
 # ── 1. Block committed secrets ───────────────────────────────────────────────
 # Coarse, high-signal patterns. A dedicated scanner (gitleaks, trufflehog) is
 # stronger — wire it in here if you have one.
@@ -53,6 +59,7 @@ foreach ($f in 'CLAUDE.md', '.github/copilot-instructions.md') {
     }
   }
 }
+# === KIT:END ===
 
 # ── 4. Your stack's lint + fast tests — UNCOMMENT and match AGENTS.md ─────────
 # Use the SAME commands named in AGENTS.md's Commands section so local, hook,

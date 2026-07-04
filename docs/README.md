@@ -18,6 +18,7 @@ context stays small (see `context-engineering.md` for why).
 | [`hooks.md`](hooks.md) | Git hooks + agent-runtime hooks: turning prose rules into enforced, zero-token controls. Companion to `.githooks/pre-commit`. |
 | [`guardrails.md`](guardrails.md) | Universal behavioral guardrails shared across all skills — the always-on rules every skill session inherits. |
 | [`implementation-handoff.md`](implementation-handoff.md) | Rules for the agent that executes `tasks.md`: picking up an approved plan and implementing it safely. |
+| [`KIT-MANIFEST.md`](KIT-MANIFEST.md) | The kit/project ownership contract: which paths `scripts/update-kit.sh` may touch, and which are yours alone. See [ADR-0007](adr/0007-kit-versioning-and-update-path.md). |
 
 ## Project reference
 

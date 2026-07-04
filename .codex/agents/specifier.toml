@@ -4,7 +4,7 @@
 [agent]
 name = "specifier"
 description = "Use to draft or revise a feature's spec.md — Phase 1 of develop-feature, or standalone (\"draft the spec for X\", \"revise the spec with this feedback\"). Writes WHAT and WHY only — never tech stack or code structure (that's planner). The caller owns the approval gate."
-# Mapped from canonical tier "opus" - adjust the tier mapping in scripts/mirror-agents.{sh,ps1}.
+# Mapped from canonical tier "opus" - adjust the tier mapping in .agents/model-map.conf.
 model = "gpt-5.4"
 model_reasoning_effort = "high"
 tools = ["read", "grep", "edit", "write"]

@@ -11,6 +11,12 @@
 # generated file. Edit the canonical .md only (ADR-0001). CI re-runs this and
 # fails if the committed files drift from a fresh generation.
 #
+# Org-specific model/tool policy (which Copilot/Codex model a tier maps to,
+# which Codex tool a Claude tool maps to) lives in data, not code: see
+# .agents/model-map.conf. EDIT that file to match your org — this script and
+# its bash twin just read it, so a config edit can't introduce logic
+# divergence between the two.
+#
 # Fails loudly (throws) rather than emitting a subtly-wrong file: unknown tool
 # names, front-matter it can't parse as single-line scalars, or a body that would
 # break the Codex TOML string are all hard errors. See mirror-agents.sh.
@@ -22,9 +28,11 @@ $ErrorActionPreference = 'Stop'
 $root = (git rev-parse --show-toplevel 2>$null)
 if (-not $root) { $root = (Get-Location).Path }
 $canon = Join-Path $root '.agents/agents'
+$modelMapPath = Join-Path $root '.agents/model-map.conf'
 
 $srcs = Get-ChildItem $canon -Filter '*.md' -ErrorAction SilentlyContinue
 if (-not $srcs) { throw "$canon has no *.md agents - nothing to mirror." }
+if (-not (Test-Path $modelMapPath)) { throw "$modelMapPath not found - org policy data is missing." }
 
 $claudeDir  = Join-Path $root '.claude/agents'
 $copilotDir = Join-Path $root '.github/agents'
@@ -35,51 +43,37 @@ foreach ($d in @($claudeDir, $copilotDir, $codexDir)) {
     Remove-Item -Force
 }
 
-function Convert-CodexTool($t) {
-  switch ($t) {
-    'Read'  { 'read' }   'Grep'  { 'grep' }  'Glob' { 'grep' }
-    'Bash'  { 'shell' }  'Edit'  { 'edit' }  'Write' { 'write' }
-    # Unknown names are a hard error so a typo or a new tool can't pass through mis-mapped.
-    default { throw "unknown tool '$t' (add it to Convert-CodexTool in mirror-agents.{sh,ps1})" }
-  }
+# Load org policy data (model/tool mappings) from .agents/model-map.conf into
+# a flat hashtable keyed "<namespace>.<key>". This is the ONLY place an org
+# customizes tiers/tools — edit that data file, not this script. See it for
+# the format and namespaces.
+$modelMap = @{}
+foreach ($line in (Get-Content $modelMapPath)) {
+  $t = $line.Trim()
+  if (-not $t -or $t.StartsWith('#')) { continue }
+  $idx = $t.IndexOf('=')
+  if ($idx -lt 0) { continue }
+  $k = $t.Substring(0, $idx).Trim()
+  $v = $t.Substring($idx + 1).Trim()
+  $modelMap[$k] = $v
 }
 
-function Convert-CopilotModel($m) {
-  # Copilot doesn't understand Claude Code's tier aliases (opus/sonnet); it wants
-  # model-picker names, and accepts an array tried in order until an available
-  # model is found - so entries your org hasn't enabled degrade gracefully.
-  # EDIT the values below to match your org's enabled models
-  # (https://docs.github.com/en/copilot/reference/ai-models/supported-models).
-  # Keep in sync with copilot_model() in mirror-agents.sh.
-  switch ($m) {
-    'opus'   { "['Claude Opus 4.8', 'Claude Sonnet 5']" }
-    'sonnet' { "['Claude Sonnet 5', 'Claude Sonnet 4.6']" }
-    'haiku'  { "['Claude Haiku 4.5', 'Claude Sonnet 5']" }
-    default  { throw "unknown model tier '$m' (add it to Convert-CopilotModel in mirror-agents.{sh,ps1})" }
-  }
+function Get-MapEntry($ns, $key) {
+  $full = "$ns.$key"
+  if ($modelMap.ContainsKey($full)) { return $modelMap[$full] }
+  throw "unknown $ns entry '$key' (add '$full=...' to $modelMapPath)"
 }
 
-function Convert-CodexModel($m) {
-  # Codex runs OpenAI models, so the tier's intent (strong reasoning vs fast
-  # execution) maps to model choice + reasoning effort. EDIT to match the
-  # models your Codex plan offers
-  # (https://developers.openai.com/codex/config-reference). Keep in sync with
-  # codex_model()/codex_effort() in mirror-agents.sh.
-  switch ($m) {
-    'opus'   { 'gpt-5.4' }
-    'sonnet' { 'gpt-5.4' }
-    'haiku'  { 'gpt-5.4-mini' }
-    default  { throw "unknown model tier '$m' (add it to Convert-CodexModel in mirror-agents.{sh,ps1})" }
-  }
-}
-function Convert-CodexEffort($m) {
-  switch ($m) {
-    'opus'   { 'high' }
-    'sonnet' { 'medium' }
-    'haiku'  { 'medium' }
-    default  { throw "unknown model tier '$m' (add it to Convert-CodexEffort in mirror-agents.{sh,ps1})" }
-  }
-}
+# Map a Claude tool name to its Codex equivalent. Unknown names are a hard
+# error so a typo or a new tool can't pass through mis-mapped.
+function Convert-CodexTool($t) { Get-MapEntry 'codex_tool' $t }
+
+# Map a canonical model tier to Copilot's `model` front-matter value.
+function Convert-CopilotModel($m) { Get-MapEntry 'copilot_model' $m }
+
+# Map a canonical model tier to a Codex model + reasoning effort.
+function Convert-CodexModel($m) { Get-MapEntry 'codex_model' $m }
+function Convert-CodexEffort($m) { Get-MapEntry 'codex_effort' $m }
 
 $q3 = "'''"
 $count = 0
@@ -129,7 +123,7 @@ foreach ($src in $srcs) {
 [agent]
 name = "$name"
 description = "$escDesc"
-# Mapped from canonical tier "$model" - adjust the tier mapping in scripts/mirror-agents.{sh,ps1}.
+# Mapped from canonical tier "$model" - adjust the tier mapping in .agents/model-map.conf.
 model = "$(Convert-CodexModel $model)"
 model_reasoning_effort = "$(Convert-CodexEffort $model)"
 tools = [$toolsCsv]

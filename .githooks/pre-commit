@@ -11,12 +11,18 @@
 #
 # Adapt the stack-specific section to YOUR project. The generic checks above it
 # are safe to keep on as-is.
+#
+# Everything between the KIT:BEGIN/KIT:END markers is kit-owned: `update-kit.sh`
+# replaces that block verbatim on update and leaves everything outside it (this
+# section 4) alone. See docs/KIT-MANIFEST.md. Don't remove or reorder the
+# markers, and don't add stack-specific checks above KIT:END.
 
 set -uo pipefail
 
 fail=0
 staged=$(git diff --cached --name-only --diff-filter=ACM)
 
+# === KIT:BEGIN ===
 # ── 1. Block committed secrets ───────────────────────────────────────────────
 # Coarse, high-signal patterns. Tune to your stack; a dedicated scanner
 # (gitleaks, trufflehog) is stronger — wire it in here if you have one.
@@ -63,6 +69,7 @@ for f in CLAUDE.md .github/copilot-instructions.md; do
     fi
   fi
 done
+# === KIT:END ===
 
 # ── 4. Your stack's lint + fast tests — UNCOMMENT and match AGENTS.md ─────────
 # Use the SAME commands named in AGENTS.md's Commands section so local, hook,

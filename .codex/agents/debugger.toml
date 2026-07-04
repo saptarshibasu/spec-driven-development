@@ -4,7 +4,7 @@
 [agent]
 name = "debugger"
 description = "Use to investigate a failure — a failing test, exception, stack trace, or behaviour that doesn't match the spec (\"why is this test failing?\"). Runs in its own context and returns root cause plus the minimal fix, not a rewrite. Optionally accepts a spec path and a specs/<NNN>/learnings.md path."
-# Mapped from canonical tier "sonnet" - adjust the tier mapping in scripts/mirror-agents.{sh,ps1}.
+# Mapped from canonical tier "sonnet" - adjust the tier mapping in .agents/model-map.conf.
 model = "gpt-5.4"
 model_reasoning_effort = "medium"
 tools = ["read", "grep", "shell", "edit", "write"]

@@ -4,7 +4,7 @@
 [agent]
 name = "code-reviewer"
 description = "Use to review a diff or changed files before commit or PR — judges what a linter cannot: spec/constitution conformance, naming, abstraction creep, test integrity, security. Invoke after a feature increment is implemented, or on \"review my changes\"."
-# Mapped from canonical tier "opus" - adjust the tier mapping in scripts/mirror-agents.{sh,ps1}.
+# Mapped from canonical tier "opus" - adjust the tier mapping in .agents/model-map.conf.
 model = "gpt-5.4"
 model_reasoning_effort = "high"
 tools = ["read", "grep", "shell"]
