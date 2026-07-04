@@ -76,6 +76,15 @@ jobs:
             exit 1
           fi
 
+      - name: Behavioral guardrails stay in sync with docs/guardrails.md
+        run: |
+          # Drift sensor for ADR-0001's other blind spot: docs/guardrails.md is
+          # the nominal canon for the "No guessing / Investigate before
+          # claiming / Conservative by default" block, but nothing enforced
+          # that every .agents/agents/*.md and .agents/skills/*/SKILL.md
+          # actually matches it. Fails the build the moment one drifts.
+          bash scripts/check-guardrails.sh
+
       - name: No truncated files (canonical sources must end with a newline)
         run: |
           # A text file that stops without a trailing newline is the signature

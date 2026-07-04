@@ -40,12 +40,14 @@ constitution.
   invent an assumption.
 - **Investigate before claiming.** Never make statements about the codebase
   without first reading the relevant files. If a claim requires looking at
-  code, look first. Read before asking — every question you raise should be
-  something you genuinely cannot answer from the files.
+  code, look first.
 - **Conservative by default.** Recommend before you write; stop and ask before
   anything irreversible (deleting files, force-pushing, dropping tables,
-  external service calls). Do not write either file until the user explicitly
-  approves the draft.
+  external service calls).
+- **Read before asking.** Every question you raise should be something you
+  genuinely cannot answer from the files.
+- **Approval before writing.** Do not write either file until the user
+  explicitly approves the draft.
 - **No over-populating.** Short and accurate beats long and generic. Push back
   on conditional or feature-specific content that doesn't belong in these files.
 
