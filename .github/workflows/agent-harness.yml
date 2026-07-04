@@ -151,18 +151,19 @@ jobs:
           # marker the way bash/git do — "--" is PowerShell's decrement
           # operator, so `-Command '...' -- "$f"` fails to parse with
           # "Missing expression after unary operator '--'." Use -File with a
-          # small helper script instead, which binds trailing args to $args
-          # normally.
+          # small helper script instead (built via printf, not a heredoc, so
+          # every line stays a normally indented statement inside this YAML
+          # block scalar — a flush-left heredoc body here breaks YAML parsing).
           checker="$(mktemp --suffix=.ps1)"
-          cat > "$checker" <<'EOF'
-$errors = $null
-[void][System.Management.Automation.Language.Parser]::ParseFile($args[0], [ref]$null, [ref]$errors)
-if ($errors.Count -gt 0) {
-  $errors | ForEach-Object { Write-Output $_.ToString() }
-  exit 1
-}
-exit 0
-EOF
+          {
+            printf '%s\n' '$errors = $null'
+            printf '%s\n' '[void][System.Management.Automation.Language.Parser]::ParseFile($args[0], [ref]$null, [ref]$errors)'
+            printf '%s\n' 'if ($errors.Count -gt 0) {'
+            printf '%s\n' '  $errors | ForEach-Object { Write-Output $_.ToString() }'
+            printf '%s\n' '  exit 1'
+            printf '%s\n' '}'
+            printf '%s\n' 'exit 0'
+          } > "$checker"
           bad=0
           while IFS= read -r f; do
             [ -s "$f" ] || continue
