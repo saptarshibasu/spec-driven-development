@@ -119,7 +119,7 @@ foreach ($line in (Get-Content $kitManifestConf)) {
     'dir'     { $kitOwnedDirs += $path }
     'adr_dir' { $kitAdrDirs += $path }
     'partial' { $kitPartialFiles += $path }
-    default   { Die "$kitManifestConf: unknown namespace '$ns' (expected file/dir/adr_dir/partial)" }
+    default   { Die "${kitManifestConf}: unknown namespace '$ns' (expected file/dir/adr_dir/partial)" }
   }
 }
 # No assertion on $kitPartialFiles.Count - the partial= namespace is
@@ -138,7 +138,7 @@ function Test-KitMarkers($target, $source) {
     $begins = ($lines | Select-String -Pattern 'KIT:BEGIN ===' -SimpleMatch:$false).Count
     $ends = ($lines | Select-String -Pattern 'KIT:END ===' -SimpleMatch:$false).Count
     if ($begins -ne 1 -or $ends -ne 1) {
-      Die "$f: expected exactly one KIT:BEGIN/KIT:END marker pair, found $begins/$ends - resolve by hand (docs/KIT-MANIFEST.md), then re-run. Nothing has been written yet."
+      Die "${f}: expected exactly one KIT:BEGIN/KIT:END marker pair, found $begins/$ends - resolve by hand (docs/KIT-MANIFEST.md), then re-run. Nothing has been written yet."
     }
   }
 }
@@ -204,7 +204,7 @@ function Merge-KitSection($target, $source) {
     $begins = ($lines | Select-String -Pattern 'KIT:BEGIN ===' -SimpleMatch:$false).Count
     $ends = ($lines | Select-String -Pattern 'KIT:END ===' -SimpleMatch:$false).Count
     if ($begins -ne 1 -or $ends -ne 1) {
-      Die "$f: expected exactly one KIT:BEGIN/KIT:END marker pair, found $begins/$ends - resolve by hand (docs/KIT-MANIFEST.md), then re-run."
+      Die "${f}: expected exactly one KIT:BEGIN/KIT:END marker pair, found $begins/$ends - resolve by hand (docs/KIT-MANIFEST.md), then re-run."
     }
   }
 
