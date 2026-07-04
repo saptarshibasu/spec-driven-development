@@ -11,28 +11,51 @@ stay small and issues surface early).
    extension packs). It runs the full review against spec, constitution,
    conventions, performance idioms, boundaries, and security, and reports
    findings grouped by severity with a verdict.
-2. If the verdict has Blockers, **this skill runs the review↔debugger loop**
-   — sub-agents can't invoke each other or pause for approval, so the loop
-   lives here, not inside `code-reviewer`:
+2. If the verdict has Blockers, **this skill runs the review↔fix loop** —
+   sub-agents can't invoke each other or pause for approval, so the loop
+   lives here, not inside `code-reviewer`. First, split the numbered Blocker
+   list by the `Kind` `code-reviewer` tagged each one with:
+   - **`defect`** Blockers (broken/weakened test, behavior diverging from
+     spec, a plausible exploit — an actual bad state to reproduce) go to
+     `debugger`.
+   - **`design`** Blockers (scope creep, an untraceable abstraction, a
+     boundary/"Ask first"/"Never" rule crossed, a convention violation —
+     nothing to reproduce, the diff itself is the finding) go to
+     `implementor` instead. Routing these to `debugger` is a role mismatch —
+     its method starts with "Reproduce," and there's nothing to reproduce for
+     a design violation.
+
+   Then, per round:
    - Relay the complete findings, then ask the human: *"Invoke the debugger
-     on all [N] Blockers above?"* Wait for explicit approval before the
-     **first** round only; later rounds in the same loop don't re-ask.
-   - Invoke the `debugger` agent once per round, passing every currently-open
-     Blocker as a numbered list (file:line, description, suggested fix) and
-     this feature's `learnings.md` path; on round 2+, note which Blockers are
-     still open and what the debugger already tried, so it doesn't repeat a
-     failed fix.
+     on the [N] defect Blocker(s) and implementor on the [M] design
+     Blocker(s) above?"* Wait for explicit approval before the **first**
+     round only; later rounds in the same loop don't re-ask.
+   - Invoke `debugger` on the open `defect` Blockers (numbered list —
+     file:line, description, suggested fix — plus this feature's
+     `learnings.md` path) and, separately, `implementor` on the open `design`
+     Blockers (per its "invoked with a reviewer's design Blocker" section) —
+     both can run in the same round since they touch different findings. On
+     round 2+, note per Blocker what's still open and what was already tried,
+     so neither agent repeats a failed fix.
    - Re-invoke `code-reviewer` for a **re-check pass**, passing the prior
-     findings, the debugger's report, and the files it touched (see the
-     Debugger handoff section of `.agents/agents/code-reviewer.md`).
+     findings, both agents' reports for the round, and the files touched
+     (see the Fix-loop handoff section of `.agents/agents/code-reviewer.md`).
    - Decide from the re-check verdict: all Blockers resolved → step 3; some
-     resolved, some still open → another round; **no forward progress** (the
-     same Blocker survives two consecutive rounds, or the debugger calls it a
-     spec bug) → stop looping and take that Blocker to the human — accept the
-     risk, revise the spec, or redesign (step 4).
-   - If any round's debugger report includes a proposed `AGENTS.md`
-     correction, relay it and get approval the same way Phase 4 step 2 does —
-     apply directly if approved, don't let it block the Blocker loop itself.
+     resolved, some still open → another round; **no forward progress** on a
+     given Blocker (it survives two consecutive rounds, `debugger` calls it a
+     spec bug, or `implementor` reports it can't apply the fix cleanly) →
+     stop looping on that Blocker and take it to the human — accept the risk,
+     revise the spec, or redesign (step 4). Other still-open Blockers can keep
+     looping independently.
+   - If any round's `debugger` or `implementor` report includes a proposed
+     `AGENTS.md` correction, relay it and get approval the same way Phase 4
+     step 2 does — apply directly if approved, don't let it block the loop.
+   - If `implementor` flags a **recurring pattern** of `design` Blockers
+     across stories on this feature (its report's step 6), relay that to the
+     human alongside the Blocker resolution itself — it's signal that
+     `tasks.md` is under-specified or the plan is being under-enforced, a
+     separate thing to fix from closing out the individual findings, and
+     worth surfacing even though it doesn't block this round's verdict.
 3. On a clean verdict (`approve` or `approve-with-nits`): append a **Review**
    row to `decision-log.md`, let the human commit (the `.githooks/pre-commit`
    hook runs its own checks), then continue to step 5 before moving to the

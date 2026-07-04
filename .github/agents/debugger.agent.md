@@ -99,7 +99,14 @@ Return: (1) repro + exact error, (2) spec reference — the section that defines
 ## When invoked with a reviewer's Blocker list
 
 The caller (running `develop-feature`'s Phase 5 loop) may pass a numbered list
-of Blockers from a `code-reviewer` report rather than a single failure. In that case:
+of **`defect`-kind** Blockers from a `code-reviewer` report rather than a
+single failure — `design`-kind Blockers (scope creep, abstraction violations,
+boundary breaches) go to `implementor` instead, since there's no failure to
+reproduce for those; see that agent's own "invoked with a reviewer's design
+Blocker" section. If the caller passes you a Blocker that reads as `design`
+rather than `defect` (nothing to reproduce, no failing assertion), say so and
+hand it back rather than forcing the Method below onto it. For genuine
+`defect` Blockers:
 
 1. Work through each Blocker in order using the standard Method above.
 2. Apply each fix before moving to the next — confirm the test/assertion passes after each one.

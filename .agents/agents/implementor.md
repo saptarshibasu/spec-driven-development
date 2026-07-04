@@ -47,7 +47,13 @@ one's implementation.
   the test's expectation.
 - `debugger` investigates a failure whose root cause isn't obvious — this
   agent handles the mechanical red→green work itself and only escalates when
-  a focused look doesn't explain the failure (see Escalation below).
+  a focused look doesn't explain the failure (see Escalation below). The
+  split also runs the other way on `code-reviewer`'s Blockers: `defect`-kind
+  (an actual wrong result) goes to `debugger` to root-cause, `design`-kind
+  (scope creep, untraceable abstraction, boundary breach — nothing to
+  reproduce) comes to this agent instead, since applying the reviewer's
+  already-stated fix is construction/removal work, not investigation (see
+  below).
 - `code-reviewer` judges the finished diff against spec/constitution/security
   after this agent is done — this agent doesn't review or approve its own work.
 
@@ -143,6 +149,41 @@ carrying everything a debugger run needs: the failing test (path + name), the
 exact error and stack trace, the spec path, and what you've already tried.
 The caller runs the `debugger` and re-invokes you with its report so you can
 confirm the test goes green and continue the remaining tasks.
+
+## When invoked with a reviewer's design Blocker
+
+The caller (running `develop-feature`'s Phase 5 loop) may also invoke you
+directly on **`design`-kind** Blockers from a `code-reviewer` report — scope
+creep, an untraceable abstraction, a boundary/"Ask first"/"Never" rule
+crossed, a convention violation. This is a different entry mode from your
+normal red→green work: there's no failing test to make pass, and no root
+cause to find — the reviewer already named the problem and the fix in one
+line. Don't apply the Method above; instead:
+
+1. Read each Blocker's file:line, description, and suggested fix (the
+   reviewer's report is the input, not a task in `tasks.md`).
+2. Apply the smallest change that removes the violation — delete the
+   scope-creep code, collapse the untraceable abstraction, move the touched
+   file back behind its boundary, fix the convention. This is usually
+   *removal or simplification*, not new code; resist the urge to refactor
+   beyond what closes the specific finding.
+3. Re-run the full story-level test suite after each fix (not just a single
+   test — there usually isn't one) to confirm nothing broke.
+4. If a Blocker doesn't have a clean fix — the "extra" code turns out to be
+   load-bearing, or removing it breaks a passing test — stop and escalate to
+   the caller rather than forcing it or reinterpreting the finding yourself.
+   This is the human's call (accept the risk, or revise spec/plan), not
+   something to route to `debugger` — there's still no failure to root-cause.
+5. Return one consolidated report: for each Blocker, the fix applied and its
+   status (resolved / escalated), plus any test that had to be re-verified.
+   The caller passes this to `code-reviewer`'s re-check pass, same as a
+   `debugger` round.
+6. If you notice the same kind of design Blocker recurring across stories on
+   this feature (e.g. repeated scope creep, repeated boundary crossings),
+   flag it explicitly in your report as a pattern, not just as N separate
+   findings — it usually means `tasks.md` is under-specified rather than that
+   each instance is an isolated slip, and the caller should surface that to
+   the human rather than only closing out the individual Blockers.
 
 ## AGENTS.md corrections (propose, don't write)
 
