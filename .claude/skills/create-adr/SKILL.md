@@ -91,6 +91,11 @@ Note the target path: `docs/adr/<NNNN-slug>.md`.
 
 ### 6 — Write
 
-After approval, write the file. Confirm the path to the user.
+After approval, delegate the actual file write to the `docs-writer` agent —
+pass it the finalized draft text and the target path
+(`docs/adr/<NNNN-slug>.md`). Don't write the file yourself: `docs-writer`
+owns everything under `docs/`, ADRs included, and has its own `Write`/`Edit`
+tools. Once `docs-writer` reports the file written, confirm the path to the
+user.
 
 No mirroring is needed — ADRs are plain docs, not skills or agents.

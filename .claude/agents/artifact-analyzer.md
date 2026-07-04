@@ -107,7 +107,12 @@ in `decision-log.md`, read its rules under `.agents/extensions/` yourself
    the spec/plan. An unmet condition with no covering task is a Blocker. Report
    by rule ID (e.g. "SEC-02: no authz test task for the new endpoint — Blocker").
 7. **Leftover markers.** No unresolved `[NEEDS CLARIFICATION]` survives into an
-   approved spec/plan that tasks now depend on.
+   approved `spec.md` or `plan.md` that `tasks.md` now depends on — **and**
+   `tasks.md` itself is scanned directly for the same marker, not assumed
+   clean because spec/plan are. This check is a **backstop, not a
+   replacement** for checks 1–2: a task can be marker-free and still be an
+   uncovered requirement (check 1) or contradict the plan (check 2) — run all
+   three regardless of what this one finds.
 
 ## How to report
 

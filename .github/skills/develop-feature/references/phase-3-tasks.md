@@ -20,10 +20,14 @@ and local rather than propagating.
    plus any extension-compliance notes. Relay it.
 3. **Stop.** Tell the human the file path (`specs/<NNN>/tasks.md`) and the
    summary from step 2 (see `SKILL.md`'s "don't reprint drafted documents"
-   guardrail). Get explicit approval. On approval, set `tasks.md`'s
-   **Status** to `Approved — <who>, <date>` and append a **Tasks** row to
-   `decision-log.md`. Don't tell the user to start implementing yet — on
-   Tracks C/D the analyzer gate (Phase 3.5) runs first.
+   guardrail). Get explicit approval, and resolution of any
+   `[NEEDS CLARIFICATION]` markers left in `tasks.md`, before this gate
+   clears — resolution means the marker is answered and removed from
+   `tasks.md` itself, not just noted as an accepted exemption in
+   `decision-log.md`. Don't proceed on your own judgment. On approval, set
+   `tasks.md`'s **Status** to `Approved — <who>, <date>` and append a
+   **Tasks** row to `decision-log.md`. Don't tell the user to start
+   implementing yet — on Tracks C/D the analyzer gate (Phase 3.5) runs first.
 4. On requested changes, re-invoke `task-decomposer` with the specific
    feedback rather than hand-editing `tasks.md` yourself, for the same reason
    as Phase 1.

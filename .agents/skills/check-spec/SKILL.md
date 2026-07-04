@@ -17,6 +17,19 @@ Output: `specs/<NNN-feature>/checklist.md` (or `security-checklist.md`), from
 After `clarify-spec`, before `plan`, on any risky or ambiguous feature. Also for
 narrow repeatable domain passes — security, accessibility, migration-readiness.
 
+Track-gated (see `develop-feature`'s Step R):
+
+| Track | Run check-spec? | Why |
+|---|---|---|
+| **A · Trivial — Direct change** | Skip | No `spec.md` to check. |
+| **B · Simple — Patch** | Optional | Short spec, low stakes — offer it; don't default it on. |
+| **C · Moderate — Feature** | Default-on, skippable up front | Standard-depth spec; run unless the human declines before it starts. |
+| **D · Complex — Architecture / brownfield** | Default-on, skippable up front | Highest stakes; same default as C. |
+
+"Skippable up front" means the human may decline before it starts, the same
+convention `artifact-analyzer` uses — it is not a mid-run bailout. Record
+whichever way it goes (ran, or declined) at the approval gate.
+
 ## Behavioral guardrails
 
 - **No guessing.** Where input leaves something unspecified, write

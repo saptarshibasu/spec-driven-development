@@ -27,11 +27,14 @@ session's routing/scaffolding chatter into the draft.
    skill; for a high-stakes, security-sensitive, or ambiguous spec, offer the
    `check-spec` skill (a requirements-quality or domain pass). Both are
    optional — surface them and let the human choose; don't run them
-   unprompted. Then ask for explicit approval or resolution of any
-   `[NEEDS CLARIFICATION]` markers before touching `plan.md`. Don't proceed
-   on your own judgment. On approval, set `spec.md`'s **Status** to
-   `Approved — <who>, <date>` and append a **Specify** row to
-   `decision-log.md`.
+   unprompted. Then ask for explicit approval. Approval requires every
+   `[NEEDS CLARIFICATION]` marker to be resolved **in `spec.md` itself** —
+   the marker answered and removed from the document — before touching
+   `plan.md`; a logged exemption in `decision-log.md` records that a human
+   accepted a risk, it does not substitute for writing the resolution into
+   the artifact. Don't proceed on your own judgment. On approval, set
+   `spec.md`'s **Status** to `Approved — <who>, <date>` and append a
+   **Specify** row to `decision-log.md`.
 4. If the human requests substantive changes instead of approving, re-invoke
    `specifier` with the specific feedback (it re-reads its own prior draft
    from disk) rather than hand-editing `spec.md` yourself — the drafting

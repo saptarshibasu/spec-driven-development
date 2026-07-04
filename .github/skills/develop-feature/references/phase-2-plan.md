@@ -24,8 +24,12 @@ architecture decision here is as expensive to reverse as a wrong requirement.
    summarize it away.
 3. **Stop.** Tell the human the file path (`specs/<NNN>/plan.md`) and the
    gate/extension/research summary from step 2 (see `SKILL.md`'s "don't
-   reprint drafted documents" guardrail). Ask for explicit approval before
-   touching `tasks.md`. On approval, set `plan.md`'s **Status** to
-   `Approved — <who>, <date>` and append a **Plan** row to `decision-log.md`.
+   reprint drafted documents" guardrail). Ask for explicit approval, and
+   resolution of any `[NEEDS CLARIFICATION]` markers left in `plan.md`,
+   before touching `tasks.md` — resolution means the marker is answered and
+   removed from `plan.md` itself, not just noted as an accepted exemption in
+   `decision-log.md`. Don't proceed on your own judgment. On approval, set
+   `plan.md`'s **Status** to `Approved — <who>, <date>` and append a **Plan**
+   row to `decision-log.md`.
 4. On requested changes, re-invoke `planner` with the specific feedback rather
    than hand-editing `plan.md` yourself, for the same reason as Phase 1.
