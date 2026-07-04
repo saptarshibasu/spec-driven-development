@@ -34,7 +34,7 @@ deviation from the spec or plan made during implementation.
 | [DATE] | Specify | spec.md approved | [one line: what was settled, e.g. clarifications resolved] | [human] |
 | [DATE] | Plan | plan.md approved | [constitution gate results; any complexity justified] | [human] |
 | [DATE] | Tasks | tasks.md approved | [one line] | [human] |
-| [DATE] | Analyze | [implementation-ready / skipped — user's call] | [cross-artifact check: coverage + consistency; loop iterations to a clean verdict, or why skipped] | [human] |
+| [DATE] | Analyze | [implementation-ready / skipped — user's call] | [cross-artifact check: coverage + consistency; loop iterations to zero Blockers/Should-fix, open Notes remaining (if any), or why skipped] | [human] |
 | [DATE] | Tests (red) — US[N] | [N tests confirmed failing / skipped — user's call] | [right-reason failures; any characterization decision on Track D] | [human] |
 | [DATE] | Implement — US[N] | story green | [tasks completed; any debugger round or deviation from plan] | [human] |
 | [DATE] | Review — US[N] | [approve / approve-with-nits] | [Blockers resolved via the debugger loop, if any] | [human] |

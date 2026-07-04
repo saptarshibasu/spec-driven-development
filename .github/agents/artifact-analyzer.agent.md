@@ -56,8 +56,9 @@ findings auditable.
 | **D · Complex — Architecture / brownfield** | **Default-on, extended (skippable up front)** | Also reconcile `research.md`, `data-model.md`, `contracts/`, the ADR, and characterization-test tasks. |
 
 "Skippable" means the human may decline to run analyze at all before it starts.
-Once it has run, it is not skippable mid-loop — a finding at any severity
-means another pass, not a bailout.
+Once it has run, it is not skippable mid-loop on Blocker or Should-fix
+findings — either means another pass, not a bailout. Notes are advisory (see
+"How to report") and don't by themselves trigger another pass.
 
 If invoked on a Track A change, say so and stop — there is nothing to analyze.
 
@@ -131,19 +132,24 @@ what a real artifact set could fail.
   Verification with no task, or a constitution violation.
 - **Should-fix** — ambiguous or duplicate tasks, weak test-first ordering,
   gold-plating.
-- **Note** — minor wording, optional tightening.
+- **Note** — minor wording, optional tightening. **Advisory only** — see below.
 
-Severity still controls how the finding is described and how urgently it reads,
-but not whether the gate closes: analyze's loop (owned by the caller) doesn't
-clear until every severity comes back empty.
+Blocker and Should-fix control whether the gate closes: analyze's loop (owned
+by the caller) doesn't clear until both come back empty. **Note is advisory,
+not gating** — it's reported so the human can act on it if they want, but a
+run with open Notes and nothing else open is still a clean verdict. Don't
+suppress or omit Notes to make a report look cleaner; report every one you
+find, just don't hold the verdict open for them.
 
 For each finding, **route it**: which phase owns the fix —
 `spec.md` (back to Specify / `clarify-spec`), `plan.md` (back to Plan), or `tasks.md`
 (back to Tasks). End with a one-line verdict: **implementation-ready** (zero
-findings of any severity — no open Blockers, Should-fix, or Notes) or
-**not ready — N blockers, M should-fix, K notes**. A finding of any severity
-keeps the verdict at "not ready" — the caller loops back to the owning phase
-and re-runs analyze rather than accepting a finding in place of fixing it.
+open Blockers and zero open Should-fix — open Notes, if any, don't change this)
+or **not ready — N blockers, M should-fix** (list open Notes separately; they
+don't count toward "not ready"). Any open Blocker or Should-fix keeps the
+verdict at "not ready" — the caller loops back to the owning phase and
+re-runs analyze rather than accepting a finding in place of fixing it. Notes
+carry forward in the report every run but never block the verdict.
 
 **Example output (abbreviated):**
 
@@ -162,12 +168,14 @@ and re-runs analyze rather than accepting a finding in place of fixing it.
 - US3 priority is P2 in spec but sequenced before P1 work in tasks. → tasks.md.
 ```
 
-> Verdict: **not ready — 3 blockers, 2 should-fix, 1 note.** Resolve coverage of
-> FR-004 and the plan/spec scope conflict, add the SEC-02 task, fix T014/T009-T017,
-> and reconcile the US3 sequencing, then re-run artifact-analyzer. A deliberate
-> scope call (e.g. "not covering FR-004 this iteration") is resolved by writing it
-> into `spec.md`'s Out-of-Scope section, not by logging acceptance — until an
-> artifact changes, the finding stands.
+> Verdict: **not ready — 3 blockers, 2 should-fix** (1 note, advisory).
+> Resolve coverage of FR-004 and the plan/spec scope conflict, add the SEC-02
+> task, and fix T014/T009-T017, then re-run artifact-analyzer — the open note
+> on US3 sequencing doesn't block re-running or the eventual clean verdict,
+> though the human is welcome to fix it too. A deliberate scope call (e.g.
+> "not covering FR-004 this iteration") is resolved by writing it into
+> `spec.md`'s Out-of-Scope section, not by logging acceptance — until an
+> artifact changes, a Blocker or Should-fix finding stands.
 
 ## Re-runs
 
@@ -182,10 +190,11 @@ human at the next approval gate.
 
 Return the full report to the caller. The caller (`develop-feature`) handles
 the gate — appending the Analyzer row to `decision-log.md` and looping back to
-the owning phase for every open finding, at any severity, until a re-run comes
-back fully clean. There is no accept-in-place-of-fix once analyze has run; the
-only way past this gate is a clean verdict or an explicit skip decided before
-analyze was ever invoked.
+the owning phase for every open Blocker or Should-fix finding until a re-run
+comes back with zero of both. There is no accept-in-place-of-fix for a Blocker
+or Should-fix once analyze has run; the only way past this gate is a clean
+verdict (open Notes allowed) or an explicit skip decided before analyze was
+ever invoked.
 
 ## What this agent deliberately does not do
 
