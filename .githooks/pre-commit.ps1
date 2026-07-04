@@ -100,11 +100,11 @@ if ($staged | Where-Object { $_ -like '.agents/*' }) {
 }
 # === KIT:END ===
 
-# ── 5. Your stack's lint + fast tests — UNCOMMENT and match AGENTS.md ─────────
+# ── 5. Your stack's lint + fast tests - UNCOMMENT and match AGENTS.md ─────────
 # Use the SAME commands named in AGENTS.md's Commands section so local, hook,
 # and CI enforcement are identical. Keep these fast; slow suites belong in CI.
 # Route them through scripts/quiet.ps1: hook output is read by agents too, and
-# a sensor that dumps hundreds of log lines pollutes the context it feeds —
+# a sensor that dumps hundreds of log lines pollutes the context it feeds -
 # quiet.ps1 condenses it to pass/fail + the first relevant error, with the
 # full log kept in a temp file (see docs/token-efficiency.md).
 #
