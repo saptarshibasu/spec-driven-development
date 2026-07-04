@@ -147,23 +147,32 @@ jobs:
             echo "::notice::pwsh not available on this runner — skipped .ps1 parse check."
             exit 0
           fi
+          # NOTE: pwsh's -Command mode does not treat "--" as an end-of-options
+          # marker the way bash/git do — "--" is PowerShell's decrement
+          # operator, so `-Command '...' -- "$f"` fails to parse with
+          # "Missing expression after unary operator '--'." Use -File with a
+          # small helper script instead, which binds trailing args to $args
+          # normally.
+          checker="$(mktemp --suffix=.ps1)"
+          cat > "$checker" <<'EOF'
+$errors = $null
+[void][System.Management.Automation.Language.Parser]::ParseFile($args[0], [ref]$null, [ref]$errors)
+if ($errors.Count -gt 0) {
+  $errors | ForEach-Object { Write-Output $_.ToString() }
+  exit 1
+}
+exit 0
+EOF
           bad=0
           while IFS= read -r f; do
             [ -s "$f" ] || continue
-            if ! pwsh -NoProfile -Command '
-              $errors = $null
-              [void][System.Management.Automation.Language.Parser]::ParseFile($args[0], [ref]$null, [ref]$errors)
-              if ($errors.Count -gt 0) {
-                $errors | ForEach-Object { Write-Output $_.ToString() }
-                exit 1
-              }
-              exit 0
-            ' -- "$f"; then
+            if ! pwsh -NoProfile -File "$checker" "$f"; then
               echo "::error::$f failed to parse as PowerShell."
               bad=1
             fi
           done < <(find .agents templates scripts .githooks \
                      -type f -name '*.ps1' 2>/dev/null)
+          rm -f "$checker"
           exit "$bad"
 
       - name: KIT_VERSION matches the latest KIT-CHANGELOG entry
