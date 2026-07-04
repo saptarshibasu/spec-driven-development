@@ -1,5 +1,5 @@
 #!/usr/bin/env pwsh
-# quiet.ps1 — Windows/PowerShell twin of scripts/quiet.sh.
+# quiet.ps1 - Windows/PowerShell twin of scripts/quiet.sh.
 #
 # Context-efficient backpressure: runs any command, swallows its output, and
 # reports pass/fail + the first relevant error only. Full output is kept in a
@@ -12,7 +12,7 @@
 # Tuning (env vars): QUIET_MAX_LINES (default 40), QUIET_ERR_RE,
 # QUIET_TIMEOUT (max seconds before the command is killed; default 300,
 # 0 disables). A hung command is the exact failure mode this wrapper exists
-# to prevent — don't let it hang the agent with zero output instead.
+# to prevent - don't let it hang the agent with zero output instead.
 
 param(
   [Parameter(Mandatory = $true, ValueFromRemainingArguments = $true)]

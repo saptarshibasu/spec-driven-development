@@ -1,5 +1,5 @@
 #!/usr/bin/env pwsh
-# pre-commit.ps1 — Windows/PowerShell twin of the .githooks/pre-commit hook.
+# pre-commit.ps1 - Windows/PowerShell twin of the .githooks/pre-commit hook.
 #
 # Git for Windows runs the POSIX `pre-commit` hook through its bundled bash, so
 # that file already works on Windows if Git Bash is present. This PowerShell
@@ -20,12 +20,12 @@ $staged = @(git diff --cached --name-only --diff-filter=ACM) | Where-Object { $_
 # === KIT:BEGIN ===
 # ── 1. Block committed secrets ───────────────────────────────────────────────
 # Coarse, high-signal patterns. A dedicated scanner (gitleaks, trufflehog) is
-# stronger — wire it in here if you have one.
+# stronger - wire it in here if you have one.
 $secretRe = '(AKIA[0-9A-Z]{16}|-----BEGIN [A-Z ]*PRIVATE KEY-----|xox[baprs]-[0-9A-Za-z-]+|ghp_[0-9A-Za-z]{36}|(api[_-]?key|secret|password|token)["'' ]*[:=]["'' ]*[0-9A-Za-z/+]{16,})'
 $ic = [System.Text.RegularExpressions.RegexOptions]::IgnoreCase
 foreach ($f in $staged) {
   # examples/hooks and templates legitimately show patterns/placeholders;
-  # docs/, AGENTS.md, specs/, and memory/ ARE scanned — real values get pasted
+  # docs/, AGENTS.md, specs/, and memory/ ARE scanned - real values get pasted
   # into project docs and conventions in practice, so a blanket exemption
   # there would defeat the point of the scan.
   if ($f -match '\.example$' -or $f -like '.githooks/*' -or $f -like 'templates/*' -or $f -eq 'README.md') { continue }
@@ -37,7 +37,7 @@ foreach ($f in $staged) {
 }
 
 # ── 2. Block unresolved spec ambiguity markers on Approved specs ─────────────
-# A Draft spec is a work in progress — it's expected to carry open
+# A Draft spec is a work in progress - it's expected to carry open
 # [NEEDS CLARIFICATION] markers and its decision-log should still be
 # committable as an audit trail. Only an Approved spec must be fully resolved.
 foreach ($f in $staged) {
@@ -64,7 +64,7 @@ foreach ($f in 'CLAUDE.md', '.github/copilot-instructions.md') {
 }
 # ── 4. Catch mirror drift before it ever reaches CI ──────────────────────────
 # Same drift guard CI runs (see .github/workflows/agent-harness.yml), but
-# gated on whether .agents/ is actually part of this commit — the cheapest
+# gated on whether .agents/ is actually part of this commit - the cheapest
 # point to catch it is the moment the edit is staged, not a CI round-trip
 # later. Scoped to the generated mirror dirs so unrelated dirty-tree files
 # don't produce a false positive.

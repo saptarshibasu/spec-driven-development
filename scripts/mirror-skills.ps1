@@ -1,5 +1,5 @@
 #!/usr/bin/env pwsh
-# mirror-skills.ps1 — Windows/PowerShell twin of mirror-skills.sh.
+# mirror-skills.ps1 - Windows/PowerShell twin of mirror-skills.sh.
 #
 # Propagates canonical skills (.agents/skills) into the .claude, .github, and
 # .codex mirror dirs (ADR-0001). Run after adding or editing a skill under
@@ -10,7 +10,7 @@
 # (see docs/guardrails.md) gets expanded with the canonical "No guessing /
 # Investigate before claiming / Conservative by default" bullets at mirror
 # time. The canonical .agents/skills/*/SKILL.md never carries the bullets
-# itself — there is nothing to hand-copy and nothing left to drift.
+# itself - there is nothing to hand-copy and nothing left to drift.
 #
 # Usage:  pwsh ./scripts/mirror-skills.ps1   (or, on Windows PowerShell: powershell -File .\scripts\mirror-skills.ps1)
 
@@ -45,7 +45,7 @@ function Expand-SkillGuardrails($file) {
   }
   $pattern = [regex]::Escape($startMarker) + '\r?\n' + [regex]::Escape($endMarker)
   # Static [regex]::Replace has no (input, pattern, replacement, count)
-  # overload — use an instance so the count overload actually limits to one
+  # overload - use an instance so the count overload actually limits to one
   # replacement, and escape '$' in the replacement text since .NET treats it
   # as a backreference token in replacement templates.
   $replacement = ($startMarker + "`n" + $guardrailsSkillCanon + "`n" + $endMarker) -replace '\$', '$$$$'

@@ -1,10 +1,10 @@
 #!/usr/bin/env pwsh
-# start-feature.ps1 — Windows/PowerShell twin of start-feature.sh.
+# start-feature.ps1 - Windows/PowerShell twin of start-feature.sh.
 #
 # Deterministic scaffolding for a new spec-driven feature: pick the next feature
 # number, slugify the description, create specs/<NNN-slug>/, and copy the
 # canonical templates in with the mechanical header fields pre-filled. Does NOT
-# write any actual spec/plan/task content — that's the agent's job, per SKILL.md.
+# write any actual spec/plan/task content - that's the agent's job, per SKILL.md.
 # Behaviour is byte-equivalent to start-feature.sh; keep the two in sync.
 #
 # Usage: ./start-feature.ps1 "<feature description>"
@@ -51,7 +51,7 @@ if (Test-Path $featureDir) { Write-Error "Refusing to overwrite existing $featur
 New-Item -ItemType Directory -Force -Path (Join-Path $featureDir 'contracts') | Out-Null
 
 # 4. Copy the templates and fill in only the mechanical header fields
-#    (feature id, title, date) — never the actual content.
+#    (feature id, title, date) - never the actual content.
 $today = Get-Date -Format 'yyyy-MM-dd'
 foreach ($doc in 'spec', 'plan', 'tasks', 'decision-log', 'learnings') {
   $src = Join-Path $templatesDir "$doc.template.md"

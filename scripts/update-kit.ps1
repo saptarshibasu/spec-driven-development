@@ -1,9 +1,9 @@
 #!/usr/bin/env pwsh
-# update-kit.ps1 — Windows/PowerShell twin of scripts/update-kit.sh.
+# update-kit.ps1 - Windows/PowerShell twin of scripts/update-kit.sh.
 #
 # Pulls kit-owned changes from a newer kit checkout into this project without
 # touching project-owned paths. See docs/KIT-MANIFEST.md (ADR-0007) for what
-# "kit-owned" means. Keep this in lockstep with update-kit.sh — same
+# "kit-owned" means. Keep this in lockstep with update-kit.sh - same
 # KIT:BEGIN/KIT:END merge semantics. Neither script hand-maintains the
 # kit-owned path list any more: both read it from .agents/kit-manifest.conf
 # in the SOURCE checkout at run time, so a data edit can't introduce
@@ -11,15 +11,15 @@
 # checked against the same conf file in CI.
 #
 # Atomicity: every partially kit-owned file (any `partial=` entry in
-# kit-manifest.conf — none ship by default) has its KIT:BEGIN/KIT:END marker
+# kit-manifest.conf - none ship by default) has its KIT:BEGIN/KIT:END marker
 # pair validated (both this project's copy and the source's copy) before
-# step 1 writes anything at all — a corrupted marker aborts up front with
+# step 1 writes anything at all - a corrupted marker aborts up front with
 # nothing changed on disk. See update-kit.sh for the fuller rationale,
 # including why .githooks/pre-commit(.ps1) and agent-harness.yml are no
 # longer tracked here.
 #
 # Downgrade guard: KIT_VERSION is compared as semver (major.minor.patch), not
-# string inequality — pointing this at an older kit checkout is refused
+# string inequality - pointing this at an older kit checkout is refused
 # unless -Force is passed.
 #
 # Usage:
@@ -62,7 +62,7 @@ if ($curVersion -eq $newVersion) {
   exit 0
 }
 
-# ── Semver comparison — refuse a silent downgrade ───────────────────────────
+# ── Semver comparison - refuse a silent downgrade ───────────────────────────
 # Parses "MAJOR.MINOR.PATCH" (a leading 'v' and any -prerelease/+build suffix
 # are tolerated and ignored); non-numeric components are treated as 0 rather
 # than throwing, so a malformed KIT_VERSION fails safe rather than crashing
@@ -97,7 +97,7 @@ if ($DryRun) { Write-Host "(dry run - no files will be written)" }
 Write-Host ''
 
 # ── Kit-owned path lists live in data (.agents/kit-manifest.conf), not code
-# — see that file for the format. Read from the SOURCE checkout: the newer
+# - see that file for the format. Read from the SOURCE checkout: the newer
 # kit version's manifest decides what this run pulls in, same as KIT_VERSION. ──
 $kitManifestConf = Join-Path $Source '.agents/kit-manifest.conf'
 if (-not (Test-Path $kitManifestConf)) { Die "$kitManifestConf not found - '$Source' predates the kit-manifest.conf convention, or isn't a kit checkout." }
@@ -122,7 +122,7 @@ foreach ($line in (Get-Content $kitManifestConf)) {
     default   { Die "$kitManifestConf: unknown namespace '$ns' (expected file/dir/adr_dir/partial)" }
   }
 }
-# No assertion on $kitPartialFiles.Count — the partial= namespace is
+# No assertion on $kitPartialFiles.Count - the partial= namespace is
 # currently unused by default (see kit-manifest.conf's own note: a CI
 # workflow isn't opt-in the way a git hook is, so .githooks/pre-commit(.ps1)
 # and .github/workflows/agent-harness.yml were dropped from the manifest).
@@ -192,7 +192,7 @@ foreach ($adrDir in $kitAdrDirs) {
 }
 
 # ── 3. Partially kit-owned files: replace only the KIT:BEGIN..KIT:END block ─
-# Markers were already validated (both sides) before step 1 ran, above — this
+# Markers were already validated (both sides) before step 1 ran, above - this
 # re-check is just cheap defense against the files changing out from under us
 # mid-run; it should never actually trigger.
 function Merge-KitSection($target, $source) {

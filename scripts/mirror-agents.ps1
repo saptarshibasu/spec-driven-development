@@ -1,5 +1,5 @@
 #!/usr/bin/env pwsh
-# mirror-agents.ps1 — Windows/PowerShell twin of mirror-agents.sh.
+# mirror-agents.ps1 - Windows/PowerShell twin of mirror-agents.sh.
 #
 # Generates the per-tool agent file from each canonical definition in
 # .agents/agents/<name>.md (YAML front-matter + Markdown body):
@@ -14,14 +14,14 @@
 # Behavioral guardrails: the canonical agent files only carry an empty
 # `<!-- GUARDRAILS:agent --><!-- /GUARDRAILS:agent -->` (or `agent-readonly`)
 # marker where the shared "No guessing / Investigate before claiming /
-# Conservative by default" bullets go — this script fills the marker in with
+# Conservative by default" bullets go - this script fills the marker in with
 # the block from docs/guardrails.md at generation time, for every one of the
 # three per-tool outputs. There is nothing left to hand-copy and nothing left
 # to drift.
 #
 # Org-specific model/tool policy (which Copilot/Codex model a tier maps to,
 # which Codex tool a Claude tool maps to) lives in data, not code: see
-# .agents/model-map.conf. EDIT that file to match your org — this script and
+# .agents/model-map.conf. EDIT that file to match your org - this script and
 # its bash twin just read it, so a config edit can't introduce logic
 # divergence between the two.
 #
@@ -55,7 +55,7 @@ foreach ($d in @($claudeDir, $copilotDir, $codexDir)) {
 
 # Load org policy data (model/tool mappings) from .agents/model-map.conf into
 # a flat hashtable keyed "<namespace>.<key>". This is the ONLY place an org
-# customizes tiers/tools — edit that data file, not this script. See it for
+# customizes tiers/tools - edit that data file, not this script. See it for
 # the format and namespaces.
 $modelMap = @{}
 foreach ($line in (Get-Content $modelMapPath)) {
@@ -86,7 +86,7 @@ function Convert-CodexModel($m) { Get-MapEntry 'codex_model' $m }
 function Convert-CodexEffort($m) { Get-MapEntry 'codex_effort' $m }
 
 # Pull one delimited canonical guardrails block out of docs/guardrails.md (the
-# "skill" / "agent" / "agent-readonly" variants — see that file).
+# "skill" / "agent" / "agent-readonly" variants - see that file).
 $guardrailsDocText = Get-Content -Raw $guardrailsDocPath
 function Get-GuardrailsCanon($variant) {
   $start = "<!-- GUARDRAILS:$variant -->"
@@ -113,7 +113,7 @@ function Expand-Guardrails($body, $variant) {
     throw "missing a '$start' ... '$end' marker pair (expected variant '$variant')."
   }
   # Static [regex]::Replace has no (input, pattern, replacement, count)
-  # overload — a literal 4th-arg integer silently coerces into RegexOptions
+  # overload - a literal 4th-arg integer silently coerces into RegexOptions
   # instead (1 = IgnoreCase), which is not what we want. Use an instance so
   # the count overload actually limits to one replacement, and escape '$' in
   # the replacement text since .NET treats it as a backreference token.
@@ -144,7 +144,7 @@ foreach ($src in $srcs) {
 
   # Which guardrails variant this agent's marker expands to: the two
   # read-only agents (no Write/Edit tool) get "agent-readonly", every agent
-  # that can write gets "agent" — see docs/guardrails.md.
+  # that can write gets "agent" - see docs/guardrails.md.
   if ($tools -match 'Write|Edit') { $guardrailsVariant = 'agent' } else { $guardrailsVariant = 'agent-readonly' }
   $body = Expand-Guardrails $body $guardrailsVariant
 
