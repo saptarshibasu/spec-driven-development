@@ -59,9 +59,45 @@ foreach ($f in 'CLAUDE.md', '.github/copilot-instructions.md') {
     }
   }
 }
+# ── 4. Catch mirror drift before it ever reaches CI ──────────────────────────
+# Same drift guard CI runs (see .github/workflows/agent-harness.yml), but
+# gated on whether .agents/ is actually part of this commit — the cheapest
+# point to catch it is the moment the edit is staged, not a CI round-trip
+# later. Scoped to the generated mirror dirs so unrelated dirty-tree files
+# don't produce a false positive.
+if ($staged | Where-Object { $_ -like '.agents/*' }) {
+  Write-Host "Running mirror-skills.sh + mirror-agents.sh (staged .agents/ change)..."
+  $mirrorDirs = '.claude/agents', '.claude/skills', '.github/agents', '.github/skills', '.codex/agents', '.codex/skills'
+  bash scripts/mirror-skills.sh
+  $mirrorOk = $LASTEXITCODE -eq 0
+  if ($mirrorOk) {
+    bash scripts/mirror-agents.sh
+    $mirrorOk = $LASTEXITCODE -eq 0
+  }
+  if (-not $mirrorOk) {
+    Write-Host "X Mirror generation failed - fix the error above."
+    $fail = $true
+  } else {
+    # Compare the working tree to the INDEX (not HEAD): staged mirror
+    # updates you already `git add`ed are expected to differ from HEAD, so
+    # `git status --porcelain` would false-positive on those. `git diff`
+    # (no --cached) flags mirror output the regeneration just changed on
+    # disk that ISN'T what you staged; `ls-files --others` catches
+    # brand-new generated files (e.g. a new agent) that are untracked and
+    # so invisible to `git diff`.
+    $unstagedDiff = @(git diff --name-only -- $mirrorDirs) | Where-Object { $_ }
+    $untracked = @(git ls-files --others --exclude-standard -- $mirrorDirs) | Where-Object { $_ }
+    if ($unstagedDiff -or $untracked) {
+      Write-Host "X .agents/ changed but the mirrors are stale. Run:"
+      Write-Host "    bash scripts/mirror-skills.sh && bash scripts/mirror-agents.sh"
+      Write-Host "  then 'git add' the regenerated files and re-commit."
+      $fail = $true
+    }
+  }
+}
 # === KIT:END ===
 
-# ── 4. Your stack's lint + fast tests — UNCOMMENT and match AGENTS.md ─────────
+# ── 5. Your stack's lint + fast tests — UNCOMMENT and match AGENTS.md ─────────
 # Use the SAME commands named in AGENTS.md's Commands section so local, hook,
 # and CI enforcement are identical. Keep these fast; slow suites belong in CI.
 # Route them through scripts/quiet.ps1: hook output is read by agents too, and
