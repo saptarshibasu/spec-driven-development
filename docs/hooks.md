@@ -17,8 +17,10 @@ change, so they protect the repo from humans and agents alike. This kit ships a
 
 - blocks committed secrets (coarse patterns — wire in `gitleaks`/`trufflehog`
   for real coverage),
-- blocks committing a spec that still has an unresolved `[NEEDS CLARIFICATION]`
-  marker,
+- blocks committing an **Approved** spec that still has an unresolved
+  `[NEEDS CLARIFICATION]` marker (Draft specs are exempt — they're expected to
+  carry open markers while the decision-log is built up as a committed audit
+  trail),
 - keeps `CLAUDE.md` / `copilot-instructions.md` thin (ADR-0001), and
 - has a commented slot for your stack's lint + fast tests — fill it with the
   *same* commands named in `AGENTS.md` so local, hook, and CI checks are
@@ -65,7 +67,7 @@ any hook that runs commands as trusted code.
 | Rule | Best home |
 |---|---|
 | No secrets in VCS | git pre-commit (+ CI) |
-| Spec must be clarified before commit | git pre-commit |
+| Approved spec must be clarified before commit | git pre-commit |
 | Lint/format/type-check | git pre-commit (fast) + CI |
 | Full test suite | CI |
 | Don't edit a locked spec | agent runtime hook (PreToolUse) |

@@ -27,13 +27,18 @@ foreach ($f in $staged) {
   }
 }
 
-# ── 2. Block unresolved spec ambiguity markers ───────────────────────────────
+# ── 2. Block unresolved spec ambiguity markers on Approved specs ─────────────
+# A Draft spec is a work in progress — it's expected to carry open
+# [NEEDS CLARIFICATION] markers and its decision-log should still be
+# committable as an audit trail. Only an Approved spec must be fully resolved.
 foreach ($f in $staged) {
   if ($f -like 'specs/*' -and $f -match '\.md$') {
     $blob = (git show ":$f" 2>$null) -join "`n"
-    if ($blob -match 'NEEDS CLARIFICATION') {
-      Write-Host "X $f still has a [NEEDS CLARIFICATION] marker - resolve it (run the clarify-spec skill) before committing."
-      $fail = $true
+    if ($blob -match '\*\*Status\*\*:\s*Approved') {
+      if ($blob -match 'NEEDS CLARIFICATION') {
+        Write-Host "X $f is Approved but still has a [NEEDS CLARIFICATION] marker - resolve it (run the clarify-spec skill) before committing."
+        $fail = $true
+      }
     }
   }
 }
