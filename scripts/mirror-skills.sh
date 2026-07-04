@@ -52,6 +52,13 @@ expand_skill_guardrails() {
   local file="$1"
   grep -qF '<!-- GUARDRAILS:skill -->' "$file" \
     || die "$file: missing a '<!-- GUARDRAILS:skill --> ... <!-- /GUARDRAILS:skill -->' marker pair."
+  # awk's print always terminates the last record with ORS ("\n"), even when
+  # the source file had no trailing newline -- that would silently add one and
+  # diverge from the .ps1 twin (which preserves the source's exact ending via
+  # Set-Content -NoNewline). Remember whether the source lacked a final
+  # newline so we can strip the one awk adds back off afterward.
+  local had_trailing_nl=1
+  [ -z "$(tail -c1 "$file")" ] || had_trailing_nl=0
   local tmp
   tmp="$(mktemp)"
   awk -v start="<!-- GUARDRAILS:skill -->" -v end="<!-- /GUARDRAILS:skill -->" -v canon="$GUARDRAILS_SKILL_CANON" '
@@ -59,7 +66,12 @@ expand_skill_guardrails() {
     index($0, end) == 1 { f=0 }
     !f { print }
   ' "$file" > "$tmp"
-  mv "$tmp" "$file"
+  if [ "$had_trailing_nl" -eq 0 ]; then
+    printf '%s' "$(cat "$tmp")" > "$file"
+    rm -f "$tmp"
+  else
+    mv "$tmp" "$file"
+  fi
 }
 
 for tool_skills in \
