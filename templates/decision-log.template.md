@@ -30,11 +30,17 @@ deviation from the spec or plan made during implementation.
 | Date | Stage | Decision | Rationale | Approved by |
 |---|---|---|---|---|
 | [DATE] | Route | Track [A/B/C/D] — [name] | [why this track fits the change's scope/risk] | [human] |
-| [DATE] | Extensions | Opted in: [pack-ids or "none"] | [why these packs apply / don't] | [human] |
+| [DATE] | Extensions | Opted in: [pack-id → rule-file path, or "none"] | [why these packs apply / don't] | [human] |
 | [DATE] | Specify | spec.md approved | [one line: what was settled, e.g. clarifications resolved] | [human] |
 | [DATE] | Plan | plan.md approved | [constitution gate results; any complexity justified] | [human] |
 | [DATE] | Tasks | tasks.md approved | [one line] | [human] |
-| [DATE] | Analyze | [implementation-ready / N blockers resolved / skipped — user's call] | [cross-artifact check: coverage + consistency; any finding knowingly accepted, or why skipped] | [human] |
+| [DATE] | Analyze | [implementation-ready / skipped — user's call] | [cross-artifact check: coverage + consistency; loop iterations to zero Blockers/Should-fix, open Notes remaining (if any), or why skipped] | [human] |
+| [DATE] | Tests (red) — US[N] | [N tests confirmed failing / skipped — user's call] | [right-reason failures; any characterization decision on Track D] | [human] |
+| [DATE] | Implement — US[N] | story green | [tasks completed; any debugger round or deviation from plan] | [human] |
+| [DATE] | Review — US[N] | [approve / approve-with-nits] | [Blockers resolved via the debugger loop, if any] | [human] |
+
+The three per-story rows (Tests red → Implement → Review) repeat for each user
+story, in the priority order `tasks.md` defines.
 
 ## Notes
 

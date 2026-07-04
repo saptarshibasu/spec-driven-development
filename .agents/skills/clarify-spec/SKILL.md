@@ -1,6 +1,6 @@
 ---
 name: clarify-spec
-description: Use after a draft spec exists but before planning, to surface and resolve ambiguity — triggers on phrases like "clarify the spec", "are there gaps in this spec", "what's ambiguous here", "review my spec for missing details", or when about to run plan on a spec that still has open questions. Asks a small number of targeted questions one at a time, then writes the answers back into spec.md. Do not use to write a spec from scratch (use develop-feature) or for plan/tasks-level questions.
+description: "Use after a draft spec exists but before planning, to surface and resolve ambiguity — triggers: \"clarify the spec\", \"what's ambiguous here\", \"are there gaps in this spec\". Asks a few targeted questions one at a time, then writes the answers back into spec.md. Not for writing a spec from scratch (develop-feature)."
 ---
 
 # Clarify Spec
@@ -14,15 +14,8 @@ After spec draft exists, before `plan`. Clears `[NEEDS CLARIFICATION]` markers.
 
 ## Behavioral guardrails
 
-- **No guessing.** Where input leaves something unspecified, write
-  `[NEEDS CLARIFICATION: specific question]` and surface it — never silently
-  invent an assumption.
-- **Investigate before claiming.** Never make statements about the codebase
-  without first reading the relevant files. If a claim requires looking at
-  code, look first.
-- **Conservative by default.** Recommend before you write; stop and ask before
-  anything irreversible (deleting files, force-pushing, dropping tables,
-  external service calls).
+<!-- GUARDRAILS:skill -->
+<!-- /GUARDRAILS:skill -->
 - **Ask, don't assume.** Every question must be a real open decision. If you can
   answer it from the spec or codebase, go look — don't ask.
 - **One or two questions at a time.** Focused conversation, not a questionnaire.

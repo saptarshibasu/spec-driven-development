@@ -1,116 +1,93 @@
-<!--
-  TEMPLATE — project-wide, ALWAYS-true principles. Not feature-specific.
-  This file changes rarely and deliberately; per-feature specifics go in
-  spec.template.md instead. Save as e.g. `memory/constitution.md` or
-  `docs/constitution.md` and point to it from AGENTS.md.
-
-  Keep this short. Every principle here should be something you'd enforce
-  on EVERY feature, in EVERY session, regardless of who's working on it —
-  if it's only sometimes true, it belongs in a spec or a Skill, not here.
-
-  Once a principle below is filled in, delete its instructional comment along
-  with it — including this one, once the constitution is ratified. Watch in
-  particular for principle III below: its example citation only makes sense
-  while you're drafting from this knowledge base's templates, not as
-  permanent content of your actual constitution.
--->
-
 # [PROJECT NAME] Constitution
+
+<!--
+Sync Impact Report (fill in on every amendment):
+- Version: [OLD] -> [NEW]
+- Modified principles: [list]
+- Added sections: [list]
+- Removed sections: [list]
+- Templates requiring updates: [list, or "none"]
+-->
 
 ## Core Principles
 
-### I. [PRINCIPLE NAME, e.g. "Library-First"]
+### Article I — [Principle name, e.g. "Library-First"]
 
-[One or two sentences. Example: "Every feature starts as a standalone,
-independently testable module before it's wired into the application — no
-feature is implemented directly inline with no reusable boundary."]
+[Statement of the principle in 1-3 sentences. Should be a testable rule, not
+an aspiration.]
 
-### II. [PRINCIPLE NAME, e.g. "Observability"]
+**Rationale**: [Why this principle exists — what failure mode it prevents.]
 
-[Example: "Every component exposes a way to inspect or invoke it directly
-(CLI, admin endpoint, structured logs) — nothing should require attaching a
-debugger to understand what it did."]
+### Article II — [Principle name]
 
-### III. Test-First (NON-NEGOTIABLE)
+[Statement of the principle.]
 
-No implementation code is written before:
-1. The test is written.
-2. The test is reviewed/approved (by a human, or against the spec's
-   acceptance criteria).
-3. The test is confirmed to **fail** for the expected reason.
+**Rationale**: [Why.]
 
-Red → Green → Refactor, enforced every time.
+### Article III — Test-First Development
 
-Additional rules that are corollaries of this principle and equally
-non-negotiable:
-- **Never delete or weaken a failing test to make the suite pass.** Fix
-  the implementation, or flag the test as wrong and get explicit approval
-  before changing it.
-- **Brownfield areas:** Before changing existing behaviour in any area
-  without existing tests, write characterization tests capturing *current*
-  behaviour first — do not assume what "correct" means without one. Mark
-  these areas in `AGENTS.md` so all agents know to apply this rule there.
+Tests are written before implementation and must fail for the right reason
+before any implementation code is written. Every test carries evidence of
+its own intent.
 
-### IV. [PRINCIPLE NAME, e.g. "Integration-First Testing"]
+Corollaries:
 
-[Example: "Prefer real databases and real service instances over mocks
-wherever practical. Contract tests are mandatory before implementation of
-anything crossing a service or repo boundary."]
+- No implementation code is written before a failing test exists for it.
+- Tests are not modified to make them pass; implementation changes to satisfy
+  tests, never the reverse, without an explicit, logged exception.
+- Every test documents its own intent: a docstring or comment naming the
+  acceptance-criterion ID it verifies and a one-line rationale for why the
+  test proves that criterion.
 
-### V. Simplicity / Anti-Abstraction
+**Rationale**: A test written after the implementation tends to describe what
+the code does, not what it should do — it inherits the implementation's
+blind spots.
 
-- Maximum [N] new top-level modules/projects per feature without documented
-  justification (see Complexity Tracking in plan.template.md).
-- Use the framework directly rather than wrapping it, unless the wrapper is
-  justified in writing.
-- No speculative "might need it later" features or abstractions — every
-  abstraction must trace back to a concrete, current requirement.
+### Article IV — [Principle name]
 
-## [Additional Constraints]
+[Statement of the principle.]
 
-<!-- Security requirements, compliance standards, performance floors,
-     deployment policies — anything that's always true for this project.
-     Example entries below; keep only what's genuinely universal for your
-     project and delete the rest. -->
+**Rationale**: [Why.]
 
-- **Credentials:** No secrets, API keys, tokens, or passwords are ever
-  committed to version control, hard-coded in source files, or logged.
-  Use the project's designated secrets manager or environment-variable
-  mechanism — always.
-- **Cross-repo contracts — never guess, always verify.** When a dependency's
-  source is not visible in this repo, resolve it before writing any code that
-  depends on it: look for a sibling repo checkout, then a source jar, then
-  decompile the binary jar. The specific resolution commands and paths are in
-  `AGENTS.md`'s Multi-Repo section. If no resolution is possible, say so
-  explicitly — do not infer or fabricate class names, field names, method
-  signatures, or return types.
-- [Compliance / regulatory requirement, if any — e.g. "All PII must be
-  encrypted at rest and in transit; no PII in logs."]
-- [Performance floor, if non-negotiable across all features — e.g.
-  "p95 response time ≤ 200 ms for all user-facing endpoints."]
-- [Deployment policy, if universal — e.g. "Production deploys require
-  a human to trigger them; no automated deploy to production."]
+## Additional Constraints
 
-## [Development Workflow / Quality Gates]
+[Technology stack requirements, compliance obligations, deployment policies,
+or other constraints that apply across all features. Optional section —
+delete if not needed.]
 
-<!-- Code review requirements, required CI checks, what blocks a merge.
-     Only include items that are enforced for every PR, without exception. -->
+## Development Workflow
 
-- [e.g., "All CI checks must pass before merge — no exceptions."]
-- [e.g., "Every PR requires at least one human review from a team member
-  who did not write the code."]
-- [e.g., "Coverage must not drop below N% — PRs that reduce coverage are
-  blocked until tests are added."]
+[Code review requirements, testing gates, deployment approval process.
+Optional section — delete if not needed.]
 
 ## Governance
 
-This constitution supersedes ad hoc team conventions. Amendments require:
-- Written rationale for the change.
-- Review/approval by [whoever owns this].
-- A note on backward-compatibility impact for in-flight features.
+This constitution supersedes all other project practices and guidelines.
+Amendments require documentation of the change, a migration or compatibility
+review, and explicit approval before the new version takes effect.
 
-Use `AGENTS.md` and per-feature `spec.md` files for day-to-day, conditional
-guidance — this file is for what's true regardless of which feature is being
-built.
+All PRs and reviews must verify compliance with this constitution. Complexity
+introduced beyond these principles must be justified in `decision-log.md`.
+Use `AGENTS.md` for day-to-day runtime development guidance; this document
+is the constitutional layer it must remain consistent with.
 
-**Version**: [x.y.z] | **Ratified**: [DATE] | **Last Amended**: [DATE]
+### Amendments
+
+To amend this constitution:
+
+1. Propose the change (what's changing, and why) and reach agreement with the
+   project's maintainers.
+2. Update this file, filling in the Sync Impact Report at the top.
+3. Bump the version per the rules below.
+4. Propagate any resulting changes to `AGENTS.md`, templates, and skill
+   files so they stay consistent with the new text.
+
+Versioning policy (semantic):
+
+- **MAJOR**: backward-incompatible governance/principle removals or
+  redefinitions.
+- **MINOR**: a new principle or materially expanded guidance added.
+- **PATCH**: clarifications, wording fixes, typo corrections, non-semantic
+  refinements.
+
+**Version**: [X.Y.Z] | **Ratified**: [DATE] | **Last Amended**: [DATE]

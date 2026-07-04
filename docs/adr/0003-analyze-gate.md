@@ -67,7 +67,7 @@ noted there too). No new per-feature artifact/template is introduced — analyze
 reports to chat and logs a row — keeping the maintenance surface small.
 
 The agent is canonical in `.agents/agents/artifact-analyzer.md` and mirrored to the tool
-dirs via `mirror-agents.sh` (ADR-0001); the `develop-feature` edit propagates
+dirs via `scripts/mirror-agents.sh` (ADR-0001); the `develop-feature` edit propagates
 the same way.
 
 ## Consequences

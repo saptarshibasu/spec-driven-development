@@ -1,6 +1,6 @@
 ---
 name: init-project
-description: Use when setting up a project's AI agent configuration from scratch — triggers on phrases like "initialize the project", "set up AGENTS.md", "bootstrap project config", "create project constitution", "set up the project for agents", "initialize agent config", "let's configure the project", or any request to fill in the project's AGENTS.md or create its constitution. Reads the codebase first, then produces both a filled-in AGENTS.md and memory/constitution.md in a single gated session with explicit approval before writing either file. This is the one-time project setup step that should happen before any develop-feature work.
+description: "Use when setting up a project's AI agent configuration from scratch — triggers: \"initialize the project\", \"set up AGENTS.md\", \"bootstrap project config\", \"create project constitution\". Reads the codebase, then produces a filled-in AGENTS.md and memory/constitution.md with explicit approval before writing. One-time setup that precedes any develop-feature work."
 ---
 
 # Init Project
@@ -35,17 +35,21 @@ constitution.
 
 ## Behavioral guardrails (apply throughout this skill session)
 
+<!-- GUARDRAILS:skill -->
 - **No guessing.** Where input leaves something unspecified, write
   `[NEEDS CLARIFICATION: specific question]` and surface it — never silently
   invent an assumption.
 - **Investigate before claiming.** Never make statements about the codebase
   without first reading the relevant files. If a claim requires looking at
-  code, look first. Read before asking — every question you raise should be
-  something you genuinely cannot answer from the files.
+  code, look first.
 - **Conservative by default.** Recommend before you write; stop and ask before
   anything irreversible (deleting files, force-pushing, dropping tables,
-  external service calls). Do not write either file until the user explicitly
-  approves the draft.
+  external service calls).
+<!-- /GUARDRAILS:skill -->
+- **Read before asking.** Every question you raise should be something you
+  genuinely cannot answer from the files.
+- **Approval before writing.** Do not write either file until the user
+  explicitly approves the draft.
 - **No over-populating.** Short and accurate beats long and generic. Push back
   on conditional or feature-specific content that doesn't belong in these files.
 
@@ -203,8 +207,9 @@ repeat the summary; do not paste the revised draft into chat.
 Then confirm to the user:
 - Both files written and their paths
 - Constitution version and ratification date
-- Reminder: run `mirror-agents.sh` (or `.ps1`) to sync AGENTS.md to
-  `.agents/` and `.codex/` format files
+- Note: `AGENTS.md` needs no mirroring — `CLAUDE.md` and
+  `.github/copilot-instructions.md` are static pointers to it (ADR-0001);
+  the mirror scripts propagate agents/skills, not this file.
 
 ## What this skill does not do
 

@@ -1,6 +1,6 @@
 ---
 name: check-spec
-description: Use to generate a requirements-quality checklist for a feature — "unit tests for the spec." Triggers on phrases like "make a checklist for this spec", "is this spec ready", "review requirements quality", "security checklist for X", or before planning a high-stakes feature. Produces a filled-in checklist from templates/checklist.template.md that tests whether the REQUIREMENTS are complete/clear/consistent/measurable — not whether the code works. Do not use to test implementation (that's the test suite) or to resolve ambiguity (use clarify-spec).
+description: "Use to generate a requirements-quality checklist for a feature spec — \"unit tests for the spec\". Triggers: \"is this spec ready\", \"make a checklist for this spec\", \"review requirements quality\", or before planning a high-stakes feature. Tests whether the requirements are complete, clear, consistent, and measurable — not whether code works, and not for resolving ambiguity (clarify-spec)."
 ---
 
 # Check Spec
@@ -17,8 +17,22 @@ Output: `specs/<NNN-feature>/checklist.md` (or `security-checklist.md`), from
 After `clarify-spec`, before `plan`, on any risky or ambiguous feature. Also for
 narrow repeatable domain passes — security, accessibility, migration-readiness.
 
+Track-gated (see `develop-feature`'s Step R):
+
+| Track | Run check-spec? | Why |
+|---|---|---|
+| **A · Trivial — Direct change** | Skip | No `spec.md` to check. |
+| **B · Simple — Patch** | Optional | Short spec, low stakes — offer it; don't default it on. |
+| **C · Moderate — Feature** | Default-on, skippable up front | Standard-depth spec; run unless the human declines before it starts. |
+| **D · Complex — Architecture / brownfield** | Default-on, skippable up front | Highest stakes; same default as C. |
+
+"Skippable up front" means the human may decline before it starts, the same
+convention `artifact-analyzer` uses — it is not a mid-run bailout. Record
+whichever way it goes (ran, or declined) at the approval gate.
+
 ## Behavioral guardrails
 
+<!-- GUARDRAILS:skill -->
 - **No guessing.** Where input leaves something unspecified, write
   `[NEEDS CLARIFICATION: specific question]` and surface it — never silently
   invent an assumption.
@@ -28,6 +42,7 @@ narrow repeatable domain passes — security, accessibility, migration-readiness
 - **Conservative by default.** Recommend before you write; stop and ask before
   anything irreversible (deleting files, force-pushing, dropping tables,
   external service calls).
+<!-- /GUARDRAILS:skill -->
 - **Test requirements, not implementation.** Items interrogate spec quality
   ("Is the latency target measurable?"), never code behaviour. Runnable-only
   items belong in the test suite.

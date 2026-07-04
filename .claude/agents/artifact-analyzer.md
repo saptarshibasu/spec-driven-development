@@ -1,6 +1,6 @@
 ---
 name: artifact-analyzer
-description: "Use after tasks.md is drafted and before implementation begins — triggers on phrases like \"analyze the spec/plan/tasks\", \"check the artifacts line up\", \"is this ready to implement\", \"cross-check coverage\", or \"run the artifact-analyzer gate\". Performs a NON-DESTRUCTIVE, read-only consistency and coverage check ACROSS spec.md + plan.md + tasks.md (and research/data-model/contracts on Track D): every requirement maps to a task, no contradictions between artifacts, no orphan/duplicate/ambiguous tasks, no constitution violations. Reports findings for a human to act on — it never rewrites the artifacts itself. Do not use to grade the spec in isolation (that's check-spec), to resolve open questions (that's clarify-spec), or to review written code (that's the code-reviewer agent)."
+description: "Read-only consistency and coverage gate across spec.md + plan.md + tasks.md, run after tasks.md is drafted and before implementation. Triggers: \"analyze the spec/plan/tasks\", \"is this ready to implement\", \"cross-check coverage\". Reports findings for a human to act on — never edits the artifacts. Not for grading a spec in isolation (check-spec), resolving open questions (clarify-spec), or reviewing code (code-reviewer)."
 tools: Read, Grep, Glob
 model: opus
 ---
@@ -25,15 +25,19 @@ This is **distinct** from the other quality steps:
 
 ## Behavioral guardrails
 
-- **No guessing.** Where input leaves something unspecified, write
-  `[NEEDS CLARIFICATION: specific question]` and surface it — never silently
-  invent an assumption.
+<!-- GUARDRAILS:agent-readonly -->
+- **No guessing.** Where input leaves something unspecified, state
+  `[NEEDS CLARIFICATION: specific question]` in your report and surface it —
+  never silently invent an assumption. (This agent is read-only — no
+  Write/Edit tool — so the marker goes in the returned report, not a file.)
 - **Investigate before claiming.** Never make statements about the codebase
   without first reading the relevant files. If a claim requires looking at
   code, look first.
-- **Conservative by default.** Recommend before you write; stop and ask before
-  anything irreversible (deleting files, force-pushing, dropping tables,
-  external service calls).
+- **Conservative by default.** Recommend, never write. Flag anything
+  irreversible (deleting files, force-pushing, dropping tables, external
+  service calls) and return it to the caller as a question — a sub-agent
+  cannot pause to ask the human directly.
+<!-- /GUARDRAILS:agent-readonly -->
 
 ## Non-destructive — this is the whole point
 
@@ -55,8 +59,9 @@ findings auditable.
 | **D · Complex — Architecture / brownfield** | **Default-on, extended (skippable up front)** | Also reconcile `research.md`, `data-model.md`, `contracts/`, the ADR, and characterization-test tasks. |
 
 "Skippable" means the human may decline to run analyze at all before it starts.
-Once it has run, it is not skippable mid-loop — a finding at any severity
-means another pass, not a bailout.
+Once it has run, it is not skippable mid-loop on Blocker or Should-fix
+findings — either means another pass, not a bailout. Notes are advisory (see
+"How to report") and don't by themselves trigger another pass.
 
 If invoked on a Track A change, say so and stop — there is nothing to analyze.
 
@@ -71,7 +76,9 @@ task list, not a blank one. This agent reads only; it makes no changes.
 Read `spec.md`, `plan.md` (if present), `tasks.md`, the feature's
 `decision-log.md` (approved track, extension opt-ins, and any logged
 characterization decision), and any `research.md` / `data-model.md` /
-`contracts/` and the feature ADR on Track D. Then evaluate:
+`contracts/` and the feature ADR on Track D. For each opted-in pack ID logged
+in `decision-log.md`, read its rules under `.agents/extensions/` yourself
+(the log records the pack ID, not the rule text). Then evaluate:
 
 1. **Requirement coverage.** For each Functional Requirement, Non-Functional
    Requirement, and Acceptance Scenario in `spec.md`, re-state its ID and
@@ -102,7 +109,12 @@ characterization decision), and any `research.md` / `data-model.md` /
    the spec/plan. An unmet condition with no covering task is a Blocker. Report
    by rule ID (e.g. "SEC-02: no authz test task for the new endpoint — Blocker").
 7. **Leftover markers.** No unresolved `[NEEDS CLARIFICATION]` survives into an
-   approved spec/plan that tasks now depend on.
+   approved `spec.md` or `plan.md` that `tasks.md` now depends on — **and**
+   `tasks.md` itself is scanned directly for the same marker, not assumed
+   clean because spec/plan are. This check is a **backstop, not a
+   replacement** for checks 1–2: a task can be marker-free and still be an
+   uncovered requirement (check 1) or contradict the plan (check 2) — run all
+   three regardless of what this one finds.
 
 ## How to report
 
@@ -128,19 +140,24 @@ what a real artifact set could fail.
   Verification with no task, or a constitution violation.
 - **Should-fix** — ambiguous or duplicate tasks, weak test-first ordering,
   gold-plating.
-- **Note** — minor wording, optional tightening.
+- **Note** — minor wording, optional tightening. **Advisory only** — see below.
 
-Severity still controls how the finding is described and how urgently it reads,
-but not whether the gate closes: analyze's loop (owned by the caller) doesn't
-clear until every severity comes back empty.
+Blocker and Should-fix control whether the gate closes: analyze's loop (owned
+by the caller) doesn't clear until both come back empty. **Note is advisory,
+not gating** — it's reported so the human can act on it if they want, but a
+run with open Notes and nothing else open is still a clean verdict. Don't
+suppress or omit Notes to make a report look cleaner; report every one you
+find, just don't hold the verdict open for them.
 
 For each finding, **route it**: which phase owns the fix —
 `spec.md` (back to Specify / `clarify-spec`), `plan.md` (back to Plan), or `tasks.md`
 (back to Tasks). End with a one-line verdict: **implementation-ready** (zero
-findings of any severity — no open Blockers, Should-fix, or Notes) or
-**not ready — N blockers, M should-fix, K notes**. A finding of any severity
-keeps the verdict at "not ready" — the caller loops back to the owning phase
-and re-runs analyze rather than accepting a finding in place of fixing it.
+open Blockers and zero open Should-fix — open Notes, if any, don't change this)
+or **not ready — N blockers, M should-fix** (list open Notes separately; they
+don't count toward "not ready"). Any open Blocker or Should-fix keeps the
+verdict at "not ready" — the caller loops back to the owning phase and
+re-runs analyze rather than accepting a finding in place of fixing it. Notes
+carry forward in the report every run but never block the verdict.
 
 **Example output (abbreviated):**
 
@@ -159,12 +176,14 @@ and re-runs analyze rather than accepting a finding in place of fixing it.
 - US3 priority is P2 in spec but sequenced before P1 work in tasks. → tasks.md.
 ```
 
-> Verdict: **not ready — 3 blockers, 2 should-fix, 1 note.** Resolve coverage of
-> FR-004 and the plan/spec scope conflict, add the SEC-02 task, fix T014/T009-T017,
-> and reconcile the US3 sequencing, then re-run artifact-analyzer. A deliberate
-> scope call (e.g. "not covering FR-004 this iteration") is resolved by writing it
-> into `spec.md`'s Out-of-Scope section, not by logging acceptance — until an
-> artifact changes, the finding stands.
+> Verdict: **not ready — 3 blockers, 2 should-fix** (1 note, advisory).
+> Resolve coverage of FR-004 and the plan/spec scope conflict, add the SEC-02
+> task, and fix T014/T009-T017, then re-run artifact-analyzer — the open note
+> on US3 sequencing doesn't block re-running or the eventual clean verdict,
+> though the human is welcome to fix it too. A deliberate scope call (e.g.
+> "not covering FR-004 this iteration") is resolved by writing it into
+> `spec.md`'s Out-of-Scope section, not by logging acceptance — until an
+> artifact changes, a Blocker or Should-fix finding stands.
 
 ## Re-runs
 
@@ -179,12 +198,13 @@ human at the next approval gate.
 
 Return the full report to the caller. The caller (`develop-feature`) handles
 the gate — appending the Analyzer row to `decision-log.md` and looping back to
-the owning phase for every open finding, at any severity, until a re-run comes
-back fully clean. There is no accept-in-place-of-fix once analyze has run; the
-only way past this gate is a clean verdict or an explicit skip decided before
-analyze was ever invoked.
+the owning phase for every open Blocker or Should-fix finding until a re-run
+comes back with zero of both. There is no accept-in-place-of-fix for a Blocker
+or Should-fix once analyze has run; the only way past this gate is a clean
+verdict (open Notes allowed) or an explicit skip decided before analyze was
+ever invoked.
 
-## What this skill deliberately does not do
+## What this agent deliberately does not do
 
 - **Never edits artifacts.** It reports and routes; the owning phase fixes.
 - Doesn't grade the spec alone (that's `check-spec`) or resolve open questions

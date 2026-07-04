@@ -1,6 +1,6 @@
 ---
 name: amend-constitution
-description: Use when updating or revisiting a project's governing constitution — triggers on phrases like "amend the constitution", "update our principles", "revisit the constitution", "change our architectural principles", "update the constitution", or "ratify a constitution change". Amends specific sections of an existing memory/constitution.md, asking targeted questions and requiring explicit approval before saving. The initial constitution is created by init-project — use this skill only for subsequent amendments. Do not use for per-feature decisions (those go in spec.md) or for repo-specific operational facts (those go in AGENTS.md).
+description: "Use when amending an existing memory/constitution.md — triggers: \"amend the constitution\", \"update our principles\", \"change our architectural principles\". Asks targeted questions and requires explicit approval before saving. Initial creation is init-project's job; per-feature decisions belong in spec.md, operational facts in AGENTS.md."
 ---
 
 # Amend Constitution
@@ -23,6 +23,7 @@ Only-sometimes-true or feature-specific principles don't belong here.
 
 ## Behavioral guardrails (apply throughout this skill session)
 
+<!-- GUARDRAILS:skill -->
 - **No guessing.** Where input leaves something unspecified, write
   `[NEEDS CLARIFICATION: specific question]` and surface it — never silently
   invent an assumption.
@@ -32,6 +33,7 @@ Only-sometimes-true or feature-specific principles don't belong here.
 - **Conservative by default.** Recommend before you write; stop and ask before
   anything irreversible (deleting files, force-pushing, dropping tables,
   external service calls).
+<!-- /GUARDRAILS:skill -->
 - **No over-populating.** A short constitution enforced consistently beats a
   long one that gets ignored. Push back on conditional or feature-specific
   content that doesn't belong in the constitution.

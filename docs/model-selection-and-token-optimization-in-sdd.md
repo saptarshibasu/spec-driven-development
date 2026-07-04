@@ -69,8 +69,9 @@ hand-written per-phase policy like the table above captures most of the gain.
   the `AGENTS.md` Model Routing section assumes.
 - **Subagents with pinned models.** Give the reviewer subagent a different
   model family than your implementer; give a cheap search subagent the fast
-  tier. The `code-reviewer` agent files in this repo leave the model field for
-  you to set deliberately.
+  tier. The `code-reviewer` agent in this repo pins a default `model:` in its
+  front-matter — override it deliberately, ideally to a different family than
+  the model that writes the code.
 - **A routing layer / router model.** For high request volumes, a dedicated
   complexity-based router (e.g. RouteLLM-style strong/weak routing) automates
   the dispatch and stays durable when the model lineup changes — routers

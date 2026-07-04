@@ -14,6 +14,7 @@ Records a new Architecture Decision Record in `docs/adr/`.
 
 ## Behavioral guardrails
 
+<!-- GUARDRAILS:skill -->
 - **No guessing.** Where input leaves something unspecified, write
   `[NEEDS CLARIFICATION: specific question]` and surface it — never silently
   invent an assumption.
@@ -23,6 +24,7 @@ Records a new Architecture Decision Record in `docs/adr/`.
 - **Conservative by default.** Recommend before you write; stop and ask before
   anything irreversible (deleting files, force-pushing, dropping tables,
   external service calls).
+<!-- /GUARDRAILS:skill -->
 - **One decision per ADR.** If the user describes multiple decisions, split them
   or ask which to record first.
 - **Immutable once written.** Remind the user: to reverse a decision, add a new
@@ -91,6 +93,11 @@ Note the target path: `docs/adr/<NNNN-slug>.md`.
 
 ### 6 — Write
 
-After approval, write the file. Confirm the path to the user.
+After approval, delegate the actual file write to the `docs-writer` agent —
+pass it the finalized draft text and the target path
+(`docs/adr/<NNNN-slug>.md`). Don't write the file yourself: `docs-writer`
+owns everything under `docs/`, ADRs included, and has its own `Write`/`Edit`
+tools. Once `docs-writer` reports the file written, confirm the path to the
+user.
 
 No mirroring is needed — ADRs are plain docs, not skills or agents.

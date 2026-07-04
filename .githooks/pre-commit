@@ -11,60 +11,105 @@
 #
 # Adapt the stack-specific section to YOUR project. The generic checks above it
 # are safe to keep on as-is.
+#
+# Everything between the KIT:BEGIN/KIT:END markers is kit-owned: `update-kit.sh`
+# replaces that block verbatim on update and leaves everything outside it (this
+# section 4) alone. See docs/KIT-MANIFEST.md. Don't remove or reorder the
+# markers, and don't add stack-specific checks above KIT:END.
 
 set -uo pipefail
 
 fail=0
 staged=$(git diff --cached --name-only --diff-filter=ACM)
 
+# === KIT:BEGIN ===
 # ── 1. Block committed secrets ───────────────────────────────────────────────
 # Coarse, high-signal patterns. Tune to your stack; a dedicated scanner
 # (gitleaks, trufflehog) is stronger — wire it in here if you have one.
 secret_re='(AKIA[0-9A-Z]{16}|-----BEGIN [A-Z ]*PRIVATE KEY-----|xox[baprs]-[0-9A-Za-z-]+|ghp_[0-9A-Za-z]{36}|(api[_-]?key|secret|password|token)["'"'"' ]*[:=]["'"'"' ]*[0-9A-Za-z/+]{16,})'
-for f in $staged; do
+while IFS= read -r f; do
+  [ -n "$f" ] || continue
   [ -f "$f" ] || continue
   case "$f" in
-    *.example|.githooks/*) continue ;;                 # examples/hooks show patterns
-    docs/*|templates/*|README.md|AGENTS.md) continue ;; # prose that legitimately quotes patterns
-  esac                                                 # note: specs/ and memory/ ARE scanned
+    *.example|.githooks/*) continue ;;   # examples/hooks legitimately show patterns
+    templates/*|README.md) continue ;;   # templates/placeholders and the public README
+  esac   # note: docs/, AGENTS.md, specs/, and memory/ ARE scanned — real values
+         # get pasted into project docs and conventions in practice, so a
+         # blanket exemption there defeats the point of the scan.
   if git show ":$f" | grep -nEi "$secret_re" >/dev/null 2>&1; then
     echo "✖ Possible secret in $f — remove it or use an env var (constitution: no secrets in VCS)."
     fail=1
   fi
-done
+done <<< "$staged"
 
-# ── 2. Block unresolved spec ambiguity markers ───────────────────────────────
-# A spec with an open [NEEDS CLARIFICATION] is not ready to be committed as done.
-for f in $staged; do
+# ── 2. Block unresolved spec ambiguity markers on Approved specs ─────────────
+# A Draft spec is a work in progress — it's expected to carry open
+# [NEEDS CLARIFICATION] markers and its decision-log should still be
+# committable as an audit trail. Only an Approved spec must be fully resolved.
+while IFS= read -r f; do
+  [ -n "$f" ] || continue
   case "$f" in
     specs/*.md)
-      if git show ":$f" | grep -n 'NEEDS CLARIFICATION' >/dev/null 2>&1; then
-        echo "✖ $f still has a [NEEDS CLARIFICATION] marker — resolve it (run the clarify-spec skill) before committing."
-        fail=1
+      content=$(git show ":$f" 2>/dev/null)
+      if printf '%s\n' "$content" | grep -qE '\*\*Status\*\*:[[:space:]]*Approved'; then
+        if printf '%s\n' "$content" | grep -n 'NEEDS CLARIFICATION' >/dev/null 2>&1; then
+          echo "✖ $f is Approved but still has a [NEEDS CLARIFICATION] marker — resolve it (run the clarify-spec skill) before committing."
+          fail=1
+        fi
       fi
       ;;
   esac
-done
+done <<< "$staged"
 
 # ── 3. Keep tool instruction files thin (see ADR-0001) ───────────────────────
 for f in CLAUDE.md .github/copilot-instructions.md; do
-  case " $staged " in
-    *" $f "*)
-      lines=$(git show ":$f" | grep -cvE '^\s*(<!--.*-->)?\s*$' || true)
-      if [ "${lines:-0}" -gt 2 ]; then
-        echo "✖ $f has grown beyond a pointer — conventions belong in AGENTS.md (ADR-0001)."
-        fail=1
-      fi
-      ;;
-  esac
+  if printf '%s\n' "$staged" | grep -qxF "$f"; then
+    lines=$(git show ":$f" | grep -cvE '^\s*(<!--.*-->)?\s*$' || true)
+    if [ "${lines:-0}" -gt 2 ]; then
+      echo "✖ $f has grown beyond a pointer — conventions belong in AGENTS.md (ADR-0001)."
+      fail=1
+    fi
+  fi
 done
+# ── 4. Catch mirror drift before it ever reaches CI ──────────────────────────
+# Same drift guard CI runs (see .github/workflows/agent-harness.yml), but
+# gated on whether .agents/ is actually part of this commit — the cheapest
+# point to catch it is the moment the edit is staged, not a CI round-trip
+# later. Scoped to the generated mirror dirs so unrelated dirty-tree files
+# don't produce a false positive.
+if printf '%s\n' "$staged" | grep -q '^\.agents/'; then
+  echo "Running mirror-skills.sh + mirror-agents.sh (staged .agents/ change)…"
+  mirror_dirs=".claude/agents .claude/skills .github/agents .github/skills .codex/agents .codex/skills"
+  if ! bash scripts/mirror-skills.sh || ! bash scripts/mirror-agents.sh; then
+    echo "✖ Mirror generation failed — fix the error above."
+    fail=1
+  # Compare the working tree to the INDEX (not HEAD): the staged mirror
+  # updates you already `git add`ed are expected to differ from HEAD, so
+  # `git status --porcelain` would false-positive on those. `git diff`
+  # (no --cached) flags mirror output the regeneration just changed on disk
+  # that ISN'T what you staged; `ls-files --others` catches brand-new
+  # generated files (e.g. a new agent) that are untracked and so invisible
+  # to `git diff`. Together they're the real "you forgot to stage the
+  # regenerated mirrors" signal.
+  elif [ -n "$(git diff --name-only -- $mirror_dirs)$(git ls-files --others --exclude-standard -- $mirror_dirs)" ]; then
+    echo "✖ .agents/ changed but the mirrors are stale. Run:"
+    echo "    bash scripts/mirror-skills.sh && bash scripts/mirror-agents.sh"
+    echo "  then 'git add' the regenerated files and re-commit."
+    fail=1
+  fi
+fi
+# === KIT:END ===
 
-# ── 4. Your stack's lint + fast tests — UNCOMMENT and match AGENTS.md ─────────
+# ── 5. Your stack's lint + fast tests — UNCOMMENT and match AGENTS.md ─────────
 # Use the SAME commands named in AGENTS.md's Commands section so local, hook,
 # and CI enforcement are identical. Keep these fast; slow suites belong in CI.
+# Route them through scripts/quiet.sh: hook output is read by agents too, and
+# a sensor that dumps hundreds of log lines pollutes the context it feeds —
+# quiet.sh condenses it to pass/fail + the first relevant error, with the full
+# log kept in a temp file (see docs/token-efficiency.md).
 #
-# echo "Running lint…"; <exact lint command from AGENTS.md> || fail=1
-# echo "Running fast tests…"; <exact fast-test command from AGENTS.md> || fail=1
+# echo "Running lint…"; scripts/quiet.sh <exact lint command from AGENTS.md> || fail=1
+# echo "Running fast tests…"; scripts/quiet.sh <exact fast-test command from AGENTS.md> || fail=1
 
 if [ "$fail" -ne 0 ]; then
   echo ""

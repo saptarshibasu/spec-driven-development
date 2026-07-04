@@ -59,7 +59,15 @@ sprawl — a plan that re-derives the spec is paying twice.
 **Make tool output scoped.** Prefer commands that return what you need:
 `grep -n` over reading a file; `--quiet`/summary flags over full logs; a single
 failing test over the whole suite while iterating. A tool that dumps 2,000
-lines when 20 would do is a token leak you pay on every invocation.
+lines when 20 would do is a token leak you pay on every invocation. For build
+and test commands this repo ships a generic condenser, `scripts/quiet.sh`
+(`.ps1` twin included): run any command through it and the context gets one
+PASS line, or FAIL + the first relevant error, with the full log saved to a
+temp file for when the excerpt isn't enough. This is *backpressure* between
+noisy sensors and the agent's window — the same command, the same exit code,
+a fraction of the context cost. Name the wrapped form in `AGENTS.md`'s
+Commands section and use it in `.githooks/pre-commit`'s lint/test slot so
+agents inherit it everywhere they run tests.
 
 **Turn off tools and MCP servers you aren't using on this project.** Every
 connected tool's schema is sent on *every* message, used or not — the same
