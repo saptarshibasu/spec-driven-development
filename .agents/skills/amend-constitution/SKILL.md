@@ -23,15 +23,8 @@ Only-sometimes-true or feature-specific principles don't belong here.
 
 ## Behavioral guardrails (apply throughout this skill session)
 
-- **No guessing.** Where input leaves something unspecified, write
-  `[NEEDS CLARIFICATION: specific question]` and surface it — never silently
-  invent an assumption.
-- **Investigate before claiming.** Never make statements about the codebase
-  without first reading the relevant files. If a claim requires looking at
-  code, look first.
-- **Conservative by default.** Recommend before you write; stop and ask before
-  anything irreversible (deleting files, force-pushing, dropping tables,
-  external service calls).
+<!-- GUARDRAILS:skill -->
+<!-- /GUARDRAILS:skill -->
 - **No over-populating.** A short constitution enforced consistently beats a
   long one that gets ignored. Push back on conditional or feature-specific
   content that doesn't belong in the constitution.

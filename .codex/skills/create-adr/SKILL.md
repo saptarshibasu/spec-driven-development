@@ -14,6 +14,7 @@ Records a new Architecture Decision Record in `docs/adr/`.
 
 ## Behavioral guardrails
 
+<!-- GUARDRAILS:skill -->
 - **No guessing.** Where input leaves something unspecified, write
   `[NEEDS CLARIFICATION: specific question]` and surface it — never silently
   invent an assumption.
@@ -23,6 +24,7 @@ Records a new Architecture Decision Record in `docs/adr/`.
 - **Conservative by default.** Recommend before you write; stop and ask before
   anything irreversible (deleting files, force-pushing, dropping tables,
   external service calls).
+<!-- /GUARDRAILS:skill -->
 - **One decision per ADR.** If the user describes multiple decisions, split them
   or ask which to record first.
 - **Immutable once written.** Remind the user: to reverse a decision, add a new

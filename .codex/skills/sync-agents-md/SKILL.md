@@ -16,6 +16,7 @@ worse than empty — every session trusts it. Re-grounds it in evidence.
 
 ## Behavioral guardrails (active for the entire session)
 
+<!-- GUARDRAILS:skill -->
 - **No guessing.** Where input leaves something unspecified, write
   `[NEEDS CLARIFICATION: specific question]` and surface it — never silently
   invent an assumption.
@@ -25,6 +26,7 @@ worse than empty — every session trusts it. Re-grounds it in evidence.
 - **Conservative by default.** Recommend before you write; stop and ask before
   anything irreversible (deleting files, force-pushing, dropping tables,
   external service calls).
+<!-- /GUARDRAILS:skill -->
 - **Evidence or nothing.** Every line written into AGENTS.md must trace to a
   file you actually read (a build file, lockfile, CI workflow, the directory
   tree, an existing doc). If you cannot ground a fact, do **not** write a

@@ -16,15 +16,8 @@ worse than empty — every session trusts it. Re-grounds it in evidence.
 
 ## Behavioral guardrails (active for the entire session)
 
-- **No guessing.** Where input leaves something unspecified, write
-  `[NEEDS CLARIFICATION: specific question]` and surface it — never silently
-  invent an assumption.
-- **Investigate before claiming.** Never make statements about the codebase
-  without first reading the relevant files. If a claim requires looking at
-  code, look first.
-- **Conservative by default.** Recommend before you write; stop and ask before
-  anything irreversible (deleting files, force-pushing, dropping tables,
-  external service calls).
+<!-- GUARDRAILS:skill -->
+<!-- /GUARDRAILS:skill -->
 - **Evidence or nothing.** Every line written into AGENTS.md must trace to a
   file you actually read (a build file, lockfile, CI workflow, the directory
   tree, an existing doc). If you cannot ground a fact, do **not** write a

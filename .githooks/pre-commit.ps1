@@ -24,8 +24,11 @@ $staged = @(git diff --cached --name-only --diff-filter=ACM) | Where-Object { $_
 $secretRe = '(AKIA[0-9A-Z]{16}|-----BEGIN [A-Z ]*PRIVATE KEY-----|xox[baprs]-[0-9A-Za-z-]+|ghp_[0-9A-Za-z]{36}|(api[_-]?key|secret|password|token)["'' ]*[:=]["'' ]*[0-9A-Za-z/+]{16,})'
 $ic = [System.Text.RegularExpressions.RegexOptions]::IgnoreCase
 foreach ($f in $staged) {
-  # examples/hooks and prose dirs legitimately quote patterns; specs/ and memory/ ARE scanned
-  if ($f -match '\.example$' -or $f -like '.githooks/*' -or $f -like 'docs/*' -or $f -like 'templates/*' -or $f -in @('README.md', 'AGENTS.md')) { continue }
+  # examples/hooks and templates legitimately show patterns/placeholders;
+  # docs/, AGENTS.md, specs/, and memory/ ARE scanned — real values get pasted
+  # into project docs and conventions in practice, so a blanket exemption
+  # there would defeat the point of the scan.
+  if ($f -match '\.example$' -or $f -like '.githooks/*' -or $f -like 'templates/*' -or $f -eq 'README.md') { continue }
   $blob = (git show ":$f" 2>$null) -join "`n"
   if ($blob -and [regex]::IsMatch($blob, $secretRe, $ic)) {
     Write-Host "X Possible secret in $f - remove it or use an env var (constitution: no secrets in VCS)."

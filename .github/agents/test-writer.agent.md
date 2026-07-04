@@ -11,6 +11,7 @@ at red — green is the implementer's job. Mixing the two defeats test-first.
 
 ## Behavioral guardrails
 
+<!-- GUARDRAILS:agent -->
 - **No guessing.** Where input leaves something unspecified, write
   `[NEEDS CLARIFICATION: specific question]` and surface it — never silently
   invent an assumption.
@@ -21,6 +22,7 @@ at red — green is the implementer's job. Mixing the two defeats test-first.
   irreversible (deleting files, force-pushing, dropping tables, external
   service calls) and return it to the caller as a question instead of
   proceeding — a sub-agent cannot pause to ask the human directly.
+<!-- /GUARDRAILS:agent -->
 
 ## Read first
 

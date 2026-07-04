@@ -67,6 +67,15 @@ jobs:
           # exactly what mirror-skills/mirror-agents generate from the canonical
           # .agents/ sources. Regenerate, then fail if anything changed — i.e. a
           # generated copy was hand-edited, or a canonical edit wasn't mirrored.
+          #
+          # This also covers the "Behavioral guardrails" block: the canonical
+          # .agents/agents/*.md and .agents/skills/*/SKILL.md files only carry
+          # an empty <!-- GUARDRAILS:<variant> --> marker (see docs/guardrails.md),
+          # and mirror-skills.sh / mirror-agents.sh expand it from that doc at
+          # generation time. There's nothing to hand-copy into a canonical file
+          # and nothing left to drift — a stale guardrails edit shows up here as
+          # generated output that doesn't match what's committed, same as any
+          # other mirror drift.
           bash scripts/mirror-skills.sh
           bash scripts/mirror-agents.sh
           if [ -n "$(git status --porcelain)" ]; then
@@ -75,15 +84,6 @@ jobs:
             git status --porcelain
             exit 1
           fi
-
-      - name: Behavioral guardrails stay in sync with docs/guardrails.md
-        run: |
-          # Drift sensor for ADR-0001's other blind spot: docs/guardrails.md is
-          # the nominal canon for the "No guessing / Investigate before
-          # claiming / Conservative by default" block, but nothing enforced
-          # that every .agents/agents/*.md and .agents/skills/*/SKILL.md
-          # actually matches it. Fails the build the moment one drifts.
-          bash scripts/check-guardrails.sh
 
       - name: No truncated files (canonical sources must end with a newline)
         run: |
@@ -105,16 +105,106 @@ jobs:
                                 -o -name 'pre-commit' \) 2>/dev/null)
           exit "$bad"
 
-      - name: VERSION matches the latest CHANGELOG entry
+      - name: Shell scripts parse (bash -n / shellcheck)
         run: |
-          # Catches the kit's own release process slipping — VERSION and
-          # CHANGELOG.md are both kit-owned and must move together.
-          v="$(tr -d '[:space:]' < VERSION)"
-          [ -n "$v" ] || { echo "::error::VERSION is empty."; exit 1; }
-          if ! grep -qF "## [$v]" CHANGELOG.md; then
-            echo "::error::CHANGELOG.md has no '## [$v]' entry matching VERSION ($v)."
+          # A newline at EOF doesn't guarantee a script is intact — a file
+          # truncated exactly on a line boundary, or mid-statement but still
+          # newline-terminated, passes the check above but won't parse. This
+          # actually parses every kit-owned .sh file (and .githooks/pre-commit,
+          # which is bash without an extension) instead of just checking shape.
+          bad=0
+          while IFS= read -r f; do
+            [ -s "$f" ] || continue
+            if ! bash -n "$f" 2>/tmp/bash-n.err; then
+              echo "::error::$f failed to parse (bash -n):"
+              sed 's/^/::error::  /' /tmp/bash-n.err
+              bad=1
+            fi
+          done < <(find .agents templates scripts .githooks \
+                     -type f \( -name '*.sh' -o -name 'pre-commit' \) 2>/dev/null)
+          if command -v shellcheck >/dev/null 2>&1; then
+            while IFS= read -r f; do
+              [ -s "$f" ] || continue
+              # SC1071/SC1090 etc. from shellcheck not finding sourced files
+              # are not truncation signals — only fail on real parse errors.
+              if ! shellcheck -S error "$f"; then
+                echo "::error::$f failed shellcheck (severity=error)."
+                bad=1
+              fi
+            done < <(find .agents templates scripts .githooks \
+                       -type f \( -name '*.sh' -o -name 'pre-commit' \) 2>/dev/null)
+          else
+            echo "::notice::shellcheck not available on this runner — skipped lint pass, bash -n syntax check still ran."
+          fi
+          exit "$bad"
+
+      - name: PowerShell scripts parse
+        run: |
+          # Same rationale as the bash -n step above, for the .ps1 twins.
+          # Uses the PowerShell parser in parse-only mode — no script code is
+          # executed.
+          if ! command -v pwsh >/dev/null 2>&1; then
+            echo "::notice::pwsh not available on this runner — skipped .ps1 parse check."
+            exit 0
+          fi
+          bad=0
+          while IFS= read -r f; do
+            [ -s "$f" ] || continue
+            if ! pwsh -NoProfile -Command '
+              $errors = $null
+              [void][System.Management.Automation.Language.Parser]::ParseFile($args[0], [ref]$null, [ref]$errors)
+              if ($errors.Count -gt 0) {
+                $errors | ForEach-Object { Write-Output $_.ToString() }
+                exit 1
+              }
+              exit 0
+            ' -- "$f"; then
+              echo "::error::$f failed to parse as PowerShell."
+              bad=1
+            fi
+          done < <(find .agents templates scripts .githooks \
+                     -type f -name '*.ps1' 2>/dev/null)
+          exit "$bad"
+
+      - name: KIT_VERSION matches the latest KIT-CHANGELOG entry
+        run: |
+          # Catches the kit's own release process slipping — KIT_VERSION and
+          # KIT-CHANGELOG.md are both kit-owned and must move together.
+          v="$(tr -d '[:space:]' < KIT_VERSION)"
+          [ -n "$v" ] || { echo "::error::KIT_VERSION is empty."; exit 1; }
+          if ! grep -qF "## [$v]" KIT-CHANGELOG.md; then
+            echo "::error::KIT-CHANGELOG.md has no '## [$v]' entry matching KIT_VERSION ($v)."
             exit 1
           fi
+
+      - name: Kit manifest doc matches kit-manifest.conf
+        run: |
+          # docs/KIT-MANIFEST.md's prose table and .agents/kit-manifest.conf
+          # (the machine-readable list update-kit.sh/.ps1 actually read) used
+          # to be hand-synced with nothing enforcing agreement. Now: every
+          # path named in the conf file must also be mentioned somewhere in
+          # the doc, or this fails. Doesn't catch every wording nuance, but it
+          # catches the failure mode that matters — a path added to (or
+          # renamed/removed in) the conf and never reflected in the doc.
+          conf=".agents/kit-manifest.conf"
+          [ -f "$conf" ] || { echo "::error::$conf is missing."; exit 1; }
+          bad=0
+          while IFS='=' read -r ns path; do
+            ns="$(printf '%s' "$ns" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
+            [ -z "$ns" ] && continue
+            case "$ns" in \#*) continue ;; esac
+            path="$(printf '%s' "$path" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
+            [ -z "$path" ] && continue
+            case "$ns" in
+              file|dir|adr_dir|partial) ;;
+              *) echo "::error::$conf: unknown namespace '$ns'"; bad=1; continue ;;
+            esac
+            if ! grep -qF "$path" docs/KIT-MANIFEST.md; then
+              echo "::error::$conf lists '$ns=$path' but docs/KIT-MANIFEST.md never mentions it — update the table (and KIT-CHANGELOG.md)."
+              bad=1
+            fi
+          done < "$conf"
+          exit "$bad"
       # === KIT:END ===
 
       # ── Your stack's controls — UNCOMMENT and fill in ─────────────────────

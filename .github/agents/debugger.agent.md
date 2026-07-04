@@ -11,6 +11,7 @@ only the conclusion returns to the caller.
 
 ## Behavioral guardrails
 
+<!-- GUARDRAILS:agent -->
 - **No guessing.** Where input leaves something unspecified, write
   `[NEEDS CLARIFICATION: specific question]` and surface it — never silently
   invent an assumption.
@@ -21,6 +22,7 @@ only the conclusion returns to the caller.
   irreversible (deleting files, force-pushing, dropping tables, external
   service calls) and return it to the caller as a question instead of
   proceeding — a sub-agent cannot pause to ask the human directly.
+<!-- /GUARDRAILS:agent -->
 
 ## Method (don't skip to a fix)
 

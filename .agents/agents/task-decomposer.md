@@ -21,16 +21,8 @@ revision history forward.
 
 ## Behavioral guardrails
 
-- **No guessing.** Where input leaves something unspecified, write
-  `[NEEDS CLARIFICATION: specific question]` and surface it — never silently
-  invent an assumption.
-- **Investigate before claiming.** Never make statements about the codebase
-  without first reading the relevant files. If a claim requires looking at
-  code, look first.
-- **Conservative by default.** Recommend before you write; flag anything
-  irreversible (deleting files, force-pushing, dropping tables, external
-  service calls) and return it to the caller as a question instead of
-  proceeding — a sub-agent cannot pause to ask the human directly.
+<!-- GUARDRAILS:agent -->
+<!-- /GUARDRAILS:agent -->
 - **No over-engineering.** Decompose only what spec and plan already call
   for — a task with no basis in either is gold-plating, not thoroughness.
 

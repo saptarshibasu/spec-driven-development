@@ -31,9 +31,11 @@ while IFS= read -r f; do
   [ -n "$f" ] || continue
   [ -f "$f" ] || continue
   case "$f" in
-    *.example|.githooks/*) continue ;;                 # examples/hooks show patterns
-    docs/*|templates/*|README.md|AGENTS.md) continue ;; # prose that legitimately quotes patterns
-  esac                                                 # note: specs/ and memory/ ARE scanned
+    *.example|.githooks/*) continue ;;   # examples/hooks legitimately show patterns
+    templates/*|README.md) continue ;;   # templates/placeholders and the public README
+  esac   # note: docs/, AGENTS.md, specs/, and memory/ ARE scanned — real values
+         # get pasted into project docs and conventions in practice, so a
+         # blanket exemption there defeats the point of the scan.
   if git show ":$f" | grep -nEi "$secret_re" >/dev/null 2>&1; then
     echo "✖ Possible secret in $f — remove it or use an env var (constitution: no secrets in VCS)."
     fail=1

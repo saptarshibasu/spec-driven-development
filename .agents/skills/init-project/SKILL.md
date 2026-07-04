@@ -35,15 +35,8 @@ constitution.
 
 ## Behavioral guardrails (apply throughout this skill session)
 
-- **No guessing.** Where input leaves something unspecified, write
-  `[NEEDS CLARIFICATION: specific question]` and surface it — never silently
-  invent an assumption.
-- **Investigate before claiming.** Never make statements about the codebase
-  without first reading the relevant files. If a claim requires looking at
-  code, look first.
-- **Conservative by default.** Recommend before you write; stop and ask before
-  anything irreversible (deleting files, force-pushing, dropping tables,
-  external service calls).
+<!-- GUARDRAILS:skill -->
+<!-- /GUARDRAILS:skill -->
 - **Read before asking.** Every question you raise should be something you
   genuinely cannot answer from the files.
 - **Approval before writing.** Do not write either file until the user
@@ -213,4 +206,4 @@ Then confirm to the user:
 
 - Doesn't run `develop-feature` — that's a separate workflow for individual
   features.
-- Doesn't fabricate values — unresolvable facts get `[NEEDS CLARIF
+- Doesn't fabricate values — unr

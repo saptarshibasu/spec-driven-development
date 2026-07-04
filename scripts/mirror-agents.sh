@@ -15,6 +15,16 @@
 # canonical .md only (ADR-0001). CI re-runs this and fails if the committed files
 # drift from a fresh generation.
 #
+# Behavioral guardrails: the canonical agent files only carry an empty
+# `<!-- GUARDRAILS:agent --><!-- /GUARDRAILS:agent -->` (or `agent-readonly`)
+# marker where the shared "No guessing / Investigate before claiming /
+# Conservative by default" bullets go — this script fills the marker in with
+# the block from docs/guardrails.md at generation time, for every one of the
+# three per-tool outputs. There is nothing left to hand-copy and nothing left
+# to drift: the single source is docs/guardrails.md, and a stale copy simply
+# can't exist because the bullets are never written into a canonical file by
+# hand in the first place.
+#
 # Org-specific model/tool policy (which Copilot/Codex model a tier maps to,
 # which Codex tool a Claude tool maps to) lives in data, not code: see
 # .agents/model-map.conf. EDIT that file to match your org — this script and
@@ -37,12 +47,50 @@ die() { echo "✖ $*" >&2; exit 1; }
 ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
 CANON="$ROOT/.agents/agents"
 MODEL_MAP="$ROOT/.agents/model-map.conf"
+GUARDRAILS_DOC="$ROOT/docs/guardrails.md"
 
 if [ ! -d "$CANON" ] || ! ls "$CANON"/*.md >/dev/null 2>&1; then
   die "$CANON has no *.md agents — nothing to mirror."
 fi
 
 [ -f "$MODEL_MAP" ] || die "$MODEL_MAP not found — org policy data is missing."
+[ -f "$GUARDRAILS_DOC" ] || die "$GUARDRAILS_DOC not found — guardrails canon is missing."
+
+# Pull one delimited canonical guardrails block out of docs/guardrails.md
+# (the "skill" / "agent" / "agent-readonly" variants — see that file).
+extract_guardrails_canon() {
+  local variant="$1"
+  awk -v start="<!-- GUARDRAILS:$variant -->" -v end="<!-- /GUARDRAILS:$variant -->" '
+    index($0, start) == 1 { f=1; next }
+    index($0, end) == 1 { f=0 }
+    f { print }
+  ' "$GUARDRAILS_DOC"
+}
+
+declare -A GUARDRAILS_CANON
+for variant in agent agent-readonly; do
+  GUARDRAILS_CANON["$variant"]="$(extract_guardrails_canon "$variant")"
+  [ -n "${GUARDRAILS_CANON[$variant]}" ] \
+    || die "$GUARDRAILS_DOC has no (or an empty) GUARDRAILS:$variant block."
+done
+
+# Replace an agent's empty <!-- GUARDRAILS:<variant> --> marker with the
+# canonical bullets for that variant. Fails loudly if a canonical file is
+# missing the marker (or has a stale hand-written copy instead) so an
+# unmirrored guardrails edit can't silently ship.
+inject_guardrails() {
+  local body="$1" variant="$2"
+  local start="<!-- GUARDRAILS:$variant -->" end="<!-- /GUARDRAILS:$variant -->"
+  case "$body" in
+    *"$start"*"$end"*) ;;
+    *) die "missing a '$start' ... '$end' marker pair (expected variant '$variant')." ;;
+  esac
+  awk -v start="$start" -v end="$end" -v canon="${GUARDRAILS_CANON[$variant]}" '
+    index($0, start) == 1 { print; print canon; f=1; next }
+    index($0, end) == 1 { f=0 }
+    !f { print }
+  ' <<< "$body"
+}
 
 CLAUDE_DIR="$ROOT/.claude/agents"
 COPILOT_DIR="$ROOT/.github/agents"
@@ -133,12 +181,25 @@ for src in "$CANON"/*.md; do
     || die "$base: front-matter name '$name' must match the filename."
 
   body="$(body_after_frontmatter "$src")"
+
+  # Which guardrails variant this agent's marker expands to: the two
+  # read-only agents (no Write/Edit tool) get "agent-readonly", every agent
+  # that can write gets "agent" — see docs/guardrails.md.
+  case "$tools" in
+    *Write*|*Edit*) guardrails_variant=agent ;;
+    *)              guardrails_variant=agent-readonly ;;
+  esac
+  body="$(inject_guardrails "$body" "$guardrails_variant")"
+
   case "$body" in
     *"$Q3"*) die "$base: body contains a triple single-quote, which would break the Codex TOML string." ;;
   esac
 
-  # 1) Claude — canonical format, copied verbatim.
-  cp "$src" "$CLAUDE_DIR/$name.md"
+  # 1) Claude — canonical front-matter, generated body (guardrails marker expanded).
+  {
+    awk '/^---[[:space:]]*\r?$/ { print; d++; if (d==2) exit; next } { print }' "$src"
+    printf '%s\n' "$body"
+  } > "$CLAUDE_DIR/$name.md"
 
   # 2) Copilot — name + description + mapped model in front-matter, then the body.
   {
@@ -147,7 +208,7 @@ for src in "$CANON"/*.md; do
     printf 'description: %s\n' "$desc"
     printf 'model: %s\n' "$(copilot_model "$model")"
     printf -- '---\n'
-    body_after_frontmatter "$src"
+    printf '%s\n' "$body"
   } > "$COPILOT_DIR/$name.agent.md"
 
   # 3) Codex — TOML table. Tools mapped + de-duplicated; body as instructions.
@@ -181,7 +242,7 @@ for src in "$CANON"/*.md; do
     printf 'model_reasoning_effort = "%s"\n' "$(codex_effort "$model")"
     printf 'tools = [%s]\n\n' "$codex_tools"
     printf 'instructions = %s\n' "$Q3"
-    body_after_frontmatter "$src"
+    printf '%s\n' "$body"
     printf '%s' "$Q3"
   } > "$CODEX_DIR/$name.toml"
 

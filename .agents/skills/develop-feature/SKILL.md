@@ -31,15 +31,8 @@ decaying as the session grows.
 These rules are active from Step R through Phase 5 — routing, drafting,
 analysis, and implementation alike.
 
-- **No guessing.** Where input leaves something unspecified, write
-  `[NEEDS CLARIFICATION: specific question]` and surface it — never silently
-  invent an assumption.
-- **Investigate before claiming.** Never make statements about the codebase
-  without first reading the relevant files. If a claim requires looking at
-  code, look first.
-- **Conservative by default.** Recommend before you write; stop and ask before
-  anything irreversible (deleting files, force-pushing, dropping tables,
-  external service calls).
+<!-- GUARDRAILS:skill -->
+<!-- /GUARDRAILS:skill -->
 - **No over-engineering.** Only specify, plan, and build what is directly
   requested — no abstractions, extra projects, or flexibility for hypothetical
   future requirements unless the user explicitly asks.

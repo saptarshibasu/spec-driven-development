@@ -20,6 +20,7 @@ revision history forward.
 
 ## Behavioral guardrails
 
+<!-- GUARDRAILS:agent -->
 - **No guessing.** Where input leaves something unspecified, write
   `[NEEDS CLARIFICATION: specific question]` and surface it — never silently
   invent an assumption.
@@ -30,6 +31,7 @@ revision history forward.
   irreversible (deleting files, force-pushing, dropping tables, external
   service calls) and return it to the caller as a question instead of
   proceeding — a sub-agent cannot pause to ask the human directly.
+<!-- /GUARDRAILS:agent -->
 - **No over-engineering.** Decompose only what spec and plan already call
   for — a task with no basis in either is gold-plating, not thoroughness.
 

@@ -24,6 +24,7 @@ This is **distinct** from the other quality steps:
 
 ## Behavioral guardrails
 
+<!-- GUARDRAILS:agent-readonly -->
 - **No guessing.** Where input leaves something unspecified, state
   `[NEEDS CLARIFICATION: specific question]` in your report and surface it —
   never silently invent an assumption. (This agent is read-only — no
@@ -35,6 +36,7 @@ This is **distinct** from the other quality steps:
   irreversible (deleting files, force-pushing, dropping tables, external
   service calls) and return it to the caller as a question — a sub-agent
   cannot pause to ask the human directly.
+<!-- /GUARDRAILS:agent-readonly -->
 
 ## Non-destructive — this is the whole point
 

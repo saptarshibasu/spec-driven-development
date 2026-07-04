@@ -18,6 +18,7 @@ the Specify phase's revision back-and-forth into the plan.
 
 ## Behavioral guardrails
 
+<!-- GUARDRAILS:agent -->
 - **No guessing.** Where input leaves something unspecified, write
   `[NEEDS CLARIFICATION: specific question]` and surface it — never silently
   invent an assumption.
@@ -28,6 +29,7 @@ the Specify phase's revision back-and-forth into the plan.
   irreversible (deleting files, force-pushing, dropping tables, external
   service calls) and return it to the caller as a question instead of
   proceeding — a sub-agent cannot pause to ask the human directly.
+<!-- /GUARDRAILS:agent -->
 - **No over-engineering.** Only plan what the spec actually requires — no
   extra projects, layers, or flexibility for hypothetical future
   requirements.

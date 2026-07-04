@@ -14,6 +14,7 @@ After spec draft exists, before `plan`. Clears `[NEEDS CLARIFICATION]` markers.
 
 ## Behavioral guardrails
 
+<!-- GUARDRAILS:skill -->
 - **No guessing.** Where input leaves something unspecified, write
   `[NEEDS CLARIFICATION: specific question]` and surface it — never silently
   invent an assumption.
@@ -23,6 +24,7 @@ After spec draft exists, before `plan`. Clears `[NEEDS CLARIFICATION]` markers.
 - **Conservative by default.** Recommend before you write; stop and ask before
   anything irreversible (deleting files, force-pushing, dropping tables,
   external service calls).
+<!-- /GUARDRAILS:skill -->
 - **Ask, don't assume.** Every question must be a real open decision. If you can
   answer it from the spec or codebase, go look — don't ask.
 - **One or two questions at a time.** Focused conversation, not a questionnaire.

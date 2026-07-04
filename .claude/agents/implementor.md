@@ -20,6 +20,7 @@ one's implementation.
 
 ## Behavioral guardrails
 
+<!-- GUARDRAILS:agent -->
 - **No guessing.** Where input leaves something unspecified, write
   `[NEEDS CLARIFICATION: specific question]` and surface it — never silently
   invent an assumption.
@@ -30,6 +31,7 @@ one's implementation.
   irreversible (deleting files, force-pushing, dropping tables, external
   service calls) and return it to the caller as a question instead of
   proceeding — a sub-agent cannot pause to ask the human directly.
+<!-- /GUARDRAILS:agent -->
 - **No over-engineering.** Implement only what the task in front of you
   requires — no extra abstraction, config, or flexibility for a hypothetical
   future task.

@@ -1,17 +1,23 @@
 # Behavioral Guardrails
 
 These are the canonical universal guardrails that apply to every skill and
-agent in this kit. Skill and agent files embed them verbatim so the wording is
-identical across all prompts — a single source here makes future edits
-propagate consistently.
+agent in this kit. This file is the *only* place the wording lives: a
+canonical file under `.agents/agents/` or `.agents/skills/` never embeds the
+bullets itself — it carries an empty delimited marker instead (e.g.
+`<!-- GUARDRAILS:skill --><!-- /GUARDRAILS:skill -->`, right after its
+`## Behavioral guardrails` heading), and `scripts/mirror-agents.sh` /
+`scripts/mirror-skills.sh` expand that marker with the matching block below
+at mirror time, for every one of the generated `.claude/.github/.codex`
+copies.
 
-This is enforced, not just nominal: `scripts/check-guardrails.sh` (run in CI
-by `agent-harness.yml`) extracts the three delimited blocks below and fails
-the build if any canonical file under `.agents/agents/` or `.agents/skills/`
-has a `## Behavioral guardrails` section whose first three bullets don't
-match the applicable block byte-for-byte. Do not change the wording inside a
-`GUARDRAILS:*` delimiter without also updating every file that embeds it —
-the checker will tell you which ones still need it.
+This makes drift structurally impossible instead of merely policed: there is
+no verbatim copy anywhere to fall out of sync, because the mirrors are
+*generated* from this doc, not hand-copied from it. Editing a `GUARDRAILS:*`
+block here and re-running the mirror scripts is the only way the wording
+ever changes anywhere. CI's existing mirror-drift guard (`agent-harness.yml`'s
+"Skills & agents are in sync with canonical sources" step) catches the one
+remaining failure mode — a mirror committed without re-running the
+generator — the same way it catches any other unmirrored edit.
 
 ## The three universal guardrails (skill variant)
 
@@ -84,11 +90,18 @@ Write/Edit tool) use this block instead:
   cannot pause to ask the human directly.
 <!-- /GUARDRAILS:agent-readonly -->
 
-When adding a new agent under `.agents/agents/`, use the sub-agent wording
-above, not the skill wording. After editing any canonical agent file, run
-`scripts/mirror-agents.sh` (or `.ps1`) to regenerate `.claude/agents/`,
-`.codex/agents/`, and `.github/agents/` — never hand-edit those generated
-copies (ADR-0001).
+When adding a new agent under `.agents/agents/`, give its
+`## Behavioral guardrails` section the sub-agent marker — `<!-- GUARDRAILS:agent -->
+<!-- /GUARDRAILS:agent -->` for anything with a Write/Edit tool, or
+`<!-- GUARDRAILS:agent-readonly -->
+<!-- /GUARDRAILS:agent-readonly -->` for the two read-only agents — never the
+skill marker, and never the bullets themselves. Likewise a new skill under
+`.agents/skills/*/SKILL.md` gets the `<!-- GUARDRAILS:skill -->
+<!-- /GUARDRAILS:skill -->` marker. After adding or editing a canonical file,
+run `scripts/mirror-agents.sh` / `scripts/mirror-skills.sh` (or their `.ps1`
+twins) to regenerate `.claude/`, `.codex/`, and `.github/` with the marker
+expanded — never hand-edit those generated copies (ADR-0001), and never
+hand-write the bullets into a canonical `.agents/` file either.
 
 ## Skill-specific additions
 
@@ -108,15 +121,17 @@ Each skill may extend these with its own guardrails — for example:
 
 ## Maintenance
 
-When editing a guardrail, update the matching `GUARDRAILS:*` block here
-first, then propagate the change to every skill or agent file that embeds
-that block. The text must be identical everywhere so there's a single
-authoritative wording to update. Run `scripts/check-guardrails.sh` (or
-`.ps1`) after editing — it will list every canonical file whose guardrails
-section still doesn't match, so you don't have to grep for stragglers by
-hand. A skill or agent may add its own extra bullets after the shared block
-(e.g. `develop-feature`'s **No over-engineering**), but must not alter the
-wording of the three shared bullets — extend, don't inline-edit.
+When editing a guardrail, update the matching `GUARDRAILS:*` block here —
+that's the only edit needed. Then run `scripts/mirror-agents.sh` and
+`scripts/mirror-skills.sh` (or their `.ps1` twins) to regenerate every
+`.claude/.github/.codex` copy with the new wording and commit the result;
+CI's mirror-drift guard fails the build if you forget. There is no second
+file to hand-edit, and no canonical `.agents/` file to keep in sync — they
+only ever carry the empty marker. A skill or agent may add its own extra
+bullets after the shared block (e.g. `develop-feature`'s
+**No over-engineering**) directly below the closing
+`<!-- /GUARDRAILS:* -->` marker in its own file; that part is still
+hand-written and untouched by the mirror scripts.
 
 ## See also
 

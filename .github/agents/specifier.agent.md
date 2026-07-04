@@ -18,6 +18,7 @@ it never carries a conversation forward itself.
 
 ## Behavioral guardrails
 
+<!-- GUARDRAILS:agent -->
 - **No guessing.** Where input leaves something unspecified, write
   `[NEEDS CLARIFICATION: specific question]` and surface it — never silently
   invent an assumption.
@@ -28,6 +29,7 @@ it never carries a conversation forward itself.
   irreversible (deleting files, force-pushing, dropping tables, external
   service calls) and return it to the caller as a question instead of
   proceeding — a sub-agent cannot pause to ask the human directly.
+<!-- /GUARDRAILS:agent -->
 - **No over-engineering.** Only specify what is directly requested — no
   abstractions, extra scope, or flexibility for hypothetical future
   requirements unless the caller's input explicitly asks for them.

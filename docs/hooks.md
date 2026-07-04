@@ -41,6 +41,31 @@ Bypass deliberately, never habitually:
 git commit --no-verify
 ```
 
+Also enable once per clone — the merge driver behind `.gitattributes`'
+`merge=ours` on the generated mirror dirs (`.claude/`, `.codex/`,
+`.github/agents/`, `.github/skills/`; see `docs/KIT-MANIFEST.md`). Git ships
+the `merge=ours` *attribute* but not the driver it names, so without this
+step a merge touching those paths falls back to a normal line merge and can
+leave conflict markers in generated files:
+
+```bash
+git config merge.ours.driver true
+```
+
+With it configured, a merge touching a mirror path just keeps your side's
+content and never conflicts — but that's a mechanical no-op, not a real
+merge, so it can leave the mirrors stale relative to whatever the other side
+changed in `.agents/`. Always follow a merge that touched `.agents/` or a
+mirror dir by regenerating and recommitting:
+
+```bash
+bash scripts/mirror-agents.sh && bash scripts/mirror-skills.sh
+git add .claude .codex .github/agents .github/skills
+```
+
+The pre-commit hook's mirror-drift check (section 4 below) catches it if you
+forget on your next commit.
+
 Keep pre-commit **fast** — anything slow belongs in CI
 (`.github/workflows/agent-harness.yml`), which is the backstop that runs even
 when someone uses `--no-verify`.

@@ -11,6 +11,14 @@
 # generated file. Edit the canonical .md only (ADR-0001). CI re-runs this and
 # fails if the committed files drift from a fresh generation.
 #
+# Behavioral guardrails: the canonical agent files only carry an empty
+# `<!-- GUARDRAILS:agent --><!-- /GUARDRAILS:agent -->` (or `agent-readonly`)
+# marker where the shared "No guessing / Investigate before claiming /
+# Conservative by default" bullets go — this script fills the marker in with
+# the block from docs/guardrails.md at generation time, for every one of the
+# three per-tool outputs. There is nothing left to hand-copy and nothing left
+# to drift.
+#
 # Org-specific model/tool policy (which Copilot/Codex model a tier maps to,
 # which Codex tool a Claude tool maps to) lives in data, not code: see
 # .agents/model-map.conf. EDIT that file to match your org — this script and
@@ -29,10 +37,12 @@ $root = (git rev-parse --show-toplevel 2>$null)
 if (-not $root) { $root = (Get-Location).Path }
 $canon = Join-Path $root '.agents/agents'
 $modelMapPath = Join-Path $root '.agents/model-map.conf'
+$guardrailsDocPath = Join-Path $root 'docs/guardrails.md'
 
 $srcs = Get-ChildItem $canon -Filter '*.md' -ErrorAction SilentlyContinue
 if (-not $srcs) { throw "$canon has no *.md agents - nothing to mirror." }
 if (-not (Test-Path $modelMapPath)) { throw "$modelMapPath not found - org policy data is missing." }
+if (-not (Test-Path $guardrailsDocPath)) { throw "$guardrailsDocPath not found - guardrails canon is missing." }
 
 $claudeDir  = Join-Path $root '.claude/agents'
 $copilotDir = Join-Path $root '.github/agents'
@@ -75,6 +85,43 @@ function Convert-CopilotModel($m) { Get-MapEntry 'copilot_model' $m }
 function Convert-CodexModel($m) { Get-MapEntry 'codex_model' $m }
 function Convert-CodexEffort($m) { Get-MapEntry 'codex_effort' $m }
 
+# Pull one delimited canonical guardrails block out of docs/guardrails.md (the
+# "skill" / "agent" / "agent-readonly" variants — see that file).
+$guardrailsDocText = Get-Content -Raw $guardrailsDocPath
+function Get-GuardrailsCanon($variant) {
+  $start = "<!-- GUARDRAILS:$variant -->"
+  $end = "<!-- /GUARDRAILS:$variant -->"
+  if ($guardrailsDocText -notmatch ('(?s)' + [regex]::Escape($start) + '\r?\n(.*?)\r?\n' + [regex]::Escape($end))) {
+    throw "$guardrailsDocPath has no (or an empty) GUARDRAILS:$variant block."
+  }
+  return $Matches[1]
+}
+$guardrailsCanon = @{
+  'agent'          = Get-GuardrailsCanon 'agent'
+  'agent-readonly' = Get-GuardrailsCanon 'agent-readonly'
+}
+
+# Replace an agent's empty <!-- GUARDRAILS:<variant> --> marker with the
+# canonical bullets for that variant. Fails loudly if a canonical file is
+# missing the marker (or has a stale hand-written copy instead) so an
+# unmirrored guardrails edit can't silently ship.
+function Expand-Guardrails($body, $variant) {
+  $start = "<!-- GUARDRAILS:$variant -->"
+  $end = "<!-- /GUARDRAILS:$variant -->"
+  $pattern = [regex]::Escape($start) + '\r?\n' + [regex]::Escape($end)
+  if ($body -notmatch $pattern) {
+    throw "missing a '$start' ... '$end' marker pair (expected variant '$variant')."
+  }
+  # Static [regex]::Replace has no (input, pattern, replacement, count)
+  # overload — a literal 4th-arg integer silently coerces into RegexOptions
+  # instead (1 = IgnoreCase), which is not what we want. Use an instance so
+  # the count overload actually limits to one replacement, and escape '$' in
+  # the replacement text since .NET treats it as a backreference token.
+  $replacement = ($start + "`n" + $guardrailsCanon[$variant] + "`n" + $end) -replace '\$', '$$$$'
+  $rx = New-Object System.Text.RegularExpressions.Regex($pattern)
+  return $rx.Replace($body, $replacement, 1)
+}
+
 $q3 = "'''"
 $count = 0
 foreach ($src in $srcs) {
@@ -94,10 +141,18 @@ foreach ($src in $srcs) {
     if (-not $fields[$k]) { throw "$($src.Name): missing or empty '$k' (block-list YAML is unsupported - use 'tools: A, B')." }
   }
   if ($name -ne $src.BaseName) { throw "$($src.Name): front-matter name '$name' must match the filename." }
+
+  # Which guardrails variant this agent's marker expands to: the two
+  # read-only agents (no Write/Edit tool) get "agent-readonly", every agent
+  # that can write gets "agent" — see docs/guardrails.md.
+  if ($tools -match 'Write|Edit') { $guardrailsVariant = 'agent' } else { $guardrailsVariant = 'agent-readonly' }
+  $body = Expand-Guardrails $body $guardrailsVariant
+
   if ($body.Contains($q3)) { throw "$($src.Name): body contains a triple single-quote, which would break the Codex TOML string." }
 
-  # 1) Claude - verbatim copy.
-  Copy-Item -Force $src.FullName (Join-Path $claudeDir "$name.md")
+  # 1) Claude - canonical front-matter, generated body (guardrails marker expanded).
+  $claudeContent = "---`n$fm`n---`n$body"
+  Set-Content -NoNewline -Path (Join-Path $claudeDir "$name.md") -Value $claudeContent
 
   # 2) Copilot - name + description + mapped model front-matter, then body.
   $copilot = "---`nname: $name`ndescription: $desc`nmodel: $(Convert-CopilotModel $model)`n---`n$body"

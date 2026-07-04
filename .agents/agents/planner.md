@@ -19,16 +19,8 @@ the Specify phase's revision back-and-forth into the plan.
 
 ## Behavioral guardrails
 
-- **No guessing.** Where input leaves something unspecified, write
-  `[NEEDS CLARIFICATION: specific question]` and surface it — never silently
-  invent an assumption.
-- **Investigate before claiming.** Never make statements about the codebase
-  without first reading the relevant files. If a claim requires looking at
-  code, look first.
-- **Conservative by default.** Recommend before you write; flag anything
-  irreversible (deleting files, force-pushing, dropping tables, external
-  service calls) and return it to the caller as a question instead of
-  proceeding — a sub-agent cannot pause to ask the human directly.
+<!-- GUARDRAILS:agent -->
+<!-- /GUARDRAILS:agent -->
 - **No over-engineering.** Only plan what the spec actually requires — no
   extra projects, layers, or flexibility for hypothetical future
   requirements.
