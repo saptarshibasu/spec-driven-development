@@ -206,4 +206,5 @@ Then confirm to the user:
 
 - Doesn't run `develop-feature` — that's a separate workflow for individual
   features.
-- Doesn't fabricate values — unr
+- Doesn't fabricate values — unresolvable facts get `[NEEDS CLARIFICATION]`.
+- Never writes either file until the user explicitly approves both drafts.

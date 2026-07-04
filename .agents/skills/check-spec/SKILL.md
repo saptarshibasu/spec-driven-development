@@ -82,4 +82,24 @@ trivial passes). Then:
 - Route: ambiguity → `clarify-spec`; missing requirements → spec author.
 - State if spec is plan-ready.
 
-**Example output** (requirements-quality pass
+**Example output** (requirements-quality pass, abbreviated):
+
+```markdown
+## Measurability
+- [x] CHK001 Every success criterion is a number or binary.
+- [ ] CHK002 Latency target is quantified.
+      ✖ SC-002 says "responses feel fast" — no number. → clarify-spec (suggest p95 target).
+
+## Completeness
+- [ ] CHK003 Every user story has acceptance scenarios.
+      ✖ US2 has none. → back to author.
+- [x] CHK004 Out of Scope is filled in, not a placeholder.
+```
+
+> Verdict: 2 of 4 failing — not plan-ready. CHK002 is an ambiguity (route to
+> `clarify-spec`); CHK003 is a missing requirement (route to the author).
+
+## What this skill does not do
+
+- Doesn't test implementation — that's the test suite.
+- Doesn't resolve gaps — routes them to `clarify-spec` or the author.
