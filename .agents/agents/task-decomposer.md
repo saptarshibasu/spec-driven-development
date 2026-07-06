@@ -23,6 +23,10 @@ revision history forward.
 
 <!-- GUARDRAILS:agent -->
 <!-- /GUARDRAILS:agent -->
+- **Never approve your own work.** Leave `tasks.md`'s Status at `Draft` and
+  return your summary to the caller — the approval gate is the caller's, never
+  yours. Don't mark the task list `Approved`, and don't treat a clean
+  decomposition as approval to move on.
 - **No over-engineering.** Decompose only what spec and plan already call
   for — a task with no basis in either is gold-plating, not thoroughness.
 

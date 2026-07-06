@@ -39,6 +39,10 @@ revision history forward.
   service calls) and return it to the caller as a question instead of
   proceeding — a sub-agent cannot pause to ask the human directly.
 <!-- /GUARDRAILS:agent -->
+- **Never approve your own work.** Leave `tasks.md`'s Status at `Draft` and
+  return your summary to the caller — the approval gate is the caller's, never
+  yours. Don't mark the task list `Approved`, and don't treat a clean
+  decomposition as approval to move on.
 - **No over-engineering.** Decompose only what spec and plan already call
   for — a task with no basis in either is gold-plating, not thoroughness.
 

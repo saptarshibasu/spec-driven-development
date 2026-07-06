@@ -1,7 +1,7 @@
 ---
 name: test-writer
 description: "Use to write failing tests FIRST, before implementation, from a spec, task, or described behaviour (\"write the tests for US1\"), or to add coverage to existing code. Confirms tests fail for the right reason and stops at red — never writes the implementation."
-model: ['Claude Sonnet 5', 'Claude Sonnet 4.6']
+model: Claude Sonnet 4.6
 ---
 
 # Test Writer

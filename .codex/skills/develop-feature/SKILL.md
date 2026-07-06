@@ -42,6 +42,21 @@ analysis, and implementation alike.
   anything irreversible (deleting files, force-pushing, dropping tables,
   external service calls).
 <!-- /GUARDRAILS:skill -->
+- **The human owns every approval gate — you never self-approve.** Each
+  drafting phase (1, 2, 3) and the Analyze gate (3.5) ends by *stopping* for
+  explicit human approval; never flip a document's Status to `Approved`, merge
+  two phases into one turn, or proceed on your own judgment because the draft
+  "looks fine." This is the kit's core promise ("agent proposes, human
+  approves") and it holds for the whole session, not just when a phase
+  reference file happens to be freshly in context.
+- **Route fixes to the owning phase — never hand-apply a finding.** When
+  `artifact-analyzer` (or any check) reports an issue, loop it back to the
+  agent that owns that artifact — `specifier` for `spec.md`, `planner` for
+  `plan.md`, `task-decomposer` for `tasks.md` — and re-run the gate after the
+  human approves the fix. The analyzer is read-only and reports; you are the
+  orchestrator and route. Don't edit `spec.md`/`plan.md`/`tasks.md` yourself to
+  clear a finding (small wording fixes aside) — the drafting agent stays
+  responsible for its artifact's quality.
 - **No over-engineering.** Only specify, plan, and build what is directly
   requested — no abstractions, extra projects, or flexibility for hypothetical
   future requirements unless the user explicitly asks.

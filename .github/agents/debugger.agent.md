@@ -1,7 +1,7 @@
 ---
 name: debugger
 description: "Use to investigate a failure — a failing test, exception, stack trace, or behaviour that doesn't match the spec (\"why is this test failing?\"). Runs in its own context and returns root cause plus the minimal fix, not a rewrite. Optionally accepts a spec path and a specs/<NNN>/learnings.md path."
-model: ['Claude Sonnet 5', 'Claude Sonnet 4.6']
+model: Claude Sonnet 4.6
 ---
 
 # Debugger
