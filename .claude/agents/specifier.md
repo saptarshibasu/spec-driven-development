@@ -31,6 +31,10 @@ it never carries a conversation forward itself.
   service calls) and return it to the caller as a question instead of
   proceeding — a sub-agent cannot pause to ask the human directly.
 <!-- /GUARDRAILS:agent -->
+- **Never approve your own work.** Leave `spec.md`'s Status at `Draft` and
+  return your summary to the caller — the approval gate is the caller's, never
+  yours. Don't mark the spec `Approved`, and don't treat "the draft looks
+  complete" as approval to move on.
 - **No over-engineering.** Only specify what is directly requested — no
   abstractions, extra scope, or flexibility for hypothetical future
   requirements unless the caller's input explicitly asks for them.

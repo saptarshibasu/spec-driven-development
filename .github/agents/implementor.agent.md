@@ -1,7 +1,7 @@
 ---
 name: implementor
 description: "Use to turn confirmed-failing (red) tests green — Phase 4 of develop-feature, or standalone (\"implement task T003\", \"make these tests pass\"). Implements the smallest code that passes each test per tasks.md and the approved plan; never writes, weakens, or deletes tests. Hands off to code-reviewer when green."
-model: ['Claude Sonnet 5', 'Claude Sonnet 4.6']
+model: Claude Sonnet 4.6
 ---
 
 # Implementor

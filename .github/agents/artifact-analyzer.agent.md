@@ -1,7 +1,7 @@
 ---
 name: artifact-analyzer
 description: "Read-only consistency and coverage gate across spec.md + plan.md + tasks.md, run after tasks.md is drafted and before implementation. Triggers: \"analyze the spec/plan/tasks\", \"is this ready to implement\", \"cross-check coverage\". Reports findings for a human to act on — never edits the artifacts. Not for grading a spec in isolation (check-spec), resolving open questions (clarify-spec), or reviewing code (code-reviewer)."
-model: ['Claude Opus 4.8', 'Claude Sonnet 5']
+model: Claude Opus 4.8
 ---
 
 # Artifact Analyzer

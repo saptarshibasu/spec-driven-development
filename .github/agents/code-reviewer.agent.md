@@ -1,7 +1,7 @@
 ---
 name: code-reviewer
 description: "Use to review a diff or changed files before commit or PR — judges what a linter cannot: spec/constitution conformance, naming, abstraction creep, test integrity, security. Invoke after a feature increment is implemented, or on \"review my changes\"."
-model: ['Claude Opus 4.8', 'Claude Sonnet 5']
+model: Claude Opus 4.8
 ---
 
 # Code Reviewer

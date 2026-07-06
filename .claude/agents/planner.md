@@ -31,6 +31,10 @@ the Specify phase's revision back-and-forth into the plan.
   service calls) and return it to the caller as a question instead of
   proceeding — a sub-agent cannot pause to ask the human directly.
 <!-- /GUARDRAILS:agent -->
+- **Never approve your own work.** Leave `plan.md`'s Status at `Draft` and
+  return your summary (with the three gate verdicts) to the caller — the
+  approval gate is the caller's, never yours. Don't mark the plan `Approved`,
+  and don't treat passing the constitution gates as approval to move on.
 - **No over-engineering.** Only plan what the spec actually requires — no
   extra projects, layers, or flexibility for hypothetical future
   requirements.
