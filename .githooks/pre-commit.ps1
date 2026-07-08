@@ -9,8 +9,8 @@
 #
 # Everything between the KIT:BEGIN/KIT:END markers is kit-owned: `update-kit.ps1`
 # replaces that block verbatim on update and leaves everything outside it
-# (section 4) alone. See docs/KIT-MANIFEST.md. Don't remove or reorder the
-# markers, and don't add stack-specific checks above KIT:END.
+# (section 4) alone. Don't remove or reorder the markers, and don't add
+# stack-specific checks above KIT:END.
 
 $ErrorActionPreference = 'Stop'
 $fail = $false

@@ -1,9 +1,9 @@
 # Changelog
 
 All notable changes to the **Spec-Driven Development Kit** are documented in
-this file. This tracks the *kit itself* (the contents of `docs/KIT-MANIFEST.md`'s
-kit-owned paths) — not your project's own history, which lives in your normal
-commit log.
+this file. This tracks the *kit itself* (the kit-owned paths pulled in by
+`scripts/update-kit.sh`) — not your project's own history, which lives in your
+normal commit log.
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the kit uses [Semantic Versioning](https://semver.org/): the version lives
@@ -11,8 +11,7 @@ in the root `KIT_VERSION` file.
 
 > **Downstream adopters:** don't hand-edit this file. `scripts/update-kit.sh`
 > (`.ps1` twin) appends to it automatically when you pull in a newer kit
-> version — see `docs/KIT-MANIFEST.md` for what "kit-owned" means and how
-> updates flow.
+> version.
 
 ## [Unreleased]
 
@@ -22,10 +21,10 @@ in the root `KIT_VERSION` file.
   found none of the five were referenced from any live, shipped
   `.agents/agents/*.md` or `.agents/skills/**/*.md` file — the canonical
   content that actually drives agent behavior during feature development —
-  only from each other's "See also" sections, the docs index, the kit
-  manifest, and this repo's own non-distributed `.githooks/pre-commit(.ps1)`
-  / `agent-harness.yml`. Removed the corresponding entries from
-  `docs/KIT-MANIFEST.md`, `.agents/kit-manifest.conf`, `docs/README.md`, and
+  only from each other's "See also" sections, the docs index, and this
+  repo's own non-distributed `.githooks/pre-commit(.ps1)` /
+  `agent-harness.yml`. Removed the corresponding entries from
+  `.agents/kit-manifest.conf`, `docs/README.md`, and
   every dangling citation across `README.md`, `AGENTS.md`,
   `.agents/extensions/README.md`, `docs/adaptive-workflow-and-extensions.md`,
   `docs/adr/0003-analyze-gate.md`, `docs/context-engineering.md`,
@@ -56,7 +55,7 @@ in the root `KIT_VERSION` file.
   `.agents/skills/init-project/SKILL.md`,
   `.agents/skills/sync-agents-md/SKILL.md`,
   `.agents/extensions/README.md`, `docs/adaptive-workflow-and-extensions.md`,
-  `docs/guardrails.md`, `docs/README.md`, `docs/KIT-MANIFEST.md`,
+  `docs/guardrails.md`, `docs/README.md`,
   `.gitattributes`, `AGENTS.md`, and `.github/workflows/agent-harness.yml` —
   the rule each one justified is left in place, only the file-that's-no-
   longer-there pointer is gone. ADR-to-ADR citations inside `docs/adr/`
@@ -96,7 +95,7 @@ in the root `KIT_VERSION` file.
   doc, the routing it described is independently enforced by each agent's
   `model:` front-matter field, not by an agent reading the doc. Removed the
   corresponding `file=` entries from `.agents/kit-manifest.conf`, the table
-  rows from `docs/KIT-MANIFEST.md` and `docs/README.md`, and every dangling
+  row from `docs/README.md`, and every dangling
   citation across `README.md`, `AGENTS.md`, `docs/guardrails.md`,
   `docs/adr/0001-agents-md-single-source-of-truth.md`,
   `.agents/extensions/README.md`, `templates/agents.template.md`,
@@ -123,9 +122,7 @@ Baseline release — the first version tracked by this file.
 - `.agents/kit-manifest.conf` — the machine-readable, single source of truth
   for the kit-owned path list. `update-kit.sh` / `.ps1` read it from the
   source checkout at run time rather than each hand-maintaining its own
-  file lists, and a CI step ("Kit manifest doc matches kit-manifest.conf")
-  fails the build if `docs/KIT-MANIFEST.md`'s prose table ever omits a path
-  listed in the conf file.
+  file lists.
 - Generated behavioral guardrails: canonical `.agents/agents/*.md` and
   `.agents/skills/*/SKILL.md` files carry an empty
   `<!-- GUARDRAILS:<variant> -->` marker, expanded from `docs/guardrails.md`

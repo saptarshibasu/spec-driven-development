@@ -14,7 +14,7 @@ nine focused agents, deterministic guardrails — and a clean upgrade path for a
 [![Codex](https://img.shields.io/badge/Codex-supported-8A2BE2)](#-works-with-your-tools)
 [![Cross-platform](https://img.shields.io/badge/scripts-.sh%20%2B%20.ps1-lightgrey)](scripts/)
 
-[Why this kit](#-why-this-kit) · [How it works](#-the-workflow) · [Quick start](#-add-it-to-an-existing-project) · [Upgrading](#-upgrading) · [Best practices](#-getting-the-best-out-of-it)
+[Why this kit](#-why-this-kit) · [How it works](#-the-workflow) · [Quick start](#-add-it-to-an-existing-project) · [Upgrading](#-upgrading) · [Kit-owned files](#-kit-owned-files) · [Best practices](#-getting-the-best-out-of-it)
 
 </div>
 
@@ -45,7 +45,7 @@ What sets it apart, in a few words:
 | 📏 | **Right-sized rigor** | Four workflow tracks — a typo fix doesn't get user stories; a new service doesn't get CRUD-level ceremony. The agent proposes, you decide. |
 | 🤖 | **Nine focused agents** | `specifier` · `planner` · `task-decomposer` · `artifact-analyzer` · `test-writer` · `implementor` · `debugger` · `code-reviewer` · `docs-writer` — each runs fresh, in its own context, on the model tier its phase needs. |
 | 🪞 | **Single source of truth** | Canonical definitions in `.agents/`; generated mirrors for each tool. CI fails if a mirror drifts. |
-| 🔄 | **Contractual upgrades** | [`docs/KIT-MANIFEST.md`](docs/KIT-MANIFEST.md) + `scripts/update-kit.sh`: pull new kit versions without ever touching your code, specs, or config. |
+| 🔄 | **Contractual upgrades** | `scripts/update-kit.sh`: pull new kit versions without ever touching your code, specs, or config. |
 | 🧩 | **Opt-in extension packs** | Blocking rule packs (security, compliance, …) layered onto a feature only when you say so. |
 | 🧠 | **Project memory** | A constitution of always-true principles, a per-feature decision log, and a `learnings.md` that captures what went sideways — with compaction so it never bloats. |
 | 🖥️ | **Cross-platform** | Every script ships as a `.sh` / `.ps1` twin. |
@@ -252,10 +252,9 @@ echo "0.0.0" > KIT_VERSION
 /tmp/sdd-kit/scripts/update-kit.sh /tmp/sdd-kit        # update-kit.ps1 on Windows
 ```
 
-This copies exactly the kit-owned paths listed in [docs/KIT-MANIFEST.md](docs/KIT-MANIFEST.md)
-(`.agents/`, `templates/`, `scripts/`, reference docs, generated tool mirrors) — and nothing
-else. Your `src/`, `tests/`, CI, and existing docs are untouched. Add `--dry-run` first to
-preview the file list.
+This copies exactly the kit-owned paths (`.agents/`, `templates/`, `scripts/`, reference docs,
+generated tool mirrors) — and nothing else. Your `src/`, `tests/`, CI, and existing docs are
+untouched. Add `--dry-run` first to preview the file list.
 
 **3 · Generate your project config.** In your agent tool, run the **`init-project`** skill. It
 scans your codebase, then — with your approval at each gate — writes a filled-in `AGENTS.md` and
@@ -279,15 +278,52 @@ scripts/update-kit.sh /tmp/sdd-kit                                # apply
 
 > [!IMPORTANT]
 > Only **kit-owned** paths are ever written. Project-owned paths — `AGENTS.md`, `memory/`,
-> `specs/`, `src/`, `tests/`, your own ADRs — are never touched. That contract is
-> [docs/KIT-MANIFEST.md](docs/KIT-MANIFEST.md), enforced in CI against its machine-readable
-> source, `.agents/kit-manifest.conf`.
+> `specs/`, `src/`, `tests/`, your own ADRs — are never touched. `update-kit.sh` / `.ps1` read
+> the kit-owned path list from `.agents/kit-manifest.conf` at run time, so there's a single
+> source of truth for what gets overwritten.
 
 - Tool mirrors are **regenerated**, not copied — your `model-map.conf` choices flow through.
 - Real semver comparison with a **downgrade guard** (`--force` to override intentionally).
 - All writes are staged and validated **before anything touches disk**.
 - `KIT-CHANGELOG.md` tells you what changed and why; compare your `KIT_VERSION` against
   upstream's any time to see if you're behind.
+
+## 📦 Kit-owned files
+
+These are the paths `scripts/update-kit.sh` (`.ps1` twin) is allowed to write. They're
+regenerated or overwritten wholesale on every update — hand-editing one creates a fork-on-day-one
+problem, so if you need a local variant, add it under `.agents/extensions/` instead. The
+authoritative, machine-readable list lives in `.agents/kit-manifest.conf`; this table is the
+human-readable summary of it.
+
+| Path | What it is |
+|---|---|
+| `KIT_VERSION` | The installed kit version (semver). |
+| `KIT-CHANGELOG.md` | The kit's own release history — not your project's. |
+| `.agents/kit-manifest.conf` | The machine-readable kit-owned path list both updater scripts read at run time. |
+| `.agents/agents/`, `.agents/skills/` | Canonical agent and skill definitions. |
+| `.agents/extensions/` | Opt-in rule packs the kit ships (e.g. `security/baseline`); packs you author yourself are project-owned. |
+| `.claude/`, `.github/agents/`, `.github/skills/`, `.codex/` | Generated mirrors of `.agents/`, regenerated by re-running `mirror-agents.sh` / `mirror-skills.sh` — never hand-edit these. |
+| `scripts/mirror-agents.sh` / `.ps1`, `scripts/mirror-skills.sh` / `.ps1` | Mirror generators. |
+| `scripts/quiet.sh` / `.ps1` | Log-condensing helper used by hooks/CI. |
+| `scripts/update-kit.sh` / `.ps1` | This updater — it updates itself like any other kit-owned file. |
+| `templates/` | Spec/plan/tasks/checklist/etc. templates. |
+| `docs/README.md`, `docs/guardrails.md` | Upstream reference guides. |
+| `.mcp.json.example` | Example MCP config. |
+| `.gitattributes` | Line-ending normalization. |
+| `LICENSE` | Kit license. |
+
+**Not distributed**, even though they live in this repo: `.githooks/pre-commit` (`.ps1`) and
+`.github/workflows/agent-harness.yml` are the kit's own reference sensors, not copied by
+`update-kit.sh` (a CI workflow auto-runs the moment it's committed, unlike an opt-in git hook) —
+copy either in by hand if you want them, and they're yours to maintain from that point on. The
+kit's own `docs/adr/` (7 ADRs) also stay put — they're kit-maintainer design history, not
+something a downstream project's feature work depends on.
+
+**Project-owned** — the kit writes these once and `update-kit.sh` never touches them again:
+`AGENTS.md`, `memory/`, `specs/`, `src/`, `tests/`, your own `docs/adr/`, `docs/glossary.md`,
+`.mcp.json`, `CLAUDE.md` / `.github/copilot-instructions.md`, and anything else the kit didn't
+ship. A new top-level file or directory you create is project-owned by default.
 
 ## 🏆 Getting the best out of it
 

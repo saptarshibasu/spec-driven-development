@@ -2,8 +2,8 @@
 # update-kit.sh — pull kit-owned changes from a newer kit version into this
 # project, without ever touching project-owned paths.
 #
-# What "kit-owned" means and the full path-by-path breakdown live in
-# docs/KIT-MANIFEST.md — read that first if anything here is
+# The kit-owned path list this reads from is .agents/kit-manifest.conf — see
+# that file for the full path-by-path breakdown if anything here is
 # surprising. In short:
 #   - Whole-file/whole-dir kit-owned paths are overwritten (added/updated,
 #     never deleted — if upstream removes a file, KIT-CHANGELOG.md calls it
@@ -58,9 +58,7 @@
 # kit-owned path list. Neither hand-maintains that list any more: both read
 # it from .agents/kit-manifest.conf in the SOURCE checkout at run time (see
 # that file for the format), so there is nothing left to hand-sync between
-# the two scripts — only the data file needs to change. docs/KIT-MANIFEST.md's
-# prose table is checked against the same conf file in CI (agent-harness.yml)
-# so the human-readable doc can't silently drift from it either.
+# the two scripts — only the data file needs to change.
 
 set -euo pipefail
 
@@ -88,7 +86,7 @@ done
 SRC="$(cd "$SRC" && pwd)"
 
 [ -f "$SRC/KIT_VERSION" ] || die "'$SRC' has no KIT_VERSION file — is it a kit checkout?"
-[ -f "KIT_VERSION" ] || die "this project has no KIT_VERSION file yet. Copy '$SRC/KIT_VERSION' in manually the first time (see docs/KIT-MANIFEST.md), then re-run."
+[ -f "KIT_VERSION" ] || die "this project has no KIT_VERSION file yet. Copy '$SRC/KIT_VERSION' in manually the first time, then re-run."
 
 CUR_VERSION="$(tr -d '[:space:]' < KIT_VERSION)"
 NEW_VERSION="$(tr -d '[:space:]' < "$SRC/KIT_VERSION")"
@@ -168,7 +166,7 @@ validate_kit_markers() {
     begins=$(grep -c 'KIT:BEGIN ===' "$f" || true)
     ends=$(grep -c 'KIT:END ===' "$f" || true)
     if [ "$begins" -ne 1 ] || [ "$ends" -ne 1 ]; then
-      die "$f: expected exactly one KIT:BEGIN/KIT:END marker pair, found $begins/$ends — resolve by hand (docs/KIT-MANIFEST.md), then re-run. Nothing has been written yet."
+      die "$f: expected exactly one KIT:BEGIN/KIT:END marker pair, found $begins/$ends — resolve by hand, then re-run. Nothing has been written yet."
     fi
   done
 }
@@ -181,7 +179,7 @@ if [ "${#KIT_PARTIAL_FILES[@]}" -gt 0 ]; then
 fi
 
 if [ "$ASSUME_YES" -ne 1 ] && [ "$DRY_RUN" -ne 1 ]; then
-  read -r -p "This overwrites kit-owned paths (see docs/KIT-MANIFEST.md). Continue? [y/N] " reply
+  read -r -p "This overwrites kit-owned paths. Continue? [y/N] " reply
   case "$reply" in
     y|Y|yes|YES) ;;
     *) echo "Aborted."; exit 1 ;;
@@ -240,7 +238,7 @@ merge_kit_section() {
     begins=$(grep -c 'KIT:BEGIN ===' "$f" || true)
     ends=$(grep -c 'KIT:END ===' "$f" || true)
     if [ "$begins" -ne 1 ] || [ "$ends" -ne 1 ]; then
-      die "$f: expected exactly one KIT:BEGIN/KIT:END marker pair, found $begins/$ends — resolve by hand (docs/KIT-MANIFEST.md), then re-run."
+      die "$f: expected exactly one KIT:BEGIN/KIT:END marker pair, found $begins/$ends — resolve by hand, then re-run."
     fi
   done
 

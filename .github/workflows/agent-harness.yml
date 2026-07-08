@@ -34,8 +34,7 @@ jobs:
 
       # === KIT:BEGIN ===
       # Everything down to KIT:END is kit-owned: `update-kit.sh` replaces this
-      # block verbatim on update. Add your own steps AFTER KIT:END only — see
-      # docs/KIT-MANIFEST.md.
+      # block verbatim on update. Add your own steps AFTER KIT:END only.
       # ── Repo-hygiene sensors (stack-agnostic — safe to keep on) ───────────
       - name: No unresolved clarification markers in committed specs
         run: |
@@ -185,35 +184,6 @@ jobs:
             echo "::error::KIT-CHANGELOG.md has no '## [$v]' entry matching KIT_VERSION ($v)."
             exit 1
           fi
-
-      - name: Kit manifest doc matches kit-manifest.conf
-        run: |
-          # docs/KIT-MANIFEST.md's prose table and .agents/kit-manifest.conf
-          # (the machine-readable list update-kit.sh/.ps1 actually read) used
-          # to be hand-synced with nothing enforcing agreement. Now: every
-          # path named in the conf file must also be mentioned somewhere in
-          # the doc, or this fails. Doesn't catch every wording nuance, but it
-          # catches the failure mode that matters — a path added to (or
-          # renamed/removed in) the conf and never reflected in the doc.
-          conf=".agents/kit-manifest.conf"
-          [ -f "$conf" ] || { echo "::error::$conf is missing."; exit 1; }
-          bad=0
-          while IFS='=' read -r ns path; do
-            ns="$(printf '%s' "$ns" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
-            [ -z "$ns" ] && continue
-            case "$ns" in \#*) continue ;; esac
-            path="$(printf '%s' "$path" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
-            [ -z "$path" ] && continue
-            case "$ns" in
-              file|dir|adr_dir|partial) ;;
-              *) echo "::error::$conf: unknown namespace '$ns'"; bad=1; continue ;;
-            esac
-            if ! grep -qF "$path" docs/KIT-MANIFEST.md; then
-              echo "::error::$conf lists '$ns=$path' but docs/KIT-MANIFEST.md never mentions it — update the table (and KIT-CHANGELOG.md)."
-              bad=1
-            fi
-          done < "$conf"
-          exit "$bad"
       # === KIT:END ===
 
       # ── Your stack's controls — UNCOMMENT and fill in ─────────────────────

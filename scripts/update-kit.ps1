@@ -2,13 +2,11 @@
 # update-kit.ps1 - Windows/PowerShell twin of scripts/update-kit.sh.
 #
 # Pulls kit-owned changes from a newer kit checkout into this project without
-# touching project-owned paths. See docs/KIT-MANIFEST.md for what
-# "kit-owned" means. Keep this in lockstep with update-kit.sh - same
-# KIT:BEGIN/KIT:END merge semantics. Neither script hand-maintains the
+# touching project-owned paths. Keep this in lockstep with update-kit.sh -
+# same KIT:BEGIN/KIT:END merge semantics. Neither script hand-maintains the
 # kit-owned path list any more: both read it from .agents/kit-manifest.conf
 # in the SOURCE checkout at run time, so a data edit can't introduce
-# divergence between the two, and docs/KIT-MANIFEST.md's prose table is
-# checked against the same conf file in CI.
+# divergence between the two.
 #
 # Atomicity: every partially kit-owned file (any `partial=` entry in
 # kit-manifest.conf - none ship by default) has its KIT:BEGIN/KIT:END marker
@@ -52,7 +50,7 @@ $Source = (Resolve-Path $Source).Path
 
 $srcVersionFile = Join-Path $Source 'KIT_VERSION'
 if (-not (Test-Path $srcVersionFile)) { Die "'$Source' has no KIT_VERSION file - is it a kit checkout?" }
-if (-not (Test-Path 'KIT_VERSION')) { Die "this project has no KIT_VERSION file yet. Copy '$srcVersionFile' in manually the first time (see docs/KIT-MANIFEST.md), then re-run." }
+if (-not (Test-Path 'KIT_VERSION')) { Die "this project has no KIT_VERSION file yet. Copy '$srcVersionFile' in manually the first time, then re-run." }
 
 $curVersion = (Get-Content 'KIT_VERSION' -Raw).Trim()
 $newVersion = (Get-Content $srcVersionFile -Raw).Trim()
@@ -138,7 +136,7 @@ function Test-KitMarkers($target, $source) {
     $begins = ($lines | Select-String -Pattern 'KIT:BEGIN ===' -SimpleMatch:$false).Count
     $ends = ($lines | Select-String -Pattern 'KIT:END ===' -SimpleMatch:$false).Count
     if ($begins -ne 1 -or $ends -ne 1) {
-      Die "${f}: expected exactly one KIT:BEGIN/KIT:END marker pair, found $begins/$ends - resolve by hand (docs/KIT-MANIFEST.md), then re-run. Nothing has been written yet."
+      Die "${f}: expected exactly one KIT:BEGIN/KIT:END marker pair, found $begins/$ends - resolve by hand, then re-run. Nothing has been written yet."
     }
   }
 }
@@ -151,7 +149,7 @@ if ($kitPartialFiles.Count -gt 0) {
 }
 
 if (-not $Yes -and -not $DryRun) {
-  $reply = Read-Host "This overwrites kit-owned paths (see docs/KIT-MANIFEST.md). Continue? [y/N]"
+  $reply = Read-Host "This overwrites kit-owned paths. Continue? [y/N]"
   if ($reply -notmatch '^(y|yes)$') { Write-Host 'Aborted.'; exit 1 }
 }
 
@@ -204,7 +202,7 @@ function Merge-KitSection($target, $source) {
     $begins = ($lines | Select-String -Pattern 'KIT:BEGIN ===' -SimpleMatch:$false).Count
     $ends = ($lines | Select-String -Pattern 'KIT:END ===' -SimpleMatch:$false).Count
     if ($begins -ne 1 -or $ends -ne 1) {
-      Die "${f}: expected exactly one KIT:BEGIN/KIT:END marker pair, found $begins/$ends - resolve by hand (docs/KIT-MANIFEST.md), then re-run."
+      Die "${f}: expected exactly one KIT:BEGIN/KIT:END marker pair, found $begins/$ends - resolve by hand, then re-run."
     }
   }
 

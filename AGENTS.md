@@ -14,9 +14,8 @@ than usual: a bug here ships to every project that later copies this kit.
 `memory/constitution.md` in this repo is intentionally still the stub — it is
 a template output, not a real constitution, because this repo has no
 application domain to ratify principles about. The kit's own non-negotiable
-rules live below and in `docs/KIT-MANIFEST.md` (what's kit-owned vs.
-project-owned) and `docs/adr/` (why each rule exists, for kit maintainers —
-not distributed to downstream projects). Never hand-edit anything under
+rules live below and in `docs/adr/` (why each rule exists, for kit
+maintainers — not distributed to downstream projects). Never hand-edit anything under
 `.claude/`, `.github/`, or `.codex/` — they're generated mirrors, not source.
 
 ## Commands
@@ -47,7 +46,7 @@ not distributed to downstream projects). Never hand-edit anything under
 - `.agents/model-map.conf` — the org-specific model/tool policy the mirror scripts read from (data, not code).
 - `.claude/`, `.github/agents/`, `.github/skills/`, `.codex/` — **generated**. Never hand-edit; `mirror-agents.sh`/`mirror-skills.sh` overwrite them and CI's drift guard fails if they don't match a fresh generation.
 - `templates/` — canonical spec/plan/tasks/constitution/decision-log/learnings/agents templates that `init-project` and `develop-feature` fill in for downstream projects.
-- `docs/` — deep-reference guides (guardrails) plus `docs/adr/` (7 ADRs, kit-maintainer reference — not distributed to downstream projects) and `docs/KIT-MANIFEST.md` (kit-owned vs. project-owned path list).
+- `docs/` — deep-reference guides (guardrails) plus `docs/adr/` (7 ADRs, kit-maintainer reference — not distributed to downstream projects).
 - `scripts/` — `mirror-agents`, `mirror-skills`, `check-guardrails`, `quiet`, `update-kit` (each with a `.sh`/`.ps1` twin).
 - `.githooks/pre-commit(.ps1)` — deterministic pre-commit sensor; has a `KIT:BEGIN`/`KIT:END`-delimited generic section (kit-owned) and a stack-specific section below it (project-owned in a downstream copy — here, that section stays empty since this repo has no stack).
 - `memory/`, `specs/`, `src/`, `tests/` — present so this repo's shape matches what it scaffolds elsewhere; contents are the unfilled template stubs, not real project artifacts.
@@ -58,7 +57,7 @@ This repo has no application source, so there is no code-style snippet to give. 
 
 - Every canonical `.agents/agents/*.md` and `.agents/skills/*/SKILL.md` file's `## Behavioral guardrails` section must open with the exact wording from the matching `<!-- GUARDRAILS:* -->` block in `docs/guardrails.md` — `scripts/check-guardrails.sh` enforces this byte-for-byte, don't hand-tune the phrasing in one file only.
 - Any `.sh` script added under `scripts/` or `.githooks/` needs a `.ps1` twin that produces byte-identical output — CI's drift guard and the cross-platform promise both depend on this.
-- Files with `KIT:BEGIN`/`KIT:END` markers (`.githooks/pre-commit`, `.github/workflows/agent-harness.yml`) must keep generic, stack-agnostic checks inside the markers and any stack-specific addition outside/below them — see `docs/KIT-MANIFEST.md`.
+- Files with `KIT:BEGIN`/`KIT:END` markers (`.githooks/pre-commit`, `.github/workflows/agent-harness.yml`) must keep generic, stack-agnostic checks inside the markers and any stack-specific addition outside/below them.
 
 ## Git / PR Workflow
 
@@ -93,7 +92,7 @@ This repo has no application source, so there is no code-style snippet to give. 
 
 ## Domain Language
 
-"Kit-owned" and "project-owned" are the load-bearing distinction in this repo — kit-owned paths are silently overwritten by `scripts/update-kit.sh`, project-owned paths never are. Full breakdown: `docs/KIT-MANIFEST.md`. "Canonical" (under `.agents/`) vs. "generated" (`.claude/`, `.github/`, `.codex/`) is the other recurring pair.
+"Kit-owned" and "project-owned" are the load-bearing distinction in this repo — kit-owned paths are silently overwritten by `scripts/update-kit.sh`, project-owned paths never are. "Canonical" (under `.agents/`) vs. "generated" (`.claude/`, `.github/`, `.codex/`) is the other recurring pair.
 
 ## Testing Discipline
 

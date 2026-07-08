@@ -51,8 +51,8 @@ follows the same shape: make the boundary explicit and mechanize crossing it.
    the kit's own release history — not the adopting project's history, which
    already lives in its normal commit log. `scripts/update-kit.sh` (`.ps1`
    twin) is the only thing that touches this file after the initial copy.
-3. **`docs/KIT-MANIFEST.md`** is the explicit, path-by-path manifest of
-   kit-owned vs. project-owned paths:
+3. **An explicit, path-by-path manifest** of kit-owned vs. project-owned
+   paths:
    - Kit-owned, whole-file/whole-dir: `.agents/agents/`, `.agents/skills/`,
      `.agents/extensions/` (kit-shipped packs), `templates/`, the `docs/*.md`
      reference guides, `scripts/mirror-*.sh|.ps1`, `scripts/quiet.sh|.ps1`,
@@ -102,12 +102,12 @@ follows the same shape: make the boundary explicit and mechanize crossing it.
   changes in with one command instead of a manual three-way merge — closing
   the "forks permanently on day one" problem this ADR exists to fix.
 - The manifest is a contract, not just documentation: `update-kit.sh` trusts
-  it literally, so a maintainer adding a new kit-owned path must update
-  `docs/KIT-MANIFEST.md`, the hardcoded path list in both updater scripts,
-  and `CHANGELOG.md` in the same change, or the updater silently won't pick
-  it up. This mirrors the existing discipline `mirror-agents.sh` already
-  requires for its tool/model mapping tables — a known, accepted cost of
-  keeping generation mechanical instead of inferred.
+  it literally, so a maintainer adding a new kit-owned path must update the
+  path list both updater scripts read and `CHANGELOG.md` in the same change,
+  or the updater silently won't pick it up. This mirrors the existing
+  discipline `mirror-agents.sh` already requires for its tool/model mapping
+  tables — a known, accepted cost of keeping generation mechanical instead
+  of inferred.
 - The `KIT:BEGIN`/`KIT:END` convention adds a small amount of ceremony to two
   files that used to be free-form, numbered-comment sections. In exchange, a
   kit update to the generic checks in those files no longer requires a human
