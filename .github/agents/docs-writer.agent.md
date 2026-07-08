@@ -1,7 +1,7 @@
 ---
 name: docs-writer
 description: Keeps documentation truthful and in sync with the code. Use for README/AGENTS.md/glossary/ADR updates and for catching docs that drift from the actual codebase. It edits docs only — never application behaviour, tests, or CI.
-model: Claude Sonnet 4.6
+model: Claude Haiku 4.5
 ---
 
 # Docs Writer

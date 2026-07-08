@@ -23,11 +23,10 @@ maintainers — not distributed to downstream projects). Never hand-edit anythin
 - Enable the pre-commit sensor (once per clone): `git config core.hooksPath .githooks`
 - Regenerate agent mirrors after editing `.agents/agents/`: `bash scripts/mirror-agents.sh`
 - Regenerate skill mirrors after editing `.agents/skills/`: `bash scripts/mirror-skills.sh`
-- Check generated mirrors match canon (what CI runs): `bash scripts/mirror-agents.sh && bash scripts/mirror-skills.sh && git status --porcelain` (non-empty output = drift)
-- Check guardrail wording is in sync: `bash scripts/check-guardrails.sh`
-- Condense noisy command output: `scripts/quiet.sh <command>` — e.g. `scripts/quiet.sh bash scripts/check-guardrails.sh`
+- Check generated mirrors match canon (what CI runs): `bash scripts/mirror-agents.sh && bash scripts/mirror-skills.sh && git status --porcelain` (non-empty output = drift) — this also covers guardrail sync, since `docs/guardrails.md` is expanded into each empty `<!-- GUARDRAILS:* --><!-- /GUARDRAILS:* -->` marker at mirror time by these same scripts.
+- Condense noisy command output: `scripts/quiet.sh <command>` — e.g. `scripts/quiet.sh bash scripts/mirror-agents.sh`
 - Pull upstream kit changes into an existing copy: `scripts/update-kit.sh <path-to-newer-kit-checkout> [--dry-run]`
-- Run the full local sensor set before committing: `bash scripts/mirror-agents.sh && bash scripts/mirror-skills.sh && bash scripts/check-guardrails.sh`
+- Run the full local sensor set before committing: `bash scripts/mirror-agents.sh && bash scripts/mirror-skills.sh && git status --porcelain`
 - There is no build step and no test runner for this repo itself — `tests/{unit,contract,characterization}` are placeholders (`.gitkeep` only) that model the layout a downstream project should adopt, not suites that run here.
 
 ## Tech Stack
@@ -47,7 +46,7 @@ maintainers — not distributed to downstream projects). Never hand-edit anythin
 - `.claude/`, `.github/agents/`, `.github/skills/`, `.codex/` — **generated**. Never hand-edit; `mirror-agents.sh`/`mirror-skills.sh` overwrite them and CI's drift guard fails if they don't match a fresh generation.
 - `templates/` — canonical spec/plan/tasks/constitution/decision-log/learnings/agents templates that `init-project` and `develop-feature` fill in for downstream projects.
 - `docs/` — deep-reference guides (guardrails) plus `docs/adr/` (7 ADRs, kit-maintainer reference — not distributed to downstream projects).
-- `scripts/` — `mirror-agents`, `mirror-skills`, `check-guardrails`, `quiet`, `update-kit` (each with a `.sh`/`.ps1` twin).
+- `scripts/` — `mirror-agents`, `mirror-skills`, `quiet`, `update-kit` (each with a `.sh`/`.ps1` twin).
 - `.githooks/pre-commit(.ps1)` — deterministic pre-commit sensor; has a `KIT:BEGIN`/`KIT:END`-delimited generic section (kit-owned) and a stack-specific section below it (project-owned in a downstream copy — here, that section stays empty since this repo has no stack).
 - `memory/`, `specs/`, `src/`, `tests/` — present so this repo's shape matches what it scaffolds elsewhere; contents are the unfilled template stubs, not real project artifacts.
 
@@ -55,7 +54,7 @@ maintainers — not distributed to downstream projects). Never hand-edit anythin
 
 This repo has no application source, so there is no code-style snippet to give. The style rules that matter here are documentation conventions:
 
-- Every canonical `.agents/agents/*.md` and `.agents/skills/*/SKILL.md` file's `## Behavioral guardrails` section must open with the exact wording from the matching `<!-- GUARDRAILS:* -->` block in `docs/guardrails.md` — `scripts/check-guardrails.sh` enforces this byte-for-byte, don't hand-tune the phrasing in one file only.
+- Every canonical `.agents/agents/*.md` and `.agents/skills/*/SKILL.md` file's `## Behavioral guardrails` section carries only an empty `<!-- GUARDRAILS:* --><!-- /GUARDRAILS:* -->` marker, never the wording itself — `scripts/mirror-agents.sh`/`scripts/mirror-skills.sh` expand it from `docs/guardrails.md` into each generated `.claude/.github/.codex` copy at mirror time, and CI's drift guard fails if a generated copy doesn't match a fresh generation. Don't hand-write guardrail wording into a canonical file.
 - Any `.sh` script added under `scripts/` or `.githooks/` needs a `.ps1` twin that produces byte-identical output — CI's drift guard and the cross-platform promise both depend on this.
 - Files with `KIT:BEGIN`/`KIT:END` markers (`.githooks/pre-commit`, `.github/workflows/agent-harness.yml`) must keep generic, stack-agnostic checks inside the markers and any stack-specific addition outside/below them.
 
@@ -63,7 +62,7 @@ This repo has no application source, so there is no code-style snippet to give. 
 
 - No enforced branch-naming or commit-message pattern beyond normal git hygiene; CI (`agent-harness.yml`) is the real gate.
 - Before opening a PR that touches `.agents/agents/` or `.agents/skills/`, run the mirror regeneration commands above and commit the resulting diffs in `.claude/`, `.github/`, `.codex/` — CI fails the drift check otherwise.
-- `VERSION` and the latest `CHANGELOG.md` entry must move together — CI checks this; bump both in the same PR when releasing.
+- `KIT_VERSION` and the latest `KIT-CHANGELOG.md` entry must move together — CI checks this; bump both in the same PR when releasing.
 
 ## Boundaries
 
@@ -74,10 +73,10 @@ This repo has no application source, so there is no code-style snippet to give. 
 - Add a `.ps1` twin for any new `.sh` script.
 
 **⚠️ Ask first** — high-impact but not categorically forbidden:
-- Changing the wording inside a `<!-- GUARDRAILS:* -->` block in `docs/guardrails.md` — every embedding file needs updating in the same change, or `check-guardrails.sh` will fail.
+- Changing the wording inside a `<!-- GUARDRAILS:* -->` block in `docs/guardrails.md` — every downstream copy needs the mirror scripts re-run in the same change, or CI's drift guard will fail.
 - Adding or renumbering an ADR in `docs/adr/` — numbers are load-bearing (ADRs cross-reference each other by number, and amending ADRs like 0004/0006 amend a specific prior one by number).
-- Editing anything inside the `KIT:BEGIN`/`KIT:END` markers of `.githooks/pre-commit` or `.github/workflows/agent-harness.yml` — this is the exact block `update-kit.sh` overwrites verbatim on every downstream update.
-- Bumping `VERSION` / adding a `CHANGELOG.md` entry — this is a release action, not a routine edit.
+- Editing anything inside the `KIT:BEGIN`/`KIT:END` markers of `.githooks/pre-commit` or `.github/workflows/agent-harness.yml` — these markers still delimit the kit-owned generic section this repo uses on itself, but `kit-manifest.conf` no longer lists either file as `partial=`, so `update-kit.sh` does not touch them on a downstream update; an adopter who wants updates to this section copies it in by hand.
+- Bumping `KIT_VERSION` / adding a `KIT-CHANGELOG.md` entry — this is a release action, not a routine edit.
 
 **🚫 Never** — hard stops, no exceptions:
 - Never hand-edit a generated mirror (`.claude/`, `.github/agents/`, `.github/skills/`, `.codex/`) — the next mirror run silently discards it.
@@ -96,7 +95,7 @@ This repo has no application source, so there is no code-style snippet to give. 
 
 ## Testing Discipline
 
-This repo has no test suite of its own to run. `tests/{unit,contract,characterization}` hold only `.gitkeep` — they exist to demonstrate the directory shape `init-project` and the templates expect a downstream project to populate, not code under test here. The closest thing to tests in this repo are the CI sensors in `.github/workflows/agent-harness.yml` (mirror drift, guardrail sync, unresolved-clarification-marker check, thin-pointer check, `VERSION`/`CHANGELOG.md` match) and `scripts/check-guardrails.sh` — run those before committing changes to `.agents/`.
+This repo has no test suite of its own to run. `tests/{unit,contract,characterization}` hold only `.gitkeep` — they exist to demonstrate the directory shape `init-project` and the templates expect a downstream project to populate, not code under test here. The closest thing to tests in this repo are the CI sensors in `.github/workflows/agent-harness.yml` (mirror drift — which also covers guardrail sync, since guardrails are expanded from `docs/guardrails.md` at mirror time — unresolved-clarification-marker check, thin-pointer check, `KIT_VERSION`/`KIT-CHANGELOG.md` match) — run `bash scripts/mirror-agents.sh && bash scripts/mirror-skills.sh && git status --porcelain` before committing changes to `.agents/`.
 
 ## Multi-Repo / Cross-Boundary Notes
 

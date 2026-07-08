@@ -33,8 +33,11 @@ jobs:
       - uses: actions/checkout@v4
 
       # === KIT:BEGIN ===
-      # Everything down to KIT:END is kit-owned: `update-kit.sh` replaces this
-      # block verbatim on update. Add your own steps AFTER KIT:END only.
+      # Everything down to KIT:END is the kit-owned generic section (this repo
+      # uses it on itself too). `kit-manifest.conf` no longer lists this file
+      # as `partial=`, so `update-kit.sh` does not overwrite this block on a
+      # downstream update — an adopter who wants upstream changes to it copies
+      # the block in by hand. Add your own steps AFTER KIT:END only.
       # ── Repo-hygiene sensors (stack-agnostic — safe to keep on) ───────────
       - name: No unresolved clarification markers in committed specs
         run: |

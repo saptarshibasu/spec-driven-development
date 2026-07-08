@@ -7,10 +7,12 @@
 # PowerShell-based hook manager): point a one-line `.githooks/pre-commit` wrapper
 # at it, or invoke it from your hook runner. Keep the two checks in sync.
 #
-# Everything between the KIT:BEGIN/KIT:END markers is kit-owned: `update-kit.ps1`
-# replaces that block verbatim on update and leaves everything outside it
-# (section 4) alone. Don't remove or reorder the markers, and don't add
-# stack-specific checks above KIT:END.
+# Everything between the KIT:BEGIN/KIT:END markers is the kit-owned generic
+# section (this repo uses it on itself too). `kit-manifest.conf` no longer
+# lists this file as `partial=`, so `update-kit.ps1` does not overwrite this
+# block on a downstream update — an adopter who wants upstream changes to it
+# copies the block in by hand. Don't remove or reorder the markers, and don't
+# add stack-specific checks above KIT:END.
 
 $ErrorActionPreference = 'Stop'
 $fail = $false
