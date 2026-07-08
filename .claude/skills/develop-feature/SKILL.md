@@ -14,8 +14,7 @@ document is delegated to a dedicated agent — `specifier` (`spec.md`),
 `planner` (`plan.md`), `task-decomposer` (`tasks.md`) — each invoked fresh, so
 none of them carries the other phases' revision back-and-forth into its own
 context, and each can be pinned to the model tier its phase actually needs
-(`AGENTS.md` Model Routing; see also
-`docs/model-selection-and-token-optimization-in-sdd.md`). Three gated phases —
+(`AGENTS.md` Model Routing). Three gated phases —
 never skip a gate, and never merge two phases into one turn.
 
 This file is intentionally short: it covers routing and the rules that apply
@@ -114,7 +113,7 @@ file.
 
 ## Step R — Route the work (right-size before you scaffold)
 
-Before scaffolding, **propose a track** (see `docs/adaptive-workflow-and-extensions.md`).
+Before scaffolding, **propose a track**.
 *You recommend; human decides.* Never pick silently.
 
 Propose exactly one track with a one-line rationale and the artifacts you'll produce:

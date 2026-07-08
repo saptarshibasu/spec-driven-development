@@ -3,7 +3,7 @@
 # project, without ever touching project-owned paths.
 #
 # What "kit-owned" means and the full path-by-path breakdown live in
-# docs/KIT-MANIFEST.md (ADR-0007) — read that first if anything here is
+# docs/KIT-MANIFEST.md — read that first if anything here is
 # surprising. In short:
 #   - Whole-file/whole-dir kit-owned paths are overwritten (added/updated,
 #     never deleted — if upstream removes a file, KIT-CHANGELOG.md calls it

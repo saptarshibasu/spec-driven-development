@@ -1,8 +1,7 @@
 # agent-harness.yml — the computational FEEDBACK half of your harness.
 #
 # This is the backstop sensor that fires on every PR even when an agent (or a
-# human) skips the local checks. See docs/harness-engineering.md for the full
-# feedforward/feedback model. It is intentionally language-agnostic and mostly
+# human) skips the local checks. It is intentionally language-agnostic and mostly
 # commented out — uncomment and fill in the block for YOUR stack so the same
 # checks AGENTS.md tells the agent to run locally also run in CI.
 #
@@ -52,7 +51,7 @@ jobs:
       - name: Tool instruction files stay thin pointers
         run: |
           # CLAUDE.md and copilot-instructions.md must not grow real content —
-          # conventions belong in AGENTS.md (see ADR-0001).
+          # conventions belong in AGENTS.md.
           for f in CLAUDE.md .github/copilot-instructions.md; do
             [ -f "$f" ] || continue
             if [ "$(grep -cvE '^\s*(<!--.*-->)?\s*$' "$f")" -gt 2 ]; then
@@ -63,7 +62,7 @@ jobs:
 
       - name: Skills & agents are in sync with canonical sources
         run: |
-          # Drift guard for ADR-0001: the .claude/.github/.codex copies must be
+          # Drift guard: the .claude/.github/.codex copies must be
           # exactly what mirror-skills/mirror-agents generate from the canonical
           # .agents/ sources. Regenerate, then fail if anything changed — i.e. a
           # generated copy was hand-edited, or a canonical edit wasn't mirrored.
@@ -236,4 +235,4 @@ jobs:
       #
       # Optional inferential sensor: an AI code-review step mirroring the
       # .claude/agents/code-reviewer.md agent. Use a model/family different from
-      # the one that generated the code. See docs/harness-engineering.md.
+      # the one that generated the code.

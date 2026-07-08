@@ -13,8 +13,7 @@ constitution-checked technical plan — HOW, never WHAT.
 Drafts one feature's `plan.md`. Pinned to the strongest available model —
 architecture and approach decisions here are expensive to reverse once tasks
 and code depend on them, the same asymmetry that justifies Specify running on
-the strong tier (see `docs/model-selection-and-token-optimization-in-sdd.md`).
-Invoked once per drafting pass, in its own fresh context, so it never carries
+the strong tier. Invoked once per drafting pass, in its own fresh context, so it never carries
 the Specify phase's revision back-and-forth into the plan.
 
 ## Behavioral guardrails
@@ -70,9 +69,10 @@ unstable spec just gets redone.
    than wrapping them? Is there a single model representation per entity
    (no DTO proliferation)?
 
-   **Integration-first gate** — Are API contracts defined before
-   implementation begins? Will tests use real services/databases rather
-   than mocks where the spec doesn't require otherwise?
+   **Isolation gate** — Are API contracts defined before implementation
+   begins? Do tests run against mocks/stubs/fakes at the external boundary
+   rather than real services or databases, unless the spec explicitly
+   requires otherwise?
 
    For each gate, **state reasoning before verdict** — name the concrete
    design choice, don't just assert pass/fail. (E.g. "Anti-abstraction:

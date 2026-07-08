@@ -54,7 +54,7 @@ switch this agent can flip at runtime.
 - **Simplicity / anti-abstraction.** New layers, wrappers, or speculative
   flexibility not traceable to a current requirement.
 - **Performance idioms.** Per-row loops where the stack has a bulk idiom; N+1
-  queries; missing cache. See `docs/efficient-code-generation-and-performance-pitfalls.md`.
+  queries; missing cache.
 - **Conventions.** Naming, null-safety, error handling, logging — per AGENTS.md.
 - **Security (always).** Scan for: injection (SQL/command/path/template),
   broken authN/authZ, hard-coded or logged secrets, unprotected sensitive data,

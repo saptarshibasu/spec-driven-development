@@ -39,8 +39,7 @@ worse than empty — every session trusts it. Re-grounds it in evidence.
   it out. Prefer deleting a section to filling it with filler.
 - **Never thicken the pointer files.** Project facts go in AGENTS.md only.
   Never write conventions into `CLAUDE.md` or `.github/copilot-instructions.md`
-  — the pre-commit hook and CI block those from growing past a pointer
-  (ADR-0001).
+  — the pre-commit hook and CI block those from growing past a pointer.
 - **Stay in lane.** Universal principles → `amend-constitution`, not here.
   Feature requirements → `spec.md`, not here. Path-scoped subtree rules →
   `.github/instructions/*.instructions.md`, not AGENTS.md.

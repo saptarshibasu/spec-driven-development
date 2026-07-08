@@ -100,7 +100,7 @@ skill marker, and never the bullets themselves. Likewise a new skill under
 <!-- /GUARDRAILS:skill -->` marker. After adding or editing a canonical file,
 run `scripts/mirror-agents.sh` / `scripts/mirror-skills.sh` (or their `.ps1`
 twins) to regenerate `.claude/`, `.codex/`, and `.github/` with the marker
-expanded — never hand-edit those generated copies (ADR-0001), and never
+expanded — never hand-edit those generated copies, and never
 hand-write the bullets into a canonical `.agents/` file either.
 
 ## Skill-specific additions
@@ -132,8 +132,3 @@ bullets after the shared block (e.g. `develop-feature`'s
 **No over-engineering**) directly below the closing
 `<!-- /GUARDRAILS:* -->` marker in its own file; that part is still
 hand-written and untouched by the mirror scripts.
-
-## See also
-
-- `docs/context-engineering.md` — explains prompt caching mechanics and why
-  the always-loaded tier should be ruthlessly small.

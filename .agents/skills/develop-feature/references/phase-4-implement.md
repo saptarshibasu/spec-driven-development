@@ -3,8 +3,7 @@
 Delegates the actual red→green→refactor work to the `implementor` agent —
 mid-tier model, since the expensive design reasoning already happened in
 Specify/Plan and this phase is mechanical execution of an already-ordered
-task list (see `docs/model-selection-and-token-optimization-in-sdd.md`).
-Invoked once per story, in its own fresh context, so one story's review
+task list. Invoked once per story, in its own fresh context, so one story's review
 back-and-forth never bleeds into the next story's implementation.
 
 **Track A** — no `implementor` invocation: Step R already routes trivial

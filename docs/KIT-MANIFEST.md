@@ -9,8 +9,7 @@ Everything under **Kit-owned** is safe to overwrite from a newer kit version —
 called out below). Everything under **Project-owned** is yours; the kit never
 writes to it after the initial copy, and `update-kit.sh` refuses to touch it.
 
-See [ADR-0007](adr/0007-kit-versioning-and-update-path.md) for the reasoning,
-and [`../scripts/update-kit.sh`](../scripts/update-kit.sh) for the mechanism.
+See [`../scripts/update-kit.sh`](../scripts/update-kit.sh) for the mechanism.
 
 **Machine-readable source of truth:** the table below is for humans; the path
 list itself lives in [`../.agents/kit-manifest.conf`](../.agents/kit-manifest.conf),
@@ -34,18 +33,17 @@ that your edit will be silently discarded on the next update.
 | `KIT_VERSION` | The installed kit version (semver). Named to avoid colliding with a project's own version file. |
 | `KIT-CHANGELOG.md` | The kit's own release history (not your project's). Named to avoid colliding with a project's own `CHANGELOG.md`. |
 | `docs/KIT-MANIFEST.md` | This file. |
-| `docs/adr/0001-*.md` … `docs/adr/000N-*.md` **that ship with the kit** | ADRs authored by the kit maintainers, numbered at release time. Project-authored ADRs (numbers you add yourself) are project-owned — see below. |
 | `.agents/agents/` | Canonical agent definitions. |
 | `.agents/skills/` | Canonical skill definitions. |
 | `.agents/kit-manifest.conf` | Machine-readable kit-owned path list — the data both `update-kit.sh`/`.ps1` read and this table is checked against in CI. See the file itself for the format. |
 | `.agents/extensions/README.md` and any extension pack the kit ships (e.g. `.agents/extensions/security/baseline/`) | Opt-in rule packs authored upstream. Extension packs *you* author locally are project-owned. |
-| `.claude/`, `.github/agents/`, `.github/skills/`, `.codex/` | Generated mirrors of `.agents/`. `update-kit.sh` regenerates these by re-running `mirror-agents.sh` / `mirror-skills.sh` after updating `.agents/` — never hand-edit them (ADR-0001). These paths are marked `linguist-generated=true` (collapsed by default in GitHub PR diffs) and `merge=ours` (no line-level merge conflicts) in `.gitattributes` — see `docs/hooks.md` for the one-time `git config merge.ours.driver true` setup and the regenerate-after-merge step that must follow any merge touching them. |
+| `.claude/`, `.github/agents/`, `.github/skills/`, `.codex/` | Generated mirrors of `.agents/`. `update-kit.sh` regenerates these by re-running `mirror-agents.sh` / `mirror-skills.sh` after updating `.agents/` — never hand-edit them. These paths are marked `linguist-generated=true` (collapsed by default in GitHub PR diffs) and `merge=ours` (no line-level merge conflicts) in `.gitattributes` — this requires a one-time per-clone `git config merge.ours.driver true`, and after any merge touching them you must still re-run the regenerate step so the mirrors reflect the merged canonical source. |
 | `scripts/mirror-agents.sh` / `scripts/mirror-agents.ps1` | Mirror generator. |
 | `scripts/mirror-skills.sh` / `scripts/mirror-skills.ps1` | Mirror generator. |
 | `scripts/quiet.sh` / `scripts/quiet.ps1` | Log-condensing helper used by hooks/CI. |
 | `scripts/update-kit.sh` / `scripts/update-kit.ps1` | This updater — it updates itself like any other kit-owned file. |
 | `templates/` | Spec/plan/tasks/checklist/etc. templates. |
-| `docs/README.md`, `docs/context-engineering.md`, `docs/harness-engineering.md`, `docs/adaptive-workflow-and-extensions.md`, `docs/token-efficiency.md`, `docs/model-selection-and-token-optimization-in-sdd.md`, `docs/efficient-code-generation-and-performance-pitfalls.md`, `docs/mcp.md`, `docs/hooks.md`, `docs/guardrails.md`, `docs/implementation-handoff.md` | Upstream reference guides, referenced by name rather than inlined (see `docs/context-engineering.md`). |
+| `docs/README.md`, `docs/guardrails.md` | Upstream reference guides, referenced by name rather than inlined. |
 | `.mcp.json.example` | Example MCP config. |
 | `.gitattributes` | Line-ending normalization. |
 | `LICENSE` | Kit license. |
@@ -53,8 +51,8 @@ that your edit will be silently discarded on the next update.
 ### Not distributed: the kit's own hook & CI files
 
 `.githooks/pre-commit` / `.ps1` and `.github/workflows/agent-harness.yml`
-still live in **this** repo — the kit uses them on itself, and they're
-documented in `docs/hooks.md` as a reference implementation you can look at.
+still live in **this** repo — the kit uses them on itself, as a reference
+implementation you can look at directly (both are short and commented inline).
 They are **not** in `.agents/kit-manifest.conf`, so `update-kit.sh` never
 copies or updates them in a downstream project, and they are not part of
 what an adopter gets by default.
@@ -73,6 +71,23 @@ If you want either one, copy it in by hand from the kit repo and it's yours
 from that point on — no markers, no `update-kit.sh` involvement, ordinary
 project-owned file like anything else not listed in this manifest.
 
+### Not distributed: the kit's own ADRs
+
+`docs/adr/` (7 ADRs, numbered 0001–0007) records why the kit's own internals
+work the way they do — audited and confirmed: nothing in a shipped agent or
+skill file requires the ADR text itself to run correctly, only the rule it
+justifies, which is always stated inline wherever that rule matters. The
+ADRs are kit-maintainer reference, not a downstream dependency, so
+`update-kit.sh` no longer copies them into an adopting project (this is a
+change from earlier kit versions, which shipped them via an `adr_dir=`
+manifest entry — see `KIT-CHANGELOG.md`). They remain in this repo for
+anyone who wants the design history behind a specific rule.
+
+An adopting project's own `docs/adr/` starts empty and gets its first entry
+the first time `create-adr` runs — numbered from 0001, with no reserved
+range and no collision risk with the kit's own numbering, since the two
+never coexist in the same repo.
+
 ## Project-owned paths
 
 The kit writes these once (via `init-project` or the initial clone) and never
@@ -87,10 +102,10 @@ when to re-derive them.
 | `memory/` (anything else you add) | Project-specific memory. |
 | `specs/` | Your feature work: specs, plans, tasks, decision logs, contracts. |
 | `src/`, `tests/` | Your application code and tests. |
-| `docs/adr/` entries **you** author (numbers added after the kit's own, e.g. your project's ADR-0007+ if the kit shipped through 0006) | Your project's own architectural decisions. |
+| `docs/adr/` | Your project's own architectural decisions, authored with `create-adr` and numbered from 0001 — the kit's own ADRs are not copied in (see "Not distributed" above). |
 | `docs/glossary.md` | Domain vocabulary — starts from the kit's stub but is yours to fill in and own going forward. |
 | `.mcp.json` (not the `.example`) | Your actual MCP server config, with real values. |
-| `CLAUDE.md`, `.github/copilot-instructions.md` | Thin pointers — content-free by design (ADR-0001), but the files themselves are project-owned (a tool might require them to exist). |
+| `CLAUDE.md`, `.github/copilot-instructions.md` | Thin pointers — content-free by design, but the files themselves are project-owned (a tool might require them to exist). |
 | `.githooks/pre-commit` / `.ps1`, `.github/workflows/agent-harness.yml` | Not kit-owned at all (see "Not distributed" above) — if you copy either in from the kit repo, the whole file, including its generic checks, is yours to maintain. |
 | `.agents/extensions/` packs you author yourself | Local rule packs not shipped by the kit. |
 | `.agents/model-map.conf` | Not shipped as kit-owned data — it's org-specific policy (which models/tools your org has enabled) that `mirror-agents.sh`/`.ps1` read at run time. Falls under the "ambiguous or new paths" rule below by default, but is called out explicitly here because it's easy to assume it's kit-owned like the scripts that read it: it isn't, and `update-kit.sh` will never touch it. |

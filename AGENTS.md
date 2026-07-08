@@ -15,9 +15,9 @@ than usual: a bug here ships to every project that later copies this kit.
 a template output, not a real constitution, because this repo has no
 application domain to ratify principles about. The kit's own non-negotiable
 rules live below and in `docs/KIT-MANIFEST.md` (what's kit-owned vs.
-project-owned) and `docs/adr/` (why each rule exists). Read `docs/adr/0001-
-agents-md-single-source-of-truth.md` before touching anything under
-`.claude/`, `.github/`, or `.codex/`.
+project-owned) and `docs/adr/` (why each rule exists, for kit maintainers —
+not distributed to downstream projects). Never hand-edit anything under
+`.claude/`, `.github/`, or `.codex/` — they're generated mirrors, not source.
 
 ## Commands
 
@@ -29,7 +29,7 @@ agents-md-single-source-of-truth.md` before touching anything under
 - Condense noisy command output: `scripts/quiet.sh <command>` — e.g. `scripts/quiet.sh bash scripts/check-guardrails.sh`
 - Pull upstream kit changes into an existing copy: `scripts/update-kit.sh <path-to-newer-kit-checkout> [--dry-run]`
 - Run the full local sensor set before committing: `bash scripts/mirror-agents.sh && bash scripts/mirror-skills.sh && bash scripts/check-guardrails.sh`
-- There is no build step and no test runner for this repo itself — `tests/{unit,contract,integration,characterization}` are placeholders (`.gitkeep` only) that model the layout a downstream project should adopt, not suites that run here.
+- There is no build step and no test runner for this repo itself — `tests/{unit,contract,characterization}` are placeholders (`.gitkeep` only) that model the layout a downstream project should adopt, not suites that run here.
 
 ## Tech Stack
 
@@ -47,7 +47,7 @@ agents-md-single-source-of-truth.md` before touching anything under
 - `.agents/model-map.conf` — the org-specific model/tool policy the mirror scripts read from (data, not code).
 - `.claude/`, `.github/agents/`, `.github/skills/`, `.codex/` — **generated**. Never hand-edit; `mirror-agents.sh`/`mirror-skills.sh` overwrite them and CI's drift guard fails if they don't match a fresh generation.
 - `templates/` — canonical spec/plan/tasks/constitution/decision-log/learnings/agents templates that `init-project` and `develop-feature` fill in for downstream projects.
-- `docs/` — deep-reference guides (harness engineering, context engineering, token efficiency, adaptive workflow, hooks, MCP, guardrails) plus `docs/adr/` (7 ADRs) and `docs/KIT-MANIFEST.md` (kit-owned vs. project-owned path list).
+- `docs/` — deep-reference guides (guardrails) plus `docs/adr/` (7 ADRs, kit-maintainer reference — not distributed to downstream projects) and `docs/KIT-MANIFEST.md` (kit-owned vs. project-owned path list).
 - `scripts/` — `mirror-agents`, `mirror-skills`, `check-guardrails`, `quiet`, `update-kit` (each with a `.sh`/`.ps1` twin).
 - `.githooks/pre-commit(.ps1)` — deterministic pre-commit sensor; has a `KIT:BEGIN`/`KIT:END`-delimited generic section (kit-owned) and a stack-specific section below it (project-owned in a downstream copy — here, that section stays empty since this repo has no stack).
 - `memory/`, `specs/`, `src/`, `tests/` — present so this repo's shape matches what it scaffolds elsewhere; contents are the unfilled template stubs, not real project artifacts.
@@ -69,14 +69,14 @@ This repo has no application source, so there is no code-style snippet to give. 
 ## Boundaries
 
 **✅ Always** — do this without asking:
-- Edit only under `.agents/`, `templates/`, `docs/`, `memory/`, `scripts/`, `.githooks/` (the generic section), and this file — never hand-edit `.claude/`, `.github/agents/`, `.github/skills/`, or `.codex/` (ADR-0001).
+- Edit only under `.agents/`, `templates/`, `docs/`, `memory/`, `scripts/`, `.githooks/` (the generic section), and this file — never hand-edit `.claude/`, `.github/agents/`, `.github/skills/`, or `.codex/`.
 - Run `mirror-agents.sh` and `mirror-skills.sh` after any edit under `.agents/agents/` or `.agents/skills/`, and commit the regenerated output.
 - Keep `CLAUDE.md` and `.github/copilot-instructions.md` as thin pointers to this file — CI fails if either grows past ~2 real lines.
 - Add a `.ps1` twin for any new `.sh` script.
 
 **⚠️ Ask first** — high-impact but not categorically forbidden:
 - Changing the wording inside a `<!-- GUARDRAILS:* -->` block in `docs/guardrails.md` — every embedding file needs updating in the same change, or `check-guardrails.sh` will fail.
-- Adding or renumbering an ADR in `docs/adr/` — numbers are load-bearing (referenced from README, KIT-MANIFEST, and each other).
+- Adding or renumbering an ADR in `docs/adr/` — numbers are load-bearing (ADRs cross-reference each other by number, and amending ADRs like 0004/0006 amend a specific prior one by number).
 - Editing anything inside the `KIT:BEGIN`/`KIT:END` markers of `.githooks/pre-commit` or `.github/workflows/agent-harness.yml` — this is the exact block `update-kit.sh` overwrites verbatim on every downstream update.
 - Bumping `VERSION` / adding a `CHANGELOG.md` entry — this is a release action, not a routine edit.
 
@@ -87,17 +87,17 @@ This repo has no application source, so there is no code-style snippet to give. 
 
 ## Conventions (rule + reason)
 
-- Reference deep docs by name (`docs/harness-engineering.md`, etc.) rather than inlining their content into `.agents/agents/*.md` or `.agents/skills/*/SKILL.md` — this repo's whole thesis is tiered context; inlining here would be the kit contradicting its own design.
+- Reference deep docs by name (`docs/guardrails.md`, etc.) rather than inlining their content into `.agents/agents/*.md` or `.agents/skills/*/SKILL.md` — this repo's whole thesis is tiered context; inlining here would be the kit contradicting its own design.
 - Keep `README.md` and this file in sync manually when a structural change lands (new agent, new skill, new script) — there is no automated sync between them, only `docs-writer` in a downstream project checks README/AGENTS.md drift, and that agent doesn't run on the kit repo itself.
 - Number new ADRs sequentially and never renumber an existing one — other docs link to ADR numbers directly.
 
 ## Domain Language
 
-"Kit-owned" and "project-owned" are the load-bearing distinction in this repo — kit-owned paths are silently overwritten by `scripts/update-kit.sh`, project-owned paths never are. Full breakdown: `docs/KIT-MANIFEST.md`. "Canonical" (under `.agents/`) vs. "generated" (`.claude/`, `.github/`, `.codex/`) is the other recurring pair — see `docs/adr/0001-agents-md-single-source-of-truth.md`.
+"Kit-owned" and "project-owned" are the load-bearing distinction in this repo — kit-owned paths are silently overwritten by `scripts/update-kit.sh`, project-owned paths never are. Full breakdown: `docs/KIT-MANIFEST.md`. "Canonical" (under `.agents/`) vs. "generated" (`.claude/`, `.github/`, `.codex/`) is the other recurring pair.
 
 ## Testing Discipline
 
-This repo has no test suite of its own to run. `tests/{unit,contract,integration,characterization}` hold only `.gitkeep` — they exist to demonstrate the directory shape `init-project` and the templates expect a downstream project to populate, not code under test here. The closest thing to tests in this repo are the CI sensors in `.github/workflows/agent-harness.yml` (mirror drift, guardrail sync, unresolved-clarification-marker check, thin-pointer check, `VERSION`/`CHANGELOG.md` match) and `scripts/check-guardrails.sh` — run those before committing changes to `.agents/`.
+This repo has no test suite of its own to run. `tests/{unit,contract,characterization}` hold only `.gitkeep` — they exist to demonstrate the directory shape `init-project` and the templates expect a downstream project to populate, not code under test here. The closest thing to tests in this repo are the CI sensors in `.github/workflows/agent-harness.yml` (mirror drift, guardrail sync, unresolved-clarification-marker check, thin-pointer check, `VERSION`/`CHANGELOG.md` match) and `scripts/check-guardrails.sh` — run those before committing changes to `.agents/`.
 
 ## Multi-Repo / Cross-Boundary Notes
 

@@ -11,8 +11,7 @@ smallest code that makes them pass — nothing the plan or tasks didn't ask for.
 
 Runs on a mid-tier model — implementing an already-decomposed, already-ordered
 task list is largely mechanical execution of decisions Specify/Plan already
-made; the expensive reasoning happened upstream (see
-`docs/model-selection-and-token-optimization-in-sdd.md`). Invoked once per
+made; the expensive reasoning happened upstream. Invoked once per
 story (or once for the whole task list on small features), in its own fresh
 context, so review feedback from a prior story doesn't bleed into the next
 one's implementation.

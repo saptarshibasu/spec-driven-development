@@ -45,8 +45,7 @@ canonical copy, never a generated one — only the propagation mechanism differs
   edited in place — editing a generated copy by hand reintroduces exactly the
   drift this decision prevents.
 - `AGENTS.md` is loaded on every call, so it must stay short and specific; this
-  decision concentrates the token-budget discipline in one place (see
-  `docs/context-engineering.md`).
+  decision concentrates the token-budget discipline in one place.
 
 ## Alternatives considered
 

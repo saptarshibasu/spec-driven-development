@@ -163,8 +163,9 @@ ask only what remains unresolved:
 wants them as-is or amended.)*
 
 **Article IV — Testing strategy:**
-> "For integration tests, do you prefer real services/databases over mocks?
-> Are contract tests required before any cross-boundary implementation?"
+> "Should tests run in isolation — mocks/stubs/fakes at the external
+> boundary — rather than against real services or databases? Are contract
+> tests required before any cross-boundary implementation?"
 
 **Additional constraints:**
 > "Any security, compliance (GDPR, HIPAA, SOC 2), or performance floors that
@@ -208,7 +209,7 @@ Then confirm to the user:
 - Both files written and their paths
 - Constitution version and ratification date
 - Note: `AGENTS.md` needs no mirroring — `CLAUDE.md` and
-  `.github/copilot-instructions.md` are static pointers to it (ADR-0001);
+  `.github/copilot-instructions.md` are static pointers to it;
   the mirror scripts propagate agents/skills, not this file.
 
 ## What this skill does not do

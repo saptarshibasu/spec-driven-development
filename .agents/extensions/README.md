@@ -12,8 +12,7 @@ prompts at the start of a feature, and the full rules file is pulled in *only if
 the human opts that pack in*. A pack you don't use costs zero context.
 
 > Influence: this mechanism is adapted from AWS Labs' AI-DLC extension system
-> (MIT-0). See `docs/adaptive-workflow-and-extensions.md` and ADR-0002 for the
-> reasoning and the differences.
+> (MIT-0).
 
 ## How a pack is structured
 
@@ -58,9 +57,8 @@ constraints that are non-negotiable for every feature in your repo.
 4. **Review** — the `code-reviewer` agent re-checks opted-in rules by ID and
    treats any violation as a **Blocker** (see `.agents/agents/code-reviewer.md`).
 
-This makes an extension a true *harness sensor* (see
-`docs/harness-engineering.md`): mostly inferential today (the model checks the
-Verification conditions), but each rule is written so its checks can be promoted
+This makes an extension a true *harness sensor*: mostly inferential today (the
+model checks the Verification conditions), but each rule is written so its checks can be promoted
 to a computational sensor — a lint rule, SAST job, or CI gate — when you have
 one. Mechanize what you can; infer what you must.
 

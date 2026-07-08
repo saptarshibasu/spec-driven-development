@@ -2,7 +2,7 @@
 # update-kit.ps1 - Windows/PowerShell twin of scripts/update-kit.sh.
 #
 # Pulls kit-owned changes from a newer kit checkout into this project without
-# touching project-owned paths. See docs/KIT-MANIFEST.md (ADR-0007) for what
+# touching project-owned paths. See docs/KIT-MANIFEST.md for what
 # "kit-owned" means. Keep this in lockstep with update-kit.sh - same
 # KIT:BEGIN/KIT:END merge semantics. Neither script hand-maintains the
 # kit-owned path list any more: both read it from .agents/kit-manifest.conf

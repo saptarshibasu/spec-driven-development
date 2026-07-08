@@ -16,7 +16,95 @@ in the root `KIT_VERSION` file.
 
 ## [Unreleased]
 
-No changes yet.
+### Removed
+- `docs/harness-engineering.md`, `docs/hooks.md`, `docs/mcp.md`,
+  `docs/token-efficiency.md`, and `docs/implementation-handoff.md`. Audit
+  found none of the five were referenced from any live, shipped
+  `.agents/agents/*.md` or `.agents/skills/**/*.md` file — the canonical
+  content that actually drives agent behavior during feature development —
+  only from each other's "See also" sections, the docs index, the kit
+  manifest, and this repo's own non-distributed `.githooks/pre-commit(.ps1)`
+  / `agent-harness.yml`. Removed the corresponding entries from
+  `docs/KIT-MANIFEST.md`, `.agents/kit-manifest.conf`, `docs/README.md`, and
+  every dangling citation across `README.md`, `AGENTS.md`,
+  `.agents/extensions/README.md`, `docs/adaptive-workflow-and-extensions.md`,
+  `docs/adr/0003-analyze-gate.md`, `docs/context-engineering.md`,
+  `docs/efficient-code-generation-and-performance-pitfalls.md`,
+  `docs/model-selection-and-token-optimization-in-sdd.md`,
+  `templates/agents.template.md`, `.mcp.json.example`, `.gitattributes`,
+  `.githooks/pre-commit(.ps1)`, and `.github/workflows/agent-harness.yml`.
+  All 7 ADRs (`docs/adr/0001`–`0007`) were reviewed and kept — each is
+  cited from live agent/skill files and forms part of an amendment chain
+  (0002→0003→0004, 0005→0006), so none qualified as unused.
+
+### Changed
+- `docs/adr/` is **no longer distributed** to downstream projects — removed
+  `adr_dir=docs/adr` from `.agents/kit-manifest.conf`. Follow-up to the
+  removal above: being *cited* from a live file and being *read* during
+  feature development turned out not to be the same thing — every
+  `(ADR-000N)` citation in a shipped agent/skill file is a footnote next to
+  a rule that's already stated in full in the same sentence; nothing ever
+  instructs an agent to open the ADR itself except the generic "check
+  `docs/adr/` before a cross-cutting change" step, which only needs the
+  directory listing, not any specific ADR's content. The 7 ADRs stay in
+  this kit repo as maintainer-facing design history (nothing here
+  contradicts the note above — they're still worth keeping, just not
+  worth shipping to every adopter). Also stripped the now-decorative
+  `(ADR-000N)` citations themselves from every shipped/operational file
+  that had one — `.agents/skills/develop-feature/references/
+  phase-3.5-analyze.md`, `.../step-0-scaffold.md`,
+  `.agents/skills/init-project/SKILL.md`,
+  `.agents/skills/sync-agents-md/SKILL.md`,
+  `.agents/extensions/README.md`, `docs/adaptive-workflow-and-extensions.md`,
+  `docs/guardrails.md`, `docs/README.md`, `docs/KIT-MANIFEST.md`,
+  `.gitattributes`, `AGENTS.md`, and `.github/workflows/agent-harness.yml` —
+  the rule each one justified is left in place, only the file-that's-no-
+  longer-there pointer is gone. ADR-to-ADR citations inside `docs/adr/`
+  itself are untouched; that's the historical record amending itself and
+  stays meaningful regardless of distribution.
+- **Testing strategy flipped from integration-first to isolation-first.**
+  Most adopting projects don't run tests against real external services or
+  databases, and `task-decomposer`/`test-writer` were defaulting to an
+  "integration test" per user story regardless of whether the project had
+  that infrastructure. Removed the `tests/integration/` category entirely
+  (folder deleted; row dropped from `tests/README.md`) and its example task
+  line from `templates/tasks.template.md`. Renamed `planner`'s third
+  constitution-check gate from **Integration-first** ("will tests use real
+  services/databases rather than mocks") to **Isolation** ("do tests run
+  against mocks/stubs/fakes at the external boundary rather than real
+  services or databases, unless the spec explicitly requires otherwise") —
+  same API-contracts-first check, inverted real-vs-mock default. Updated the
+  matching mentions in `.agents/skills/develop-feature/references/
+  phase-2-plan.md`, `.agents/agents/test-writer.md` (tier guidance + Article
+  IV label), `.agents/skills/init-project/SKILL.md` and
+  `.agents/skills/amend-constitution/SKILL.md` (Article IV — Testing
+  strategy question, and amend-constitution's tooling-choice example),
+  `AGENTS.md`, and `templates/agents.template.md` (Always-on context
+  principle list + Testing Discipline example). `contract/` and
+  `characterization/` categories are unaffected — contract tests are
+  clarified as verified against a mocked/stubbed boundary, not a live
+  external service.
+
+### Removed
+- `docs/context-engineering.md`, `docs/adaptive-workflow-and-extensions.md`,
+  `docs/efficient-code-generation-and-performance-pitfalls.md`, and
+  `docs/model-selection-and-token-optimization-in-sdd.md`. Same audit
+  standard as the first removal round: every citation to these four was
+  decorative — the operational rule it footnoted was already stated in full
+  inline (e.g. `specifier`'s strong-model pin, `code-reviewer`'s performance
+  check, `develop-feature`'s track-routing step), and for the model-selection
+  doc, the routing it described is independently enforced by each agent's
+  `model:` front-matter field, not by an agent reading the doc. Removed the
+  corresponding `file=` entries from `.agents/kit-manifest.conf`, the table
+  rows from `docs/KIT-MANIFEST.md` and `docs/README.md`, and every dangling
+  citation across `README.md`, `AGENTS.md`, `docs/guardrails.md`,
+  `docs/adr/0001-agents-md-single-source-of-truth.md`,
+  `.agents/extensions/README.md`, `templates/agents.template.md`,
+  `scripts/quiet.sh`, `.agents/agents/{specifier,planner,task-decomposer,
+  implementor,docs-writer,code-reviewer}.md`, and
+  `.agents/skills/develop-feature/{SKILL.md,references/phase-4-implement.md}`
+  (each substantive rule was left in place — only the now-dead pointer was
+  removed).
 
 ## [0.1.0] - 2026-07-04
 

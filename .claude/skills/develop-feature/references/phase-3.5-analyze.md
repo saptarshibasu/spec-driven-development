@@ -42,8 +42,8 @@ alone) and the `code-reviewer` agent (reviews the diff later).
    iteration") is resolved by writing it into the owning artifact (e.g.
    `spec.md`'s Out-of-Scope section) so analyze no longer flags it, not by
    logging acceptance and moving on. Don't start implementation while any
-   Blocker or Should-fix finding is open. **Notes are advisory, not gating**
-   (ADR-0004): report them every run and let the human act on any they
+   Blocker or Should-fix finding is open. **Notes are advisory, not gating:**
+   report them every run and let the human act on any they
    choose, but a run with open Notes and nothing else open is a clean
    verdict — it does not trigger another loop iteration by itself.
 3. Each iteration still goes through the normal per-phase approval gate: the
@@ -52,10 +52,10 @@ alone) and the `code-reviewer` agent (reviews the diff later).
    every step, just never human-skippable mid-loop on a Blocker or Should-fix.
    If a Blocker or Should-fix finding survives two consecutive runs unchanged,
    say so explicitly at that approval gate — that is where the human notices
-   a stuck loop and redirects the fix (ADR-0004 deliberately adds no separate
-   iteration cap for these; Notes were demoted to advisory instead, since
+   a stuck loop and redirects the fix. Deliberately no separate iteration cap
+   for these; Notes were demoted to advisory instead, since
    those — not Blocker/Should-fix — were the non-convergent case in
-   practice).
+   practice.
 4. On a clean verdict (zero Blockers, zero Should-fix — open Notes don't
    block this), **or an explicit skip decided in step 1**, append an
    **Analyze** row to `decision-log.md` (verdict, or "skipped — user's call",

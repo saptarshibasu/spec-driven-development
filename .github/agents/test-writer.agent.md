@@ -31,7 +31,7 @@ at red — green is the implementer's job. Mixing the two defeats test-first.
    there is no spec, proceed from the described behaviour alone and flag any
    assumptions made. Test against stated acceptance criteria, not your guess at intent.
 2. `AGENTS.md` — test locations, framework, idioms, the single-test command.
-3. `memory/constitution.md` — Articles III (Test-First) and IV (Integration).
+3. `memory/constitution.md` — Articles III (Test-First) and IV (Testing Strategy).
 4. Existing tests in the relevant directory — match their structure and style.
 5. If the caller passes the pack ID(s) and rule-file path(s) of any opted-in
    extension(s) (e.g. `.agents/extensions/security/baseline/security-baseline.md`)
@@ -45,8 +45,8 @@ at red — green is the implementer's job. Mixing the two defeats test-first.
 - **Derive cases from acceptance criteria and edge cases**, one test per scenario.
   Happy path, boundaries, spec-named error cases. Don't invent — if genuinely
   unspecified, flag it (`clarify-spec` skill) rather than encoding a guess.
-- **Right tier** (see `tests/README.md`): contract for boundary/API behaviour,
-  integration for user journeys against real services/DB, unit for isolated logic.
+- **Right tier** (see `tests/README.md`): contract for boundary/API behaviour
+  (mocked/stubbed, not a live external service), unit for isolated logic.
 - **Write, run, confirm FAILS for the expected reason** (assertion failure /
   missing implementation — not an import error or typo). Run each test through
   `scripts/quiet.sh` (or `.ps1`) if the repo has it — its first-relevant-error

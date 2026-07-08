@@ -6,7 +6,6 @@
 # equivalent is for setups that prefer a native hook (no Git Bash, or a
 # PowerShell-based hook manager): point a one-line `.githooks/pre-commit` wrapper
 # at it, or invoke it from your hook runner. Keep the two checks in sync.
-# See docs/harness-engineering.md and docs/hooks.md.
 #
 # Everything between the KIT:BEGIN/KIT:END markers is kit-owned: `update-kit.ps1`
 # replaces that block verbatim on update and leaves everything outside it
@@ -52,12 +51,12 @@ foreach ($f in $staged) {
   }
 }
 
-# ── 3. Keep tool instruction files thin (see ADR-0001) ───────────────────────
+# ── 3. Keep tool instruction files thin ───────────────────────────────────────
 foreach ($f in 'CLAUDE.md', '.github/copilot-instructions.md') {
   if ($staged -contains $f) {
     $lines = @(git show ":$f" 2>$null) | Where-Object { $_ -notmatch '^\s*(<!--.*-->)?\s*$' }
     if ($lines.Count -gt 2) {
-      Write-Host "X $f has grown beyond a pointer - conventions belong in AGENTS.md (ADR-0001)."
+      Write-Host "X $f has grown beyond a pointer - conventions belong in AGENTS.md."
       $fail = $true
     }
   }
@@ -106,7 +105,7 @@ if ($staged | Where-Object { $_ -like '.agents/*' }) {
 # Route them through scripts/quiet.ps1: hook output is read by agents too, and
 # a sensor that dumps hundreds of log lines pollutes the context it feeds -
 # quiet.ps1 condenses it to pass/fail + the first relevant error, with the
-# full log kept in a temp file (see docs/token-efficiency.md).
+# full log kept in a temp file for deeper investigation.
 #
 # pwsh scripts/quiet.ps1 <exact lint command from AGENTS.md>;       if ($LASTEXITCODE -ne 0) { $fail = $true }
 # pwsh scripts/quiet.ps1 <exact fast-test command from AGENTS.md>;  if ($LASTEXITCODE -ne 0) { $fail = $true }

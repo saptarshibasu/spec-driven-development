@@ -1,5 +1,5 @@
 {
-  "_comment": "Example MCP server config. Copy to .mcp.json and trim to what you actually use. JSON has no comments, so the reasoning, the build-vs-use decision rule, and the 5-7 server cap live in docs/mcp.md. Keep the active set SMALL: more than ~5-7 connected servers measurably degrades agent performance through tool bloat. Secrets come from env vars (${VAR}), never inline.",
+  "_comment": "Example MCP server config. Copy to .mcp.json and trim to what you actually use. Keep the active set SMALL: more than ~5-7 connected servers measurably degrades agent performance through tool bloat. Secrets come from env vars (${VAR}), never inline.",
 
   "mcpServers": {
     "context7": {

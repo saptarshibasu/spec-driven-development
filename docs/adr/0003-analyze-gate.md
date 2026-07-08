@@ -81,7 +81,7 @@ the same way.
   inferential — it can miss a subtle contradiction; it lowers risk, it does not
   eliminate it. Some checks (e.g. "every requirement has a task") could later be
   promoted to a computational control, consistent with "mechanize what you can,
-  infer what you must" (`harness-engineering.md`).
+  infer what you must."
 
 ## Alternatives considered
 
