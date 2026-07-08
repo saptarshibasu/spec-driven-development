@@ -11,10 +11,12 @@
 # Adapt the stack-specific section to YOUR project. The generic checks above it
 # are safe to keep on as-is.
 #
-# Everything between the KIT:BEGIN/KIT:END markers is kit-owned: `update-kit.sh`
-# replaces that block verbatim on update and leaves everything outside it (this
-# section 4) alone. See docs/KIT-MANIFEST.md. Don't remove or reorder the
-# markers, and don't add stack-specific checks above KIT:END.
+# Everything between the KIT:BEGIN/KIT:END markers is the kit-owned generic
+# section (this repo uses it on itself too). `kit-manifest.conf` no longer
+# lists this file as `partial=`, so `update-kit.sh` does not overwrite this
+# block on a downstream update — an adopter who wants upstream changes to it
+# copies the block in by hand. Don't remove or reorder the markers, and don't
+# add stack-specific checks above KIT:END.
 
 set -uo pipefail
 

@@ -4,8 +4,8 @@
 [agent]
 name = "docs-writer"
 description = "Keeps documentation truthful and in sync with the code. Use for README/AGENTS.md/glossary/ADR updates and for catching docs that drift from the actual codebase. It edits docs only — never application behaviour, tests, or CI."
-# Mapped from canonical tier "sonnet" - adjust the tier mapping in .agents/model-map.conf.
-model = "gpt-5.4"
+# Mapped from canonical tier "haiku" - adjust the tier mapping in .agents/model-map.conf.
+model = "gpt-5.4-mini"
 model_reasoning_effort = "medium"
 tools = ["read", "grep", "edit", "write"]
 

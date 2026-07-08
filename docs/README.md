@@ -9,7 +9,6 @@ context stays small.
 | File | What it covers |
 |---|---|
 | [`guardrails.md`](guardrails.md) | Universal behavioral guardrails shared across all skills — the always-on rules every skill session inherits. |
-| [`KIT-MANIFEST.md`](KIT-MANIFEST.md) | The kit/project ownership contract: which paths `scripts/update-kit.sh` may touch, and which are yours alone. |
 
 ## Project reference
 
