@@ -61,8 +61,15 @@ expand_skill_guardrails() {
   [ -z "$(tail -c1 "$file")" ] || had_trailing_nl=0
   local tmp
   tmp="$(mktemp)"
-  awk -v start="<!-- GUARDRAILS:skill -->" -v end="<!-- /GUARDRAILS:skill -->" -v canon="$GUARDRAILS_SKILL_CANON" '
-    index($0, start) == 1 { print; print canon; f=1; next }
+  # GUARDRAILS_SKILL_CANON spans multiple lines. Passing a multi-line value
+  # through awk's -v runs it through string-literal escape processing, and
+  # macOS's /usr/bin/awk (the "one true awk") hard-errors on any raw embedded
+  # newline there: "awk: newline in string ... at source line 1". gawk (Linux
+  # default) tolerates it, which is why this only surfaces on Mac. Route the
+  # value through the environment/ENVIRON instead — every POSIX awk accepts
+  # that verbatim, no escape parsing involved.
+  GUARDRAILS_CANON_ENV="$GUARDRAILS_SKILL_CANON" awk -v start="<!-- GUARDRAILS:skill -->" -v end="<!-- /GUARDRAILS:skill -->" '
+    index($0, start) == 1 { print; print ENVIRON["GUARDRAILS_CANON_ENV"]; f=1; next }
     index($0, end) == 1 { f=0 }
     !f { print }
   ' "$file" > "$tmp"
