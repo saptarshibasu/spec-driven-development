@@ -2,7 +2,7 @@
 # mirror-skills.sh — propagate canonical skills into every tool directory.
 #
 # Single source of truth: .agents/skills/. The .claude/, .github/, and .codex/
-# skill dirs are mirrors of it (ADR-0001), because not every runtime
+# skill dirs are mirrors of it, because not every runtime
 # auto-discovers .agents/ yet. Run this AFTER you add or edit a skill under
 # .agents/skills/ — it pushes the change into the three mirrors. Never
 # hand-edit a mirror; it will be overwritten.

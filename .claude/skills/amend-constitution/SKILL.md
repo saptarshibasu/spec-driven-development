@@ -71,9 +71,10 @@ points for spec-driven development. For the others:
 > there a standard you want enforced on every feature?"
 
 **Article IV — Testing strategy:**
-> "For integration tests, do you prefer real services and databases over
-> mocks, or do you use a hybrid approach? Are contract tests required before
-> any cross-boundary implementation?"
+> "Should tests run in isolation — mocks/stubs/fakes at the external
+> boundary — rather than against real services and databases, or do you use
+> a hybrid approach? Are contract tests required before any cross-boundary
+> implementation?"
 
 **Additional principles:**
 > "Are there any other universal principles you want enforced on every
@@ -89,7 +90,7 @@ For each answer:
 **Example of applying the test:**
 - *"No secrets in version control"* → always true, every feature, every
   session → **constitution.**
-- *"Use Testcontainers for DB integration tests"* → a tooling choice, not a
+- *"Use an in-memory SQLite database for tests"* → a tooling choice, not a
   universal principle → **AGENTS.md**, not here.
 - *"The checkout flow must support Apple Pay"* → one feature's requirement →
   **spec.md**, not here.

@@ -18,7 +18,7 @@ entirely), not this skill's folder, and that lookup will fail with "no such
 file or directory." Instead, build the full path yourself from where you read
 `SKILL.md`: `.claude/skills/develop-feature/`, `.codex/skills/develop-feature/`,
 `.github/skills/develop-feature/`, and `.agents/skills/develop-feature/` are
-byte-identical mirrors (ADR-0001) — take whichever prefix matches the copy you
+byte-identical mirrors — take whichever prefix matches the copy you
 loaded, and append `scripts/start-feature.sh` (or `.ps1`). Run the command
 with your shell's cwd at the **repo root** — these paths are repo-root-relative,
 not relative to the skill folder. Two byte-equivalent versions — use the one

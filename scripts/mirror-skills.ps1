@@ -2,7 +2,7 @@
 # mirror-skills.ps1 - Windows/PowerShell twin of mirror-skills.sh.
 #
 # Propagates canonical skills (.agents/skills) into the .claude, .github, and
-# .codex mirror dirs (ADR-0001). Run after adding or editing a skill under
+# .codex mirror dirs. Run after adding or editing a skill under
 # .agents/skills/. Never hand-edit a mirror. See mirror-skills.sh for rationale.
 #
 # Every file is copied byte-for-byte EXCEPT each skill's top-level SKILL.md,

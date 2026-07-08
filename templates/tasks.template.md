@@ -43,15 +43,14 @@ if staffed.
 ### Tests for User Story 1 — write first, confirm they fail
 
 - [ ] T007 [P] [US1] Contract test for [endpoint] in `tests/contract/...`
-- [ ] T008 [P] [US1] Integration test for [user journey] in `tests/integration/...`
 
 ### Implementation for User Story 1
 
-- [ ] T009 [P] [US1] [Model] in `src/models/...`
-- [ ] T010 [US1] [Service] in `src/services/...` (depends on T009)
-- [ ] T011 [US1] [Endpoint/feature] in `src/...`
-- [ ] T012 [US1] Validation + error handling
-- [ ] T013 [US1] Logging for this story's operations
+- [ ] T008 [P] [US1] [Model] in `src/models/...`
+- [ ] T009 [US1] [Service] in `src/services/...` (depends on T008)
+- [ ] T010 [US1] [Endpoint/feature] in `src/...`
+- [ ] T011 [US1] Validation + error handling
+- [ ] T012 [US1] Logging for this story's operations
 
 **Checkpoint**: User Story 1 is fully functional and independently testable.
 

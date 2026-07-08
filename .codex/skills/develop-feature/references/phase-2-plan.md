@@ -10,7 +10,7 @@ architecture decision here is as expensive to reverse as a wrong requirement.
    loads the rules itself. It reads `AGENTS.md` and
    `memory/constitution.md` itself, fills `plan.md`'s Technical Context and
    Project Structure, runs the three constitution check gates (Simplicity,
-   Anti-abstraction, Integration-first) with stated reasoning before each
+   Anti-abstraction, Isolation) with stated reasoning before each
    verdict — for each gate, name the concrete design choice, don't just
    assert pass/fail — fills Complexity Tracking on any gate fail, runs
    version-sensitive research where the plan depends on a rapidly-changing

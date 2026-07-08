@@ -14,7 +14,7 @@
   ones last (Boundaries, Brownfield areas). Most model APIs cache an unchanged
   prompt prefix at ~90% discount. An edit to a late section keeps the stable
   prefix cached; an edit to an early section invalidates the cache for
-  everything that follows. See docs/token-efficiency.md.
+  everything that follows.
 
   Once you've filled in (or deleted) a section below, delete its instructional
   comment too — including this one. None of these comments belong in the file
@@ -35,7 +35,7 @@ only source an agent here can see by default."]
 ## Always-on context
 
 Before acting on any task, read `memory/constitution.md`. It contains the
-project's non-negotiable principles — test-first, simplicity, integration-first,
+project's non-negotiable principles — test-first, simplicity, isolation,
 and any project-specific rules ratified by the team. Every agent session inherits
 these; they are never optional and are not repeated in this file.
 
@@ -50,7 +50,6 @@ these; they are never optional and are not repeated in this file.
 - Test (quiet, agent-preferred): `scripts/quiet.sh [exact test command]` —
   condenses output to pass/fail + first relevant error; agents should run
   build/test through this form to keep raw logs out of context
-  (see docs/token-efficiency.md)
 - Lint/format: `[exact command]`
 - Run locally: `[exact command]`
 - [Anything else run routinely, e.g. migrations, codegen]
@@ -81,7 +80,7 @@ these; they are never optional and are not repeated in this file.
      convention") does NOT belong here — it costs tokens on every session,
      including the ones that never touch that subtree. Create
      `.github/instructions/<name>.instructions.md` with an `applyTo` glob
-     instead; see docs/context-engineering.md. -->
+     instead. -->
 
 ```[language]
 [A short, real example from this codebase that shows naming conventions,
@@ -145,8 +144,7 @@ formatting, and the idioms you actually want repeated.]
      training — for "do X to each item" that's usually a naive per-item loop —
      unless something signals the operation's grain is a design decision. State
      your real idioms; "be efficient" alone won't. A real before/after snippet
-     beats prose here. Full reasoning + cost numbers (3-100x):
-     `docs/efficient-code-generation-and-performance-pitfalls.md`. -->
+     beats prose here. -->
 
 - **Batch/bulk over row-by-row — this is the highest-frequency, highest-cost
   pattern to call out explicitly.** [Name your stack's actual bulk idiom, e.g.
@@ -203,8 +201,7 @@ to use isn't in that glossary, ask rather than guessing at its meaning.
   / D architecture) to right-size the pipeline — approve or override it; don't
   let it pick the depth silently. It also scans `.agents/extensions/` for opt-in
   rule packs (e.g. `security/baseline`) and records the track, opt-ins, and each
-  approval in the feature's committed `decision-log.md`. See
-  `docs/adaptive-workflow-and-extensions.md`.
+  approval in the feature's committed `decision-log.md`.
 - Read the spec for the feature you're touching before implementing. Specs
   are not auto-loaded into every prompt — pull in the one relevant to your
   current task explicitly.
@@ -230,8 +227,7 @@ to use isn't in that glossary, ask rather than guessing at its meaning.
   coverage — write characterization tests capturing *current* behavior
   before changing anything there. The constitution's Article III defines
   the process.
-- Test locations: `[e.g., unit tests in tests/unit/, integration tests
-  in tests/integration/, contract tests in tests/contract/]`
+- Test locations: `[e.g., unit tests in tests/unit/, contract tests in tests/contract/]`
 - [Any framework-specific idiom worth naming — e.g. "Use pytest fixtures,
   not setUp/tearDown." or "Mock at the service boundary, not inside
   services."]
@@ -266,11 +262,9 @@ to use isn't in that glossary, ask rather than guessing at its meaning.
 
 ## Model Routing
 
-<!-- See docs/model-selection-and-token-optimization-in-sdd.md for the full
-     reasoning. Delete this section if your tooling
-     doesn't support per-phase model selection, but consider it default-on
-     for any non-trivial project — the cost asymmetry is real in both
-     directions. -->
+<!-- Delete this section if your tooling doesn't support per-phase model
+     selection, but consider it default-on for any non-trivial project — the
+     cost asymmetry is real in both directions. -->
 
 - Specify / Plan phases: use **[your strongest available model]** explicitly
   — do not rely on auto-model-selection for these two phases. A weak model's

@@ -1,5 +1,5 @@
 # Codex custom agent - generated from .agents/agents/debugger.md by mirror-agents.
-# Do not hand-edit; edit the canonical .md and re-run the mirror (ADR-0001).
+# Do not hand-edit; edit the canonical .md and re-run the mirror.
 
 [agent]
 name = "debugger"

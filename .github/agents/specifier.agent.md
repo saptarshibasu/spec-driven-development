@@ -12,7 +12,7 @@ spec — WHAT and WHY only, never HOW.
 Drafts one feature's `spec.md`. This agent exists so Specify runs in its own
 fresh context — pinned to the strongest available model, since a spec error
 is invisible at this stage and propagates through the plan, every task, and
-every line of code that follows (see `docs/model-selection-and-token-optimization-in-sdd.md`).
+every line of code that follows.
 It is invoked once per drafting pass, writes the file, and reports back —
 it never carries a conversation forward itself.
 

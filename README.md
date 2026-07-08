@@ -52,11 +52,11 @@ What sets it apart, in a few words:
 
 ## 🧱 Principles
 
-1. **Every token must earn its place.** Small always-loaded files; deep reference docs pulled in by name only when needed — [docs/context-engineering.md](docs/context-engineering.md).
-2. **Mechanize what you can, infer what you must.** A rule that can be a test should be a test, not a sentence an agent re-reads — [docs/harness-engineering.md](docs/harness-engineering.md).
+1. **Every token must earn its place.** Small always-loaded files; deep reference docs pulled in by name only when needed.
+2. **Mechanize what you can, infer what you must.** A rule that can be a test should be a test, not a sentence an agent re-reads.
 3. **Humans decide where mistakes are cheap.** Gates sit at spec, plan, and tasks — the points where course-correcting costs a paragraph, not a feature.
 4. **Test-first, non-negotiable.** Red before green; regression guards for bug fixes; characterization tests before touching untested legacy code.
-5. **Depth is a decision, not a constant.** Rigor scales with the work, and the routing itself is logged and auditable — [docs/adaptive-workflow-and-extensions.md](docs/adaptive-workflow-and-extensions.md).
+5. **Depth is a decision, not a constant.** Rigor scales with the work, and the routing itself is logged and auditable.
 6. **No over-engineering.** Only what is directly requested — enforced as a guardrail in every skill session.
 
 ## 🗺️ The workflow
@@ -152,9 +152,9 @@ flowchart TD
 ```
 
 The feedforward half ships filled-in. The feedback half is deliberately yours to wire to your
-stack (test command, lint, CI) — [docs/harness-engineering.md](docs/harness-engineering.md) lists
-the highest-leverage sensors to add first, and `scripts/quiet.sh` keeps their output token-cheap:
-pass/fail + first error to the agent, full log to a file.
+stack (test command, lint, CI) — start with tests and a linter, then a CI job mirroring them;
+`scripts/quiet.sh` keeps their output token-cheap: pass/fail + first error to the agent, full
+log to a file.
 
 ## 🔁 The loops
 

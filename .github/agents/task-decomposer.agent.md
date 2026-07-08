@@ -13,8 +13,7 @@ Drafts one feature's `tasks.md`. Runs on a mid-tier model — decomposing an
 already-good, already-approved plan into ordered tasks is largely mechanical;
 errors here are visible and local (a missing task, a wrong file path) rather
 than the kind that silently propagate, so this phase doesn't need the
-strongest tier that Specify and Plan do (see
-`docs/model-selection-and-token-optimization-in-sdd.md`). Invoked once per
+strongest tier that Specify and Plan do. Invoked once per
 drafting pass, in its own fresh context, carrying none of the Specify/Plan
 revision history forward.
 

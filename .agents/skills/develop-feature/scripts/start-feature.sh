@@ -24,7 +24,7 @@ TEMPLATES_DIR="$REPO_ROOT/templates"
 
 # 1. Refuse to proceed without the canonical templates. This script does
 #    not carry its own fallback copies — one source of truth, at the
-#    project root (the same single-source rule as ADR-0001).
+#    project root.
 for f in spec.template.md plan.template.md tasks.template.md decision-log.template.md learnings.template.md; do
   if [ ! -f "$TEMPLATES_DIR/$f" ]; then
     echo "Missing $TEMPLATES_DIR/$f" >&2

@@ -14,8 +14,7 @@ document is delegated to a dedicated agent — `specifier` (`spec.md`),
 `planner` (`plan.md`), `task-decomposer` (`tasks.md`) — each invoked fresh, so
 none of them carries the other phases' revision back-and-forth into its own
 context, and each can be pinned to the model tier its phase actually needs
-(`AGENTS.md` Model Routing; see also
-`docs/model-selection-and-token-optimization-in-sdd.md`). Three gated phases —
+(`AGENTS.md` Model Routing). Three gated phases —
 never skip a gate, and never merge two phases into one turn.
 
 This file is intentionally short: it covers routing and the rules that apply
@@ -66,6 +65,14 @@ analysis, and implementation alike.
   output-token cost for no benefit. If the human asks to see it inline
   ("show me", "print it"), read the file and relay it then; otherwise let them
   review it in the file directly.
+- **Every prompt gets routed, not just the first one.** A message with no
+  matching `specs/<NNN>-<slug>/` folder goes through Step R fresh. A message
+  that arrives mid-session on a feature already in progress goes through the
+  resume diff-check ("Resuming an in-progress feature" below) before anything
+  else happens. Never skip straight to editing code because the request
+  "sounds small," "sounds urgent," or repeats something said earlier in the
+  conversation — routing and the diff-check are what determine that, not your
+  own in-the-moment judgment.
 
 ## Before starting
 
@@ -80,6 +87,20 @@ truth: the project root, not this skill.
 If `specs/<NNN>-<slug>/` already exists: **resume, don't start** — Step 0
 refuses to overwrite by design.
 
+0. **Diff the triggering prompt against what's already drafted, before
+   anything else** — including before touching any code. Check `spec.md`,
+   `plan.md`, and `tasks.md` far enough to answer one question: does this
+   prompt describe something already captured there (rephrasing aside), or is
+   it introducing something new — a requirement, an acceptance criterion, a
+   changed scope, a different approach than what was approved? If it's
+   already covered, go to step 1. If it's new, don't hand-apply it: route it
+   to whichever phase owns the affected artifact (`specifier` for `spec.md`,
+   `planner` for `plan.md`, `task-decomposer` for `tasks.md`) — the same
+   "route fixes to the owning phase" guardrail above, applied to a human's new
+   instruction instead of an `artifact-analyzer` finding; the source of the
+   finding doesn't change who owns the fix. Get the human's approval on the
+   amended document (flipping its Status and logging the gate like any other
+   approval) before resuming below.
 1. Read each document's **Status** header (`spec.md`, `plan.md`, `tasks.md`):
    `Draft` = drafted but not yet approved; `Approved` = that gate is cleared. A
    document still full of placeholders hasn't been started.
@@ -114,7 +135,7 @@ file.
 
 ## Step R — Route the work (right-size before you scaffold)
 
-Before scaffolding, **propose a track** (see `docs/adaptive-workflow-and-extensions.md`).
+Before scaffolding, **propose a track**.
 *You recommend; human decides.* Never pick silently.
 
 Propose exactly one track with a one-line rationale and the artifacts you'll produce:

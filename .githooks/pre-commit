@@ -2,9 +2,8 @@
 # pre-commit — computational controls that run before every commit.
 #
 # This is the cheapest, most reliable layer of the harness: deterministic
-# checks that cost zero tokens and never hallucinate (see docs/harness-
-# engineering.md). It moves rules out of always-loaded prose and into an
-# enforcement that actually fails.
+# checks that cost zero tokens and never hallucinate. It moves rules out of
+# always-loaded prose and into an enforcement that actually fails.
 #
 # Enable once per clone:   git config core.hooksPath .githooks
 # Skip in an emergency:    git commit --no-verify   (use sparingly, on purpose)
@@ -61,12 +60,12 @@ while IFS= read -r f; do
   esac
 done <<< "$staged"
 
-# ── 3. Keep tool instruction files thin (see ADR-0001) ───────────────────────
+# ── 3. Keep tool instruction files thin ───────────────────────────────────────
 for f in CLAUDE.md .github/copilot-instructions.md; do
   if printf '%s\n' "$staged" | grep -qxF "$f"; then
     lines=$(git show ":$f" | grep -cvE '^\s*(<!--.*-->)?\s*$' || true)
     if [ "${lines:-0}" -gt 2 ]; then
-      echo "✖ $f has grown beyond a pointer — conventions belong in AGENTS.md (ADR-0001)."
+      echo "✖ $f has grown beyond a pointer — conventions belong in AGENTS.md."
       fail=1
     fi
   fi
@@ -106,7 +105,7 @@ fi
 # Route them through scripts/quiet.sh: hook output is read by agents too, and
 # a sensor that dumps hundreds of log lines pollutes the context it feeds —
 # quiet.sh condenses it to pass/fail + the first relevant error, with the full
-# log kept in a temp file (see docs/token-efficiency.md).
+# log kept in a temp file for deeper investigation.
 #
 # echo "Running lint…"; scripts/quiet.sh <exact lint command from AGENTS.md> || fail=1
 # echo "Running fast tests…"; scripts/quiet.sh <exact fast-test command from AGENTS.md> || fail=1

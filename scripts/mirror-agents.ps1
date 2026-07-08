@@ -8,7 +8,7 @@
 #   -> .codex/agents/<name>.toml        Codex        ([agent] table + instructions)
 #
 # Run after adding or editing an agent under .agents/agents/. Never hand-edit a
-# generated file. Edit the canonical .md only (ADR-0001). CI re-runs this and
+# generated file. Edit the canonical .md only. CI re-runs this and
 # fails if the committed files drift from a fresh generation.
 #
 # Behavioral guardrails: the canonical agent files only carry an empty
@@ -173,7 +173,7 @@ foreach ($src in $srcs) {
   else { $escDesc = $desc -replace '\\', '\\' -replace '"', '\"' }
   $toml = @"
 # Codex custom agent - generated from .agents/agents/$($src.Name) by mirror-agents.
-# Do not hand-edit; edit the canonical .md and re-run the mirror (ADR-0001).
+# Do not hand-edit; edit the canonical .md and re-run the mirror.
 
 [agent]
 name = "$name"

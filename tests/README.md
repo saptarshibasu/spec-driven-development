@@ -6,8 +6,7 @@ humans and agents.
 
 | Directory | What goes here | When it is written |
 |---|---|---|
-| `contract/` | Tests that pin down an API/event contract a caller depends on. | **Before** implementation, generated from `tasks.md`. Required for anything crossing a service or repo boundary (constitution, Article IV). |
-| `integration/` | End-to-end / cross-component tests exercising a real user journey, against real services or databases where practical. | With the user story, tests first. |
+| `contract/` | Tests that pin down an API/event contract a caller depends on, verified against a mocked/stubbed boundary — not a live external service. | **Before** implementation, generated from `tasks.md`. Required for anything crossing a service or repo boundary (constitution, Article IV). |
 | `unit/` | Fast, isolated tests for a single module's logic. | With the implementation, tests first (Red → Green → Refactor). |
 | `characterization/` | Tests that capture the **current** behaviour of brownfield/legacy code *before* you change it — kept separate so their special status (they assert "what is," not "what should be") stays obvious. | Before touching any untested legacy area (constitution, Article III). |
 

@@ -3,9 +3,8 @@
 #
 # Verbose test/build output is a token leak AND a quality problem: hundreds of
 # log lines dumped into an agent's context window degrade the very loop the
-# sensor exists to close (see docs/token-efficiency.md, docs/context-
-# engineering.md). This wrapper runs any command, swallows its output, and
-# reports only what the loop needs:
+# sensor exists to close. This wrapper runs any command, swallows its output,
+# and reports only what the loop needs:
 #
 #   success → one PASS line (exit 0)
 #   failure → one FAIL line + the first relevant error excerpt, full log kept

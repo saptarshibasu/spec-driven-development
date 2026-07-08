@@ -12,7 +12,7 @@
 #
 # Run this AFTER you add or edit an agent under .agents/agents/. Never hand-edit a
 # generated file in .claude/.github/.codex — it will be overwritten. Edit the
-# canonical .md only (ADR-0001). CI re-runs this and fails if the committed files
+# canonical .md only. CI re-runs this and fails if the committed files
 # drift from a fresh generation.
 #
 # Behavioral guardrails: the canonical agent files only carry an empty
@@ -67,11 +67,22 @@ extract_guardrails_canon() {
   ' "$GUARDRAILS_DOC"
 }
 
-declare -A GUARDRAILS_CANON
+# Look up (and validate) the canonical block for a variant on demand. No
+# associative array here on purpose: `declare -A` needs bash 4+, and macOS
+# still ships bash 3.2 as /bin/bash (frozen there over GPLv3 licensing), so a
+# preloaded map would break the script for anyone running the stock shell.
+guardrails_canon_for() {
+  local variant="$1" canon
+  canon="$(extract_guardrails_canon "$variant")"
+  [ -n "$canon" ] || die "$GUARDRAILS_DOC has no (or an empty) GUARDRAILS:$variant block."
+  printf '%s' "$canon"
+}
+
+# Fail fast at startup (before touching any agent file) if either variant's
+# block is missing or empty — same fail-fast timing the old preloaded-array
+# version had.
 for variant in agent agent-readonly; do
-  GUARDRAILS_CANON["$variant"]="$(extract_guardrails_canon "$variant")"
-  [ -n "${GUARDRAILS_CANON[$variant]}" ] \
-    || die "$GUARDRAILS_DOC has no (or an empty) GUARDRAILS:$variant block."
+  guardrails_canon_for "$variant" >/dev/null
 done
 
 # Replace an agent's empty <!-- GUARDRAILS:<variant> --> marker with the
@@ -79,13 +90,14 @@ done
 # missing the marker (or has a stale hand-written copy instead) so an
 # unmirrored guardrails edit can't silently ship.
 inject_guardrails() {
-  local body="$1" variant="$2"
+  local body="$1" variant="$2" canon
   local start="<!-- GUARDRAILS:$variant -->" end="<!-- /GUARDRAILS:$variant -->"
   case "$body" in
     *"$start"*"$end"*) ;;
     *) die "missing a '$start' ... '$end' marker pair (expected variant '$variant')." ;;
   esac
-  awk -v start="$start" -v end="$end" -v canon="${GUARDRAILS_CANON[$variant]}" '
+  canon="$(guardrails_canon_for "$variant")"
+  awk -v start="$start" -v end="$end" -v canon="$canon" '
     index($0, start) == 1 { print; print canon; f=1; next }
     index($0, end) == 1 { f=0 }
     !f { print }
@@ -101,27 +113,39 @@ mkdir -p "$CLAUDE_DIR" "$COPILOT_DIR" "$CODEX_DIR"
 find "$CLAUDE_DIR" "$COPILOT_DIR" "$CODEX_DIR" -type f \
      \( -name '*.md' -o -name '*.toml' \) ! -name '.gitkeep' -delete 2>/dev/null || true
 
-# Load org policy data (model/tool mappings) from .agents/model-map.conf into
-# an associative array keyed "<namespace>.<key>". This is the ONLY place an
-# org customizes tiers/tools — edit that data file, not this script. See it
-# for the format and namespaces. Kept in sync with the loader in
-# mirror-agents.ps1 only in the sense that both read the same data file.
-declare -A MAP
-while IFS='=' read -r k v; do
-  k="$(printf '%s' "$k" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
-  [ -z "$k" ] && continue
-  case "$k" in \#*) continue ;; esac
-  v="$(printf '%s' "$v" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
-  MAP["$k"]="$v"
-done < "$MODEL_MAP"
-
+# Look up "<namespace>.<key>=<value>" straight out of .agents/model-map.conf
+# on each call — this is the ONLY place an org customizes tiers/tools; edit
+# that data file, not this script. Deliberately not preloaded into an
+# associative array: `declare -A` needs bash 4+, and macOS still ships bash
+# 3.2 as /bin/bash (frozen there over GPLv3 licensing), so a preloaded map
+# would break this script for anyone running the stock shell there. Kept in
+# sync with the loader in mirror-agents.ps1 only in the sense that both read
+# the same data file.
 map_lookup() {
-  local ns="$1" key="$2" full="$1.$2"
-  if [ -n "${MAP[$full]+x}" ]; then
-    printf '%s\n' "${MAP[$full]}"
-  else
-    die "unknown $ns entry '$key' (add '$full=...' to $MODEL_MAP)"
-  fi
+  local ns="$1" key="$2" full="$1.$2" val status
+  val="$(awk -v want="$full" '
+    {
+      line = $0
+      trimmed = line
+      gsub(/^[[:space:]]+|[[:space:]]+$/, "", trimmed)
+      if (trimmed == "" || trimmed ~ /^#/) next
+      eq = index(line, "=")
+      if (eq == 0) next
+      k = substr(line, 1, eq - 1)
+      gsub(/^[[:space:]]+|[[:space:]]+$/, "", k)
+      if (k != want) next
+      v = substr(line, eq + 1)
+      gsub(/^[[:space:]]+|[[:space:]]+$/, "", v)
+      sub(/\r$/, "", v)
+      print v
+      found = 1
+      exit
+    }
+    END { exit(found ? 0 : 3) }
+  ' "$MODEL_MAP")"
+  status=$?
+  [ "$status" -eq 0 ] || die "unknown $ns entry '$key' (add '$full=...' to $MODEL_MAP)"
+  printf '%s\n' "$val"
 }
 
 # Map a Claude tool name to its Codex equivalent. Unknown names are a hard
@@ -233,7 +257,7 @@ for src in "$CANON"/*.md; do
   esac
   {
     printf '# Codex custom agent - generated from .agents/agents/%s by mirror-agents.\n' "$base"
-    printf '# Do not hand-edit; edit the canonical .md and re-run the mirror (ADR-0001).\n\n'
+    printf '# Do not hand-edit; edit the canonical .md and re-run the mirror.\n\n'
     printf '[agent]\n'
     printf 'name = "%s"\n' "$name"
     printf 'description = "%s"\n' "$esc_desc"

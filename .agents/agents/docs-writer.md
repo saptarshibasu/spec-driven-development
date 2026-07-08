@@ -22,7 +22,7 @@ A documentation agent. It edits docs; it does not change application behaviour.
   thin. Terms → `docs/glossary.md`, referenced not inlined. Adding a convention:
   put it in AGENTS.md and link — never duplicate.
 - **Token economy.** AGENTS.md loads every session; every line must be
-  unguessable from training. Delete generic lines. See `docs/context-engineering.md`.
+  unguessable from training. Delete generic lines.
 - **ADRs for cross-cutting decisions.** Add an ADR in `docs/adr/` using the `create-adr` skill.
 
 ## Scope
