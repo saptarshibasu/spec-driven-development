@@ -97,8 +97,15 @@ inject_guardrails() {
     *) die "missing a '$start' ... '$end' marker pair (expected variant '$variant')." ;;
   esac
   canon="$(guardrails_canon_for "$variant")"
-  awk -v start="$start" -v end="$end" -v canon="$canon" '
-    index($0, start) == 1 { print; print canon; f=1; next }
+  # canon spans multiple lines. Passing a multi-line value through awk's -v
+  # runs it through string-literal escape processing, and macOS's /usr/bin/awk
+  # (the "one true awk") hard-errors on any raw embedded newline there:
+  # "awk: newline in string ... at source line 1". gawk (Linux default)
+  # tolerates it, which is why this only surfaces on Mac. Route the value
+  # through the environment/ENVIRON instead — every POSIX awk accepts that
+  # verbatim, no escape parsing involved.
+  GUARDRAILS_CANON_ENV="$canon" awk -v start="$start" -v end="$end" '
+    index($0, start) == 1 { print; print ENVIRON["GUARDRAILS_CANON_ENV"]; f=1; next }
     index($0, end) == 1 { f=0 }
     !f { print }
   ' <<< "$body"
