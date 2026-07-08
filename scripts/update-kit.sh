@@ -195,38 +195,44 @@ run() {
 }
 
 echo "── Kit-owned files"
-for f in "${KIT_OWNED_FILES[@]}"; do
-  [ -f "$SRC/$f" ] || continue
-  run mkdir -p "$(dirname "$f")"
-  if [ -f "$f" ] && cmp -s "$SRC/$f" "$f"; then
-    continue
-  fi
-  info "$f"
-  run cp "$SRC/$f" "$f"
-done
-
-echo "── Kit-owned directories (add/update only, nothing deleted)"
-for d in "${KIT_OWNED_DIRS[@]}"; do
-  [ -d "$SRC/$d" ] || continue
-  info "$d/"
-  run mkdir -p "$d"
-  run cp -R "$SRC/$d/." "$d/"
-done
-
-for adr_dir in "${KIT_ADR_DIRS[@]}"; do
-  [ -d "$SRC/$adr_dir" ] || continue
-  echo "── Kit's own ADRs ($adr_dir/, matched by filename)"
-  run mkdir -p "$adr_dir"
-  for f in "$SRC/$adr_dir"/*.md; do
-    [ -e "$f" ] || continue
-    base="$(basename "$f")"
-    if [ -f "$adr_dir/$base" ] && cmp -s "$f" "$adr_dir/$base"; then
+if [ "${#KIT_OWNED_FILES[@]}" -gt 0 ]; then
+  for f in "${KIT_OWNED_FILES[@]}"; do
+    [ -f "$SRC/$f" ] || continue
+    run mkdir -p "$(dirname "$f")"
+    if [ -f "$f" ] && cmp -s "$SRC/$f" "$f"; then
       continue
     fi
-    info "$adr_dir/$base"
-    run cp "$f" "$adr_dir/$base"
+    info "$f"
+    run cp "$SRC/$f" "$f"
   done
-done
+fi
+
+echo "── Kit-owned directories (add/update only, nothing deleted)"
+if [ "${#KIT_OWNED_DIRS[@]}" -gt 0 ]; then
+  for d in "${KIT_OWNED_DIRS[@]}"; do
+    [ -d "$SRC/$d" ] || continue
+    info "$d/"
+    run mkdir -p "$d"
+    run cp -R "$SRC/$d/." "$d/"
+  done
+fi
+
+if [ "${#KIT_ADR_DIRS[@]}" -gt 0 ]; then
+  for adr_dir in "${KIT_ADR_DIRS[@]}"; do
+    [ -d "$SRC/$adr_dir" ] || continue
+    echo "── Kit's own ADRs ($adr_dir/, matched by filename)"
+    run mkdir -p "$adr_dir"
+    for f in "$SRC/$adr_dir"/*.md; do
+      [ -e "$f" ] || continue
+      base="$(basename "$f")"
+      if [ -f "$adr_dir/$base" ] && cmp -s "$f" "$adr_dir/$base"; then
+        continue
+      fi
+      info "$adr_dir/$base"
+      run cp "$f" "$adr_dir/$base"
+    done
+  done
+fi
 
 merge_kit_section() {
   local target="$1" source="$2"
