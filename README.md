@@ -7,6 +7,7 @@
 Drop it into any repository. Get a gated Specify → Plan → Tasks → Implement pipeline,
 nine focused agents, deterministic guardrails — and a clean upgrade path for all of it.
 
+<!-- Keep the version badge in sync with KIT_VERSION when releasing. -->
 [![Version](https://img.shields.io/badge/kit-v0.2.0-blue)](KIT-CHANGELOG.md)
 [![License](https://img.shields.io/badge/license-Apache--2.0-green)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude_Code-supported-8A2BE2)](#-works-with-your-tools)
@@ -14,7 +15,7 @@ nine focused agents, deterministic guardrails — and a clean upgrade path for a
 [![Codex](https://img.shields.io/badge/Codex-supported-8A2BE2)](#-works-with-your-tools)
 [![Cross-platform](https://img.shields.io/badge/scripts-.sh%20%2B%20.ps1-lightgrey)](scripts/)
 
-[Why this kit](#-why-this-kit) · [How it works](#-the-workflow) · [Quick start](#-add-it-to-an-existing-project) · [Upgrading](#-upgrading) · [Kit-owned files](#-kit-owned-files) · [Best practices](#-getting-the-best-out-of-it)
+[Why this kit](#-why-this-kit) · [The workflow](#-the-workflow) · [What a run looks like](#-what-a-run-looks-like) · [Quick start](#-add-it-to-an-existing-project) · [The skills](#-the-skills) · [Upgrading](#-upgrading) · [Best practices](#-getting-the-best-out-of-it)
 
 </div>
 
@@ -23,32 +24,30 @@ nine focused agents, deterministic guardrails — and a clean upgrade path for a
 ## 💡 Why this kit
 
 Prompting an agent to "just build the feature" produces code you have to re-read line by line.
-This kit replaces that with a pipeline where **every expensive mistake is caught while it's still
-a cheap one** — a wrong spec costs a re-draft at an approval gate, not a rewritten feature.
+This kit replaces that with a pipeline where every expensive mistake is caught while it's still
+a cheap one: a wrong spec costs a re-draft at an approval gate, not a rewritten feature.
 
-What sets it apart, in a few words:
+Three things set it apart:
 
-> **Versioned and upgradeable.** A machine-enforced ownership contract defines exactly which files
-> the kit may update and which are forever yours — so adopting it never means forking it.
->
-> **One source, every tool.** Agents and skills are defined once and mirrored byte-for-byte to
-> Claude Code, GitHub Copilot, and Codex. Your team's tool choice stops mattering.
->
-> **Token-disciplined by architecture.** Thin pointer files, phase protocols read at the point of
-> use, fresh sub-agent contexts per phase — context engineering is the design, not a tip.
+- **Versioned and upgradeable.** A machine-enforced ownership contract defines exactly which
+  files the kit may update and which are forever yours — so adopting it never means forking it.
+- **One source, every tool.** Agents and skills are defined once and mirrored byte-for-byte to
+  Claude Code, GitHub Copilot, and Codex. Your team's tool choice stops mattering.
+- **Token-disciplined by architecture.** Thin pointer files, phase protocols read at the point
+  of use, fresh sub-agent contexts per phase — context engineering is the design, not a tip.
 
 ## ✨ Key features
 
-| | Feature | What you get |
-|---|---|---|
-| 🚦 | **Gated SDLC pipeline** | Route → Specify → Plan → Tasks → Analyze → Tests (red) → Implement (green) → Review. Human sign-off at every gate, recorded in a committed `decision-log.md`. |
-| 📏 | **Right-sized rigor** | Four workflow tracks — a typo fix doesn't get user stories; a new service doesn't get CRUD-level ceremony. The agent proposes, you decide. |
-| 🤖 | **Nine focused agents** | `specifier` · `planner` · `task-decomposer` · `artifact-analyzer` · `test-writer` · `implementor` · `debugger` · `code-reviewer` · `docs-writer` — each runs fresh, in its own context, on the model tier its phase needs. |
-| 🪞 | **Single source of truth** | Canonical definitions in `.agents/`; generated mirrors for each tool. CI fails if a mirror drifts. |
-| 🔄 | **Contractual upgrades** | `scripts/update-kit.sh`: copy kit updates in without ever touching your code, specs, or config. |
-| 🧩 | **Opt-in extension packs** | Blocking rule packs (security, compliance, …) layered onto a feature only when you say so. |
-| 🧠 | **Project memory** | A constitution of always-true principles, a per-feature decision log, and a `learnings.md` that captures what went sideways — with compaction so it never bloats. |
-| 🖥️ | **Cross-platform** | Every script ships as a `.sh` / `.ps1` twin. |
+| Feature | What you get |
+|---|---|
+| **Gated SDLC pipeline** | Route → Specify → Plan → Tasks → Analyze → Tests (red) → Implement (green) → Review. Human sign-off at every gate, recorded in a committed `decision-log.md`. |
+| **Right-sized rigor** | Four workflow tracks — a typo fix doesn't get user stories; a new service doesn't get CRUD-level ceremony. The agent proposes, you decide. |
+| **Nine focused agents** | `specifier` · `planner` · `task-decomposer` · `artifact-analyzer` · `test-writer` · `implementor` · `debugger` · `code-reviewer` · `docs-writer` — each runs fresh, in its own context, on the model tier its phase needs. |
+| **Single source of truth** | Canonical definitions in `.agents/`; generated mirrors for each tool. CI fails if a mirror drifts. |
+| **Contractual upgrades** | `scripts/update-kit.sh`: copy kit updates in without ever touching your code, specs, or config. |
+| **Opt-in extension packs** | Blocking rule packs (security, compliance, …) layered onto a feature only when you say so. |
+| **Project memory** | A constitution of always-true principles, a per-feature decision log, and a `learnings.md` that captures what went sideways — with compaction so it never bloats. |
+| **Cross-platform** | Every script ships as a `.sh` / `.ps1` twin. |
 
 ## 🧱 Principles
 
@@ -62,20 +61,30 @@ What sets it apart, in a few words:
 ## 🗺️ The workflow
 
 One skill — `develop-feature` — drives everything. It first **routes** the work to a
-right-sized track, then walks the gated pipeline, delegating each document to a dedicated agent:
+right-sized track, then walks the gated pipeline, delegating each document to a dedicated agent.
+
+The four tracks:
+
+| Track | Typical work | What's produced |
+|---|---|---|
+| **A · Trivial** | Typo, comment, config value, dependency bump — no design choices | No feature folder. Failing test first if behavior changes, then the change; `code-reviewer` on the diff; rationale in the commit message |
+| **B · Simple** | Localized bug fix or small enhancement, no new architecture | Short `spec.md` (problem, acceptance, regression guards) + `tasks.md`; `plan.md` skipped unless a design decision surfaces |
+| **C · Moderate** *(default)* | A normal new capability | Full `spec.md` → `plan.md` → `tasks.md` at standard depth |
+| **D · Complex** | New service, cross-cutting change, untested legacy code | Full pipeline at maximum depth, plus `research.md` / `data-model.md` as needed, an ADR for the cross-cutting decision, and characterization tests offered before touching legacy code |
 
 ```mermaid
+%%{init: {'theme': 'neutral'}}%%
 flowchart TD
     START(["💬 “Start a new feature: X”"]) --> R
 
     R{{"🚦 Step R · Route<br/>agent proposes <b>one track</b> + extension opt-ins<br/>(security, compliance, …) — <b>human approves</b>"}}
 
-    R ==>|"🟢 <b>A · Trivial</b><br/>typo · config value · dep bump"| TA
-    R ==>|"🟡 <b>B · Simple</b><br/>localized fix — short spec,<br/>plan skipped"| SP
-    R ==>|"🔵 <b>C · Moderate</b> (default)<br/>a normal new capability"| SP
-    R ==>|"🔴 <b>D · Complex</b><br/>architecture / brownfield<br/>+ research.md · data-model.md · ADR"| SP
+    R ==>|"<b>A · Trivial</b>"| TA
+    R ==>|"<b>B · Simple</b><br/>plan skipped"| SP
+    R ==>|"<b>C · Moderate</b> (default)"| SP
+    R ==>|"<b>D · Complex</b><br/>+ research.md · data-model.md · ADR"| SP
 
-    TA["✏️ Direct change<br/><i>failing test first if behavioural<br/>rationale in the commit message</i>"] --> RVA["🔍 code-reviewer<br/>reviews the diff"]
+    TA["✏️ Direct change<br/><i>failing test first if behavioural,<br/>rationale in the commit message</i>"] --> RVA["🔍 code-reviewer<br/>reviews the diff"]
     RVA --> DONE
 
     subgraph GATED["&nbsp;📋 Gated pipeline — every ✋ is a human approval, logged in decision-log.md&nbsp;"]
@@ -87,16 +96,9 @@ flowchart TD
         TK --> G3(("✋")) --> AN["🔎 <b>3.5 · Analyze</b><br/>🤖 artifact-analyzer cross-checks<br/>spec ↔ plan ↔ tasks — loops until clean"]
     end
 
-    AN --> TW
+    AN ==> LOOP["🔁 <b>Per user story, in priority order</b><br/>tests red → implement green → review<br/><i>(the story loop, detailed below)</i>"]
 
-    subgraph STORY["&nbsp;🔁 Per user story, in priority order&nbsp;"]
-        direction LR
-        TW["🔴 <b>3.7 · Tests</b><br/>🤖 test-writer<br/>failing tests, confirmed red"] --> IM["🟢 <b>4 · Implement</b><br/>🤖 implementor makes them green<br/>🤖 debugger on escalation"]
-        IM --> RV["🔍 <b>5 · Review</b><br/>🤖 code-reviewer checks spec<br/>conformance — human commits"]
-        RV -->|"next story"| TW
-    end
-
-    RV ==>|"last story clears review"| DONE["🏁 <b>Feature complete</b><br/>learnings.md compaction offered<br/>docs-writer if docs drifted"]
+    LOOP ==>|"last story clears review"| DONE["🏁 <b>Feature complete</b><br/>learnings.md compaction offered<br/>docs-writer if docs drifted"]
 
     classDef routing fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px,color:#4a148c
     classDef phase fill:#e3f2fd,stroke:#1976d2,stroke-width:1.5px,color:#0d47a1
@@ -108,16 +110,53 @@ flowchart TD
     class R routing
     class SP,PL,TK,AN phase
     class G1,G2,G3 gate
-    class TW,IM,RV story
-    class TA,RVA story
+    class TA,RVA,LOOP story
     class DONE done
     class START entry
 ```
 
 > [!NOTE]
+> The decimal phases (3.5 Analyze, 3.7 Tests) slot between Tasks and Implement in the classic
+> Specify → Plan → Tasks → Implement numbering — added checks, not renumbered phases.
 > Every approval flips the document's `Status` to `Approved` and appends a `decision-log.md`
 > row — which is also how a feature spanning days of separate sessions **resumes exactly where
 > it left off**, with no scratch files.
+
+## 🔬 What a run looks like
+
+A Track C feature, condensed:
+
+```text
+You:    Start a new feature: rate-limit the login endpoint.
+
+Agent:  Step R — I propose Track C (Moderate): a new capability, no
+        architectural change. Artifacts: spec.md, plan.md, tasks.md.
+        Opt-in extension available: security/baseline — include it?
+
+You:    Approved, include security/baseline.        ✋ logged
+
+Agent:  [specifier drafts spec.md — user stories, acceptance criteria,
+        one [NEEDS CLARIFICATION]: lockout duration?]
+
+You:    15 minutes. Approved.                        ✋ logged
+        …plan ✋ … tasks ✋ … analyze ✅ … then per story:
+        tests red → implement green → review → you commit.
+```
+
+After the run, the feature folder is the complete record:
+
+```text
+specs/003-login-rate-limit/
+├── spec.md            # what & why — user stories, acceptance criteria
+├── plan.md            # how — approach, interfaces, risks
+├── tasks.md           # in what order — tasks grouped per user story
+├── decision-log.md    # one row per gate: who approved what, when
+├── learnings.md       # what went sideways, feeding the next feature
+└── contracts/         # API contracts, when the plan calls for them
+```
+
+Close the session mid-feature and ask to continue later — Step R detects the folder,
+reads the decision log, and resumes at the exact phase it left off.
 
 ## 🛡️ The harness
 
@@ -125,6 +164,7 @@ Spec-driven development *is* a harness: **feedforward guides** steer the agent b
 **feedback sensors** catch it after — and the loop between them is where the harness improves.
 
 ```mermaid
+%%{init: {'theme': 'neutral'}}%%
 flowchart TD
     subgraph FF["&nbsp;🧭 FEEDFORWARD — steer <i>before</i> acting&nbsp;"]
         direction LR
@@ -152,15 +192,20 @@ flowchart TD
 ```
 
 The feedforward half ships filled-in. The feedback half is deliberately yours to wire to your
-stack (test command, lint, CI) — start with tests and a linter, then a CI job mirroring them;
-`scripts/quiet.sh` keeps their output token-cheap: pass/fail + first error to the agent, full
-log to a file.
+stack: start with a test command and a linter, then a CI job mirroring them. `scripts/quiet.sh`
+keeps their output token-cheap — pass/fail plus first error to the agent, full log to a file.
+
+The dotted arrow is the meta-loop, and it's run by you: when a sensor catches the same mistake
+twice, mechanize it — a test or lint rule if possible, an `AGENTS.md` line if not. Each
+iteration makes the next diff more trustable without reading every line yourself.
+[docs/guardrails.md](docs/guardrails.md) covers this in depth.
 
 ## 🔁 The loops
 
 **Analyze loop** *(Phase 3.5)* — the artifacts must agree before any code exists:
 
 ```mermaid
+%%{init: {'theme': 'neutral'}}%%
 flowchart LR
     IN(["📄 spec.md · plan.md · tasks.md<br/>all approved"]) --> AZ
 
@@ -184,6 +229,7 @@ flowchart LR
 **Story loop** *(Phases 3.7 → 4 → 5, repeated per user story in priority order)*:
 
 ```mermaid
+%%{init: {'theme': 'neutral'}}%%
 flowchart TD
     PICK(["📋 next story from tasks.md<br/>(priority order)"]) --> TW
 
@@ -219,27 +265,29 @@ flowchart TD
     class PICK input
 ```
 
-**Harness-improvement loop** *(the meta-loop, run by you)*:
+## 🧰 The skills
 
-```mermaid
-flowchart LR
-    W["🤖 <b>agent works</b><br/>guided by AGENTS.md,<br/>constitution & templates"] ==> S["📡 <b>sensors check</b><br/>tests · lint · CI ·<br/>code-reviewer · you"]
-    S ==>|"✅ pass"| T["🤝 <b>trusted diff</b><br/>merged without reading<br/>every line yourself"]
-    S -.->|"⚠️ same mistake twice"| M["🔧 <b>mechanize it</b><br/>a test or lint rule if possible,<br/>an AGENTS.md line if not"]
-    M -.->|"harness gets stronger<br/>with every iteration 📈"| W
+Seven skills, defined once under `.agents/skills/` and mirrored to every tool:
 
-    classDef work fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px,color:#4a148c
-    classDef sensor fill:#fff8e1,stroke:#ef6c00,stroke-width:1.5px,color:#e65100
-    classDef trust fill:#c8e6c9,stroke:#2e7d32,stroke-width:2px,color:#1b5e20
-    classDef mech fill:#e3f2fd,stroke:#1976d2,stroke-width:1.5px,color:#0d47a1
+| Skill | Use it to |
+|---|---|
+| `develop-feature` | Start **any** change, large or trivial — the front door to the whole pipeline. Routes, scaffolds, and owns every gate. |
+| `init-project` | One-time setup: scan the codebase, then write a filled-in `AGENTS.md` and `memory/constitution.md` with your approval. |
+| `clarify-spec` | Surface and resolve ambiguity in a draft spec before planning — targeted questions, answers written back into `spec.md`. |
+| `check-spec` | Generate a requirements-quality checklist: "unit tests for the spec" — complete, clear, consistent, measurable? |
+| `amend-constitution` | Change the always-true principles — gathered, then ratified, never skipped past you. |
+| `create-adr` | Record an architecture decision as `docs/adr/<NNNN-slug>.md`. |
+| `sync-agents-md` | Re-sync `AGENTS.md` against repo reality when it drifts. |
 
-    class W work
-    class S sensor
-    class T trust
-    class M mech
-```
+**Extension packs** are opt-in rule sets under `.agents/extensions/` (the kit ships
+`security/baseline`; you can add your own). At Step R, `develop-feature` lists every available
+pack and asks which to include; approved packs are recorded in the decision log and their rules
+bind every downstream agent for that feature — and only that feature.
 
 ## 🚀 Add it to an existing project
+
+You need `git`, `bash` (or PowerShell — every script has a `.ps1` twin), and one of the
+supported agent tools.
 
 **1 · Get a kit checkout**, anywhere on disk — it doesn't need to sit next to your project:
 
@@ -256,9 +304,9 @@ scripts/update-kit.sh /path/to/your-project        # update-kit.ps1 on Windows
 
 This copies exactly the kit-owned paths (`.agents/`, `templates/`, `scripts/`, reference docs,
 generated tool mirrors) into your project — and nothing else. Your `src/`, `tests/`, CI, and
-existing docs are untouched. Add `--dry-run` first to preview the file list. The kit itself isn't
-copied in as a script or a version marker — it stays in `/tmp/sdd-kit`, and you come back here to
-run `update-kit.sh` again whenever you want to pull in kit changes.
+existing docs are untouched. Add `--dry-run` first to preview the file list. The kit itself
+stays in `/tmp/sdd-kit`; you come back and re-run `update-kit.sh` whenever you want to pull in
+kit changes.
 
 **3 · Generate your project config.** In your agent tool, run the **`init-project`** skill. It
 scans your codebase, then — with your approval at each gate — writes a filled-in `AGENTS.md` and
@@ -317,17 +365,29 @@ human-readable summary of it.
 | `templates/` | Spec/plan/tasks/checklist/etc. templates. |
 | `docs/README.md`, `docs/guardrails.md` | Upstream reference guides. |
 | `.mcp.json.example` | Example MCP config. |
-| `.gitattributes` | Line-ending normalization. |
-| `LICENSE` | Kit license. |
+| `.agents/LICENSE` | Kit license (Apache-2.0), scoped to the kit-owned paths. |
 
-**Not distributed**, even though they live in this repo: `KIT_VERSION`, `KIT-CHANGELOG.md`, and
-`scripts/update-kit.sh` (`.ps1`) itself — the kit isn't installed into your project as files, it
-stays in whatever checkout you cloned, and you run `update-kit.sh` from there whenever you want to
-pull in kit changes. `.githooks/pre-commit` (`.ps1`) and `.github/workflows/agent-harness.yml` are
-the kit's own reference sensors, also not copied (a CI workflow auto-runs the moment it's
-committed, unlike an opt-in git hook) — copy either in by hand if you want them, and they're yours
-to maintain from that point on. The kit's own `docs/adr/` (7 ADRs) also stay put — they're
-kit-maintainer design history, not something a downstream project's feature work depends on.
+**Not distributed** — these live in this repo but stay in the kit checkout:
+
+- `KIT_VERSION`, `KIT-CHANGELOG.md`, and `scripts/update-kit.sh` (`.ps1`) itself. The kit is
+  never installed into your project as files; you run the updater from the checkout.
+- `.githooks/pre-commit` (`.ps1`) and `.github/workflows/agent-harness.yml` — the kit's own
+  reference sensors. A committed CI workflow auto-runs immediately, unlike an opt-in git hook,
+  so both are copy-by-hand: bring either in if you want it, and it's yours to maintain from
+  that point on.
+- The kit's own `docs/adr/` (7 ADRs) — kit-maintainer design history, not something a
+  downstream project's feature work depends on.
+- `.gitattributes` — a repo-wide policy file that's yours, not the kit's: your copy may carry
+  LFS rules, linguist overrides, or merge drivers the updater must not clobber. Copy-by-hand
+  like the hooks above. At minimum, merge these two things into your own `.gitattributes`:
+  `*.sh` / `*.bash` / `*.ps1 text eol=lf` (CRLF breaks shebangs on Unix shells), and the
+  `linguist-generated` / `merge=ours` attributes on the generated mirror dirs (`.claude/**`,
+  `.codex/**`, `.github/agents/**`, `.github/skills/**`). If an earlier kit version copied
+  its `.gitattributes` over yours, restore your own rules from git history.
+- The root `LICENSE` — your project's root LICENSE declares *your* license, and the updater
+  must never overwrite it. The kit's Apache-2.0 text ships at `.agents/LICENSE` instead,
+  covering the kit-owned paths. If an earlier kit version copied its LICENSE to your project
+  root, review it and remove it by hand if it doesn't match your project's actual license.
 
 **Project-owned** — the kit writes these once and `update-kit.sh` never touches them again:
 `AGENTS.md`, `memory/`, `specs/`, `src/`, `tests/`, your own `docs/adr/`, `docs/glossary.md`,

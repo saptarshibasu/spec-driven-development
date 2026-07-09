@@ -16,6 +16,33 @@ in this repo's root `KIT_VERSION` file.
 
 ## [Unreleased]
 
+### Changed
+- **`.gitattributes` removed from the kit-owned manifest — now copy-by-hand,
+  like `.githooks/pre-commit` and the CI workflow.** It's a repo-wide policy
+  file the adopter owns: their copy may carry LFS rules, linguist overrides,
+  or merge drivers, and the kit's `* text=auto eol=lf` is a whole-repo
+  choice that isn't the kit's to make — yet the updater overwrote it
+  wholesale on every run. The file stays in this repo; adopters should merge
+  the two rules that matter into their own `.gitattributes`:
+  `*.sh` / `*.bash` / `*.ps1 text eol=lf` (CRLF breaks shebangs on Unix
+  shells) and the `linguist-generated` / `merge=ours` attributes on the
+  generated mirror dirs (`.claude/**`, `.codex/**`, `.github/agents/**`,
+  `.github/skills/**`).
+  **Action for adopters:** the updater never deletes files — if an earlier
+  kit version overwrote your `.gitattributes`, restore your own rules from
+  git history and fold the kit rules above back in by hand.
+- **Kit license moved from root `LICENSE` to `.agents/LICENSE` in the
+  manifest.** The updater used to copy the kit's Apache-2.0 `LICENSE` to the
+  project root, overwriting the adopting project's own LICENSE on every
+  update — a root LICENSE declares the *project's* license, which is the
+  adopter's choice, not the kit's. The kit's license text still ships
+  (Apache-2.0 §4(a) requires a copy alongside redistributed files) but now
+  lands at `.agents/LICENSE`, scoped to the kit-owned paths.
+  **Action for adopters:** per the manifest's removal policy, the updater
+  never deletes files — if an earlier kit version copied its LICENSE to your
+  project root, review it and remove or replace it by hand if it doesn't
+  match your project's actual license.
+
 ## [0.2.0] - 2026-07-09
 
 ### Changed
