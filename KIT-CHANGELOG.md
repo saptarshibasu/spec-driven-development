@@ -1,42 +1,49 @@
 # Changelog
 
 All notable changes to the **Spec-Driven Development Kit** are documented in
-this file. This tracks the *kit itself* (the kit-owned paths pulled in by
+this file. This tracks the *kit itself* (the kit-owned paths copied in by
 `scripts/update-kit.sh`) — not your project's own history, which lives in your
 normal commit log.
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the kit uses [Semantic Versioning](https://semver.org/): the version lives
-in the root `KIT_VERSION` file.
+in this repo's root `KIT_VERSION` file.
 
-> **Downstream adopters:** don't hand-edit this file. `scripts/update-kit.sh`
-> (`.ps1` twin) appends to it automatically when you pull in a newer kit
-> version.
+> **Downstream adopters:** this file lives in the kit checkout, not in your
+> project — `scripts/update-kit.sh` no longer copies `KIT_VERSION` or this
+> file into your project (see [0.2.0] below). Read it here, in the kit
+> checkout, whenever you run an update.
 
 ## [Unreleased]
 
-### Removed
-- `docs/harness-engineering.md`, `docs/hooks.md`, `docs/mcp.md`,
-  `docs/token-efficiency.md`, and `docs/implementation-handoff.md`. Audit
-  found none of the five were referenced from any live, shipped
-  `.agents/agents/*.md` or `.agents/skills/**/*.md` file — the canonical
-  content that actually drives agent behavior during feature development —
-  only from each other's "See also" sections, the docs index, and this
-  repo's own non-distributed `.githooks/pre-commit(.ps1)` /
-  `agent-harness.yml`. Removed the corresponding entries from
-  `.agents/kit-manifest.conf`, `docs/README.md`, and
-  every dangling citation across `README.md`, `AGENTS.md`,
-  `.agents/extensions/README.md`, `docs/adaptive-workflow-and-extensions.md`,
-  `docs/adr/0003-analyze-gate.md`, `docs/context-engineering.md`,
-  `docs/efficient-code-generation-and-performance-pitfalls.md`,
-  `docs/model-selection-and-token-optimization-in-sdd.md`,
-  `templates/agents.template.md`, `.mcp.json.example`, `.gitattributes`,
-  `.githooks/pre-commit(.ps1)`, and `.github/workflows/agent-harness.yml`.
-  All 7 ADRs (`docs/adr/0001`–`0007`) were reviewed and kept — each is
-  cited from live agent/skill files and forms part of an amendment chain
-  (0002→0003→0004, 0005→0006), so none qualified as unused.
+## [0.2.0] - 2026-07-09
 
 ### Changed
+- **`scripts/update-kit.sh` (`.ps1` twin) redesigned: run from the kit
+  checkout, copy into a project, no version tracking.** Previously the tool
+  ran from inside the *project*, took a path to a kit checkout, and refused
+  to run without a `KIT_VERSION` file already seeded in the project
+  (`echo "0.0.0" > KIT_VERSION` as a first-time bootstrap step) — it then
+  compared semver between the two before copying, with a `--force` flag to
+  override a downgrade. All of that is gone: the tool now runs from inside
+  the kit checkout and takes `<path-to-project>` as its argument
+  (`scripts/update-kit.sh <path-to-project>`), and always copies the
+  kit-owned paths as they currently stand in that checkout — no version
+  comparison, no downgrade guard, no bootstrap step. A re-run still skips
+  any file whose content hasn't changed, so diffs stay small. See
+  `docs/adr/0007-kit-versioning-and-update-path.md`'s "2026-07-09 revision"
+  section for the full rationale.
+- **`KIT_VERSION`, `KIT-CHANGELOG.md`, and `scripts/update-kit.sh` (`.ps1`)
+  are no longer copied into downstream projects.** Removed their `file=`
+  entries from `.agents/kit-manifest.conf`. The kit isn't "installed" into a
+  project as files any more — it stays in whichever checkout you cloned, and
+  you come back to that checkout to run `update-kit.sh` again. This repo
+  still keeps its own root `KIT_VERSION` / `KIT-CHANGELOG.md` for the kit's
+  own release history, same as always.
+- **`README.md`'s onboarding steps simplified** to match: "clone the kit,
+  run `update-kit.sh` pointed at your project" is now one step instead of
+  "clone the kit, seed a `KIT_VERSION` file in your project, then run
+  `update-kit.sh` pointed at the kit checkout."
 - `docs/adr/` is **no longer distributed** to downstream projects — removed
   `adr_dir=docs/adr` from `.agents/kit-manifest.conf`. Follow-up to the
   removal above: being *cited* from a live file and being *read* during
@@ -85,6 +92,34 @@ in the root `KIT_VERSION` file.
   external service.
 
 ### Removed
+- **The `partial=` manifest namespace and its `KIT:BEGIN`/`KIT:END` merge
+  machinery in `update-kit.sh` / `.ps1`.** This existed only for
+  `.githooks/pre-commit` and `.github/workflows/agent-harness.yml`, and had
+  zero live entries since those two files were pulled from the manifest
+  entirely in an earlier change (a CI workflow can't be safely
+  partial-copied the way a git hook can). The `KIT:BEGIN`/`KIT:END` markers
+  themselves stay in both files — they still separate the kit-authored
+  section from the stack-specific one for a human reading the file — only
+  the now-dead code that used to read them at update time is gone.
+- `docs/harness-engineering.md`, `docs/hooks.md`, `docs/mcp.md`,
+  `docs/token-efficiency.md`, and `docs/implementation-handoff.md`. Audit
+  found none of the five were referenced from any live, shipped
+  `.agents/agents/*.md` or `.agents/skills/**/*.md` file — the canonical
+  content that actually drives agent behavior during feature development —
+  only from each other's "See also" sections, the docs index, and this
+  repo's own non-distributed `.githooks/pre-commit(.ps1)` /
+  `agent-harness.yml`. Removed the corresponding entries from
+  `.agents/kit-manifest.conf`, `docs/README.md`, and
+  every dangling citation across `README.md`, `AGENTS.md`,
+  `.agents/extensions/README.md`, `docs/adaptive-workflow-and-extensions.md`,
+  `docs/adr/0003-analyze-gate.md`, `docs/context-engineering.md`,
+  `docs/efficient-code-generation-and-performance-pitfalls.md`,
+  `docs/model-selection-and-token-optimization-in-sdd.md`,
+  `templates/agents.template.md`, `.mcp.json.example`, `.gitattributes`,
+  `.githooks/pre-commit(.ps1)`, and `.github/workflows/agent-harness.yml`.
+  All 7 ADRs (`docs/adr/0001`–`0007`) were reviewed and kept — each is
+  cited from live agent/skill files and forms part of an amendment chain
+  (0002→0003→0004, 0005→0006), so none qualified as unused.
 - `docs/context-engineering.md`, `docs/adaptive-workflow-and-extensions.md`,
   `docs/efficient-code-generation-and-performance-pitfalls.md`, and
   `docs/model-selection-and-token-optimization-in-sdd.md`. Same audit

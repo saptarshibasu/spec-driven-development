@@ -8,9 +8,9 @@
 # at it, or invoke it from your hook runner. Keep the two checks in sync.
 #
 # Everything between the KIT:BEGIN/KIT:END markers is the kit-owned generic
-# section (this repo uses it on itself too). `kit-manifest.conf` no longer
-# lists this file as `partial=`, so `update-kit.ps1` does not overwrite this
-# block on a downstream update — an adopter who wants upstream changes to it
+# section (this repo uses it on itself too). This file isn't distributed by
+# `update-kit.ps1` at all — it has no mechanism for copying or updating a
+# partially-owned file — so an adopter who wants upstream changes to it
 # copies the block in by hand. Don't remove or reorder the markers, and don't
 # add stack-specific checks above KIT:END.
 
