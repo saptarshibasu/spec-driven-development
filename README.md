@@ -193,8 +193,10 @@ flowchart TD
     IM -.->|"🆘 stuck"| DB["🩺 <b>debugger</b><br/>root-causes the failure,<br/>records findings → learnings.md 🧠"]
     DB -.-> IM
 
-    IM ==> RV["🔍 <b>5 · Review</b><br/>🤖 code-reviewer: spec conformance ·<br/>test integrity · constitution"]
-    RV -.->|"⛔ blockers"| DB
+    IM ==> RV["🔍 <b>5 · Review</b><br/>🤖 code-reviewer: build · coverage ·<br/>complexity · spec · constitution"]
+    RV -.->|"⛔ defect"| DB
+    RV -.->|"🎨 design"| IM
+    RV -.->|"🧪 coverage gap"| TW
     RV ==>|"✅ clean"| CM["✋ human reviews & commits"]
 
     CM -->|"➡️ next story"| PICK

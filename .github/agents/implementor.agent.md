@@ -170,10 +170,15 @@ line. Don't apply the Method above; instead:
 3. Re-run the full story-level test suite after each fix (not just a single
    test — there usually isn't one) to confirm nothing broke.
 4. If a Blocker doesn't have a clean fix — the "extra" code turns out to be
-   load-bearing, or removing it breaks a passing test — stop and escalate to
-   the caller rather than forcing it or reinterpreting the finding yourself.
-   This is the human's call (accept the risk, or revise spec/plan), not
-   something to route to `debugger` — there's still no failure to root-cause.
+   load-bearing, removing it breaks a passing test, or the fix actually
+   requires changing what a task/plan/spec asked for rather than the code
+   implementing it — stop and escalate to the caller rather than forcing it,
+   reinterpreting the finding yourself, or hand-editing `tasks.md`,
+   `plan.md`, or `spec.md` to make it fit. This is the human's call (accept
+   the risk, or revise spec/plan/tasks — the caller routes the revision to
+   whichever of `specifier`, `planner`, or `task-decomposer` owns that
+   artifact, same as any other artifact fix), not something to route to
+   `debugger` — there's still no failure to root-cause.
 5. Return one consolidated report: for each Blocker, the fix applied and its
    status (resolved / escalated), plus any test that had to be re-verified.
    The caller passes this to `code-reviewer`'s re-check pass, same as a
