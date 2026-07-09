@@ -60,10 +60,15 @@ analysis, and implementation alike.
   matching `specs/<NNN>-<slug>/` folder goes through Step R fresh. A message
   that arrives mid-session on a feature already in progress goes through the
   resume diff-check ("Resuming an in-progress feature" below) before anything
-  else happens. Never skip straight to editing code because the request
-  "sounds small," "sounds urgent," or repeats something said earlier in the
-  conversation — routing and the diff-check are what determine that, not your
-  own in-the-moment judgment.
+  else happens. A message that arrives on a feature that already finished —
+  every document `Approved`, every story cleared Phase 5 — is **not** exempt
+  from this: it goes through "Reopening a completed feature" below, the same
+  never-hand-apply rule applied to a document that has nothing left in
+  `Draft`. Never skip straight to editing code because the request "sounds
+  small," "sounds urgent," or repeats something said earlier in the
+  conversation, or because every gate already shows `Approved` — routing and
+  the diff-check are what determine that, not your own in-the-moment
+  judgment.
 
 ## Before starting
 
@@ -107,6 +112,37 @@ refuses to overwrite by design.
    no compaction pass has run recently, this is also a good moment to offer
    one (see `references/phase-5-review.md`'s compaction step) before it's
    handed, unread in full, into another fresh sub-agent context.
+
+### Reopening a completed feature
+
+A feature can be fully done — every document `Approved`, every story cleared
+Phase 5 — and still get a new prompt later ("actually we also need X",
+"change Y's behavior"). Steps 1-2 above only find a resume point when *some*
+document is still `Draft`; an all-`Approved` set has no such point, and that
+is not the same as "nothing left to gate." Treat this exactly like step 0's
+diff-check, just triggered by a fresh request instead of an unfinished draft:
+
+1. **Never hand-apply the change.** Identify which artifact it actually
+   touches (`spec.md` → `specifier`, `plan.md` → `planner`, `tasks.md` →
+   `task-decomposer`) using the same "route fixes to the owning phase"
+   guardrail that applies everywhere else in this skill — a completed
+   feature doesn't change who owns the fix.
+2. **Flip that document's Status from `Approved — <who>, <date>` back to
+   `Draft`** before the owning agent touches it. An `Approved` document being
+   silently rewritten in place — with no visible state change — is the one
+   outcome this skill must never produce.
+3. **Re-run that phase's gate**: the agent drafts the amendment, you stop for
+   explicit human approval (same as any Phase 1-3 gate), then flip Status
+   back to `Approved — <who>, <new date>` and append a *new*
+   `decision-log.md` row. Don't overwrite the prior row — the earlier
+   approval happened and stays in the audit trail; the amendment is a
+   separate, later decision.
+4. **Cascade the reopen.** If the change touches `spec.md` or `plan.md`,
+   treat every downstream phase whose output it invalidates as reopened too
+   — re-run Analyze (3.5) if scope shifted, and send the affected user
+   stories back through Tests → Implement → Review (3.7-5) rather than
+   assuming prior-green tests or a prior clean review still hold for the
+   amended behavior.
 
 ## Approval status (the resume signal)
 

@@ -99,7 +99,16 @@ Ask specifically about:
 ### Development Workflow / Quality Gates
 
 > "What gates apply to every PR without exception — required CI checks,
-> minimum reviewers, coverage floors, anything that blocks a merge?"
+> minimum reviewers, a test coverage floor (a percentage `code-reviewer`
+> enforces on every review — 92% is a common default if you don't already
+> have one), a static analysis / cognitive-complexity threshold, anything
+> else that blocks a merge?"
+
+If the project already has a coverage floor or complexity threshold in
+`AGENTS.md`'s Commands section (as a comment or prior convention) but not
+here, that's a gap this amendment should close — the floor/threshold itself
+belongs in the constitution (always-true, blocks every merge); the command
+that measures it belongs in `AGENTS.md`.
 
 Universal gates only — module/feature-type-specific gates belong in AGENTS.md.
 

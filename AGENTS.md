@@ -25,7 +25,7 @@ maintainers — not distributed to downstream projects). Never hand-edit anythin
 - Regenerate skill mirrors after editing `.agents/skills/`: `bash scripts/mirror-skills.sh`
 - Check generated mirrors match canon (what CI runs): `bash scripts/mirror-agents.sh && bash scripts/mirror-skills.sh && git status --porcelain` (non-empty output = drift) — this also covers guardrail sync, since `docs/guardrails.md` is expanded into each empty `<!-- GUARDRAILS:* --><!-- /GUARDRAILS:* -->` marker at mirror time by these same scripts.
 - Condense noisy command output: `scripts/quiet.sh <command>` — e.g. `scripts/quiet.sh bash scripts/mirror-agents.sh`
-- Pull upstream kit changes into an existing copy: `scripts/update-kit.sh <path-to-newer-kit-checkout> [--dry-run]`
+- Copy this kit's files into a project (run from inside this kit checkout): `scripts/update-kit.sh <path-to-project> [--dry-run]`
 - Run the full local sensor set before committing: `bash scripts/mirror-agents.sh && bash scripts/mirror-skills.sh && git status --porcelain`
 - There is no build step and no test runner for this repo itself — `tests/{unit,contract,characterization}` are placeholders (`.gitkeep` only) that model the layout a downstream project should adopt, not suites that run here.
 
@@ -75,7 +75,7 @@ This repo has no application source, so there is no code-style snippet to give. 
 **⚠️ Ask first** — high-impact but not categorically forbidden:
 - Changing the wording inside a `<!-- GUARDRAILS:* -->` block in `docs/guardrails.md` — every downstream copy needs the mirror scripts re-run in the same change, or CI's drift guard will fail.
 - Adding or renumbering an ADR in `docs/adr/` — numbers are load-bearing (ADRs cross-reference each other by number, and amending ADRs like 0004/0006 amend a specific prior one by number).
-- Editing anything inside the `KIT:BEGIN`/`KIT:END` markers of `.githooks/pre-commit` or `.github/workflows/agent-harness.yml` — these markers still delimit the kit-owned generic section this repo uses on itself, but `kit-manifest.conf` no longer lists either file as `partial=`, so `update-kit.sh` does not touch them on a downstream update; an adopter who wants updates to this section copies it in by hand.
+- Editing anything inside the `KIT:BEGIN`/`KIT:END` markers of `.githooks/pre-commit` or `.github/workflows/agent-harness.yml` — these markers still delimit the kit-owned generic section this repo uses on itself, but `update-kit.sh` has no mechanism for copying or updating a partially-owned file, so it never touches either file in a downstream project; an adopter who wants this section copies it in by hand.
 - Bumping `KIT_VERSION` / adding a `KIT-CHANGELOG.md` entry — this is a release action, not a routine edit.
 
 **🚫 Never** — hard stops, no exceptions:
@@ -99,7 +99,7 @@ This repo has no test suite of its own to run. `tests/{unit,contract,characteriz
 
 ## Multi-Repo / Cross-Boundary Notes
 
-None — this repo is self-contained. Downstream copies of the kit are separate repos this repo cannot see; `scripts/update-kit.sh` reads from an explicit local path to a newer kit checkout rather than any implicit link.
+None — this repo is self-contained. Downstream copies of the kit are separate repos this repo cannot see; `scripts/update-kit.sh` runs from this checkout and writes to an explicit local path to the target project rather than any implicit link.
 
 ## Model Routing
 

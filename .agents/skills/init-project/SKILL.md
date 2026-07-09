@@ -79,7 +79,12 @@ AGENTS.md section; work 2–3 at a time.
 **Key questions to resolve per section (ask only what you can't infer):**
 
 *Commands* — you likely found build/test/lint commands in CI or package files;
-confirm edge cases (single-test invocation, local run command).
+confirm edge cases (single-test invocation, local run command). Also confirm
+a **coverage command that produces a per-file report** (not just an aggregate
+number) and a **static analysis / cognitive-complexity command** (Sonar-style
+analyzer if one's configured, otherwise whatever linter covers code smells) —
+`code-reviewer`'s deterministic gates need both; if the project genuinely has
+neither, note that explicitly rather than leaving the line as a placeholder.
 
 *Tech Stack* — confirm specific versions if not in lockfiles; ask about key
 libraries that shape how code should be written (ORM, HTTP client, state
@@ -164,7 +169,10 @@ wants them as-is or amended.)*
 
 **Quality gates:**
 > "What must be true for every PR — specific CI checks, minimum reviewers,
-> coverage floor?"
+> and two numbers `code-reviewer` will enforce on every review: a **test
+> coverage floor** (a percentage — 90-95% is a common range, 92% if you don't
+> have a strong opinion) and a **static analysis / cognitive-complexity
+> threshold**, if the stack's analyzer supports one?"
 
 **Governance:**
 > "Who owns the constitution and has authority to amend it?"

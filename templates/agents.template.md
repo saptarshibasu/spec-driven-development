@@ -44,13 +44,21 @@ these; they are never optional and are not repeated in this file.
 <!-- Full runnable commands with flags, not just tool names. The agent will
      reference these constantly — get them exactly right. -->
 
-- Build: `[exact command]`
+- Build (clean): `[exact command, from a clean state — e.g. after removing
+  build artifacts/caches, if that differs from an incremental build]`
 - Test (all): `[exact command]`
 - Test (single file/case): `[exact command with placeholder]`
 - Test (quiet, agent-preferred): `scripts/quiet.sh [exact test command]` —
   condenses output to pass/fail + first relevant error; agents should run
   build/test through this form to keep raw logs out of context
+- Coverage (with report): `[exact command producing a per-file coverage
+  report, not just an aggregate number — code-reviewer's coverage gate needs
+  to name uncovered lines/branches, not just the overall percentage]`
 - Lint/format: `[exact command]`
+- Static analysis / complexity: `[exact command — a Sonar-style code-smell /
+  cognitive-complexity analyzer if the stack has one, otherwise whichever
+  linter/analyzer config covers it; delete this line only if the stack
+  genuinely has no such tool]`
 - Run locally: `[exact command]`
 - [Anything else run routinely, e.g. migrations, codegen]
 

@@ -8,54 +8,76 @@ stay small and issues surface early).
 
 1. Invoke `code-reviewer`. Pass it: the diff (or the files `implementor`
    touched), the spec path, and the feature's `decision-log.md` (for opted-in
-   extension packs). It runs the full review against spec, constitution,
-   conventions, performance idioms, boundaries, and security, and reports
-   findings grouped by severity with a verdict.
+   extension packs). It first runs its deterministic gates — clean build,
+   test coverage floor, static analysis / cognitive complexity, each against
+   the commands `AGENTS.md` documents and the floor/thresholds
+   `memory/constitution.md`'s Quality Gates state — then the qualitative
+   review against spec, constitution, conventions, performance idioms,
+   boundaries, and security, and reports findings grouped by severity with a
+   verdict.
 2. If the verdict has Blockers, **this skill runs the review↔fix loop** —
    sub-agents can't invoke each other or pause for approval, so the loop
    lives here, not inside `code-reviewer`. First, split the numbered Blocker
    list by the `Kind` `code-reviewer` tagged each one with:
    - **`defect`** Blockers (broken/weakened test, behavior diverging from
-     spec, a plausible exploit — an actual bad state to reproduce) go to
-     `debugger`.
+     spec, a plausible exploit, a failing build — an actual bad state to
+     reproduce) go to `debugger`.
    - **`design`** Blockers (scope creep, an untraceable abstraction, a
-     boundary/"Ask first"/"Never" rule crossed, a convention violation —
-     nothing to reproduce, the diff itself is the finding) go to
-     `implementor` instead. Routing these to `debugger` is a role mismatch —
-     its method starts with "Reproduce," and there's nothing to reproduce for
-     a design violation.
+     boundary/"Ask first"/"Never" rule crossed, a convention violation, a
+     static-analysis / cognitive-complexity finding — nothing to reproduce,
+     the diff itself is the finding) go to `implementor` instead. Routing
+     these to `debugger` is a role mismatch — its method starts with
+     "Reproduce," and there's nothing to reproduce for a design violation.
+   - **`coverage`** Blockers (overall or per-file coverage below the
+     constitution's floor, on otherwise-correct code) go to `test-writer`
+     instead of either — the fix is a new test targeting the specific
+     uncovered lines/branches `code-reviewer` listed, not a code change, so
+     neither `debugger` nor `implementor` is the right agent.
 
    Then, per round:
    - Relay the complete findings, then ask the human: *"Invoke the debugger
-     on the [N] defect Blocker(s) and implementor on the [M] design
-     Blocker(s) above?"* Wait for explicit approval before the **first**
-     round only; later rounds in the same loop don't re-ask.
+     on the [N] defect Blocker(s), implementor on the [M] design Blocker(s),
+     and test-writer on the [K] coverage Blocker(s) above?"* Wait for
+     explicit approval before the **first** round only; later rounds in the
+     same loop don't re-ask.
    - Invoke `debugger` on the open `defect` Blockers (numbered list —
      file:line, description, suggested fix — plus this feature's
-     `learnings.md` path) and, separately, `implementor` on the open `design`
-     Blockers (per its "invoked with a reviewer's design Blocker" section) —
-     both can run in the same round since they touch different findings. On
-     round 2+, note per Blocker what's still open and what was already tried,
-     so neither agent repeats a failed fix.
+     `learnings.md` path), `implementor` on the open `design` Blockers (per
+     its "invoked with a reviewer's design Blocker" section), and
+     `test-writer` on the open `coverage` Blockers (per its "add coverage to
+     existing code" mode — pass the specific uncovered lines/branches, not
+     just the aggregate percentage) — all three can run in the same round
+     since they touch different findings. On round 2+, note per Blocker
+     what's still open and what was already tried, so no agent repeats a
+     failed fix.
    - Re-invoke `code-reviewer` for a **re-check pass**, passing the prior
-     findings, both agents' reports for the round, and the files touched
-     (see the Fix-loop handoff section of `.agents/agents/code-reviewer.md`).
+     findings, all agents' reports for the round (however many ran), and the
+     files touched (see the Fix-loop handoff section of
+     `.agents/agents/code-reviewer.md`) — this re-check re-runs the
+     deterministic gates too, not just the qualitative read, since a
+     `test-writer` fix should move the coverage number and an `implementor`
+     fix should move the static-analysis count.
    - Decide from the re-check verdict: all Blockers resolved → step 3; some
      resolved, some still open → another round; **no forward progress** on a
      given Blocker (it survives two consecutive rounds, `debugger` calls it a
-     spec bug, or `implementor` reports it can't apply the fix cleanly) →
-     stop looping on that Blocker and take it to the human — accept the risk,
-     revise the spec, or redesign (step 4). Other still-open Blockers can keep
-     looping independently.
-   - If any round's `debugger` or `implementor` report includes a proposed
-     `AGENTS.md` correction, relay it and get approval the same way Phase 4
-     step 2 does — apply directly if approved, don't let it block the loop.
+     spec bug, `implementor` reports it can't apply the fix cleanly, or
+     `test-writer` reports the uncovered code can't be characterized without
+     a spec decision) → stop looping on that Blocker and take it to the
+     human — accept the risk, revise the spec/floor, or redesign (step 4).
+     Other still-open Blockers can keep looping independently.
+   - If any round's `debugger`, `implementor`, or `test-writer` report
+     includes a proposed `AGENTS.md` correction, relay it and get approval
+     the same way Phase 4 step 2 does — apply directly if approved, don't
+     let it block the loop.
    - If `implementor` flags a **recurring pattern** of `design` Blockers
      across stories on this feature (its report's step 6), relay that to the
      human alongside the Blocker resolution itself — it's signal that
      `tasks.md` is under-specified or the plan is being under-enforced, a
      separate thing to fix from closing out the individual findings, and
-     worth surfacing even though it doesn't block this round's verdict.
+     worth surfacing even though it doesn't block this round's verdict. A
+     recurring pattern of `coverage` Blockers on the same area is the same
+     kind of signal for `test-writer`'s "add coverage to existing code" mode
+     — surface it the same way.
 3. On a clean verdict (`approve` or `approve-with-nits`): append a **Review**
    row to `decision-log.md`, let the human commit (the `.githooks/pre-commit`
    hook runs its own checks), then continue to step 5 before moving to the
@@ -64,10 +86,11 @@ stay small and issues surface early).
    note on `docs-writer`).
 4. On `request-changes` with a Blocker `code-reviewer` escalated to the human
    (not resolved by its internal loop): resolve it together. If the root
-   cause turns out to be a spec or plan bug rather than an implementation
-   bug, loop back to `specifier` or `planner` instead of forcing another
-   `implementor` pass on an already-correct implementation. Once resolved,
-   re-run Phase 5 for this story.
+   cause turns out to be a spec, plan, or tasks bug rather than an
+   implementation bug, loop back to `specifier`, `planner`, or
+   `task-decomposer` (whichever owns the affected artifact) instead of
+   forcing another `implementor` pass on an already-correct implementation.
+   Once resolved, re-run Phase 5 for this story.
 5. **Offer a `learnings.md` compaction pass.** This story's checkpoint —
    Review row just committed — is the natural point to garbage-collect the
    feature's append-only scratchpad before it's carried, unread in full,
