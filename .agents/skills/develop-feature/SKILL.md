@@ -146,19 +146,39 @@ refuses to overwrite by design.
    no compaction pass has run recently, this is also a good moment to offer
    one (see `references/phase-5-review.md`'s compaction step) before it's
    handed, unread in full, into another fresh sub-agent context.
-5. **If `spec.md`, `plan.md`, and `tasks.md` are all already `Approved`**,
-   steps 1-2 have nothing left to find — the resume point is inside the
-   per-story loop (3.7 → 4 → 5), not at a document gate. Use
-   `decision-log.md`'s row history to find the story: the last story with a
-   **Tests (red)** row but no **Implement** row is mid-implementation; one
-   with an **Implement** row but no **Review** row is awaiting review; a
-   story with no rows at all hasn't started. That narrows it to a story —
-   don't try to derive the exact task from the log too. Invoke `implementor`
-   for that story and let it find the exact task itself, via its own
-   step 1 (run each task's test in order; the first one still red is where
-   real work resumes, anything already green is prior-session work already
-   done) — that check is more reliable than any status field, since it's the
-   actual code state, not a claim about it.
+5. **Before relying on `decision-log.md` for anything below, re-confirm the
+   precondition by literally reading all three Status headers again** — don't
+   carry the conclusion forward from step 1 or from earlier in this
+   conversation. This step only applies if `spec.md`, `plan.md`, and
+   `tasks.md` each read exactly `Approved — <who>, <date>`; if even one
+   doesn't, this step doesn't apply — go to step 2 instead. Only once that's
+   genuinely confirmed do steps 1-2 have nothing left to find, meaning the
+   resume point is inside the per-story loop (3.7 → 4 → 5), not at a document
+   gate.
+
+   With the precondition actually confirmed, use `decision-log.md`'s row
+   history to find the story and its state, and act on it:
+   - **No rows at all for a story** → it hasn't started. Invoke `test-writer`
+     (Phase 3.7) — never jump straight to `implementor` before tests exist;
+     that skips tests-first.
+   - **A Tests (red) row but no Implement row** → mid-implementation. Invoke
+     `implementor` for that story and let it find the exact task itself, via
+     its own step 1 (run each task's test in order; the first one still red
+     is where real work resumes, anything already green is prior-session work
+     already done) — that check is more reliable than any status field, since
+     it's the actual code state, not a claim about it.
+   - **An Implement row but no Review row** → awaiting review. Invoke
+     `code-reviewer` directly (Phase 5) — the story's implementation is
+     already done and logged, so re-invoking `implementor` would be wrong.
+
+   `decision-log.md` narrows this to a story and a phase — don't try to
+   derive the exact task from the log too (that's `implementor`'s own job,
+   per its step 1, in the mid-implementation branch only). **State what you
+   read and what it implies before invoking anything** — e.g. "US2 has an
+   Implement row but no Review row → resuming at Phase 5, invoking
+   `code-reviewer`." This isn't a new approval gate (Phase 4→5 has never
+   required stop-and-ask); it's turning what would otherwise be a silent
+   inference into a stated one.
 
 ### Reopening a completed feature
 
