@@ -105,7 +105,24 @@ that file (scoped, not whole) only when the excerpt isn't enough.
    or "fix" a test that isn't broken. Move on and check the next task's test
    the same way. Start writing code at the first task whose test actually
    fails; this check, not a status field, is what tells a resumed session
-   where a story's implementation actually left off.
+   where a story's implementation actually left off. **Use `tasks.md`'s
+   checkboxes as a fast starting hint, not proof** — skip straight to around
+   the first unchecked `[ ]` task rather than necessarily scanning from the
+   story's first task, but still confirm with the actual test run before
+   trusting it. **If a checkbox reads `[x]` but that task's test comes back
+   red, that's a discrepancy, not normal resume state** — something
+   regressed since it was marked done (a later task's change broke it, code
+   got reverted), and unlike the test-revision case, `test-writer` was never
+   involved here, so nothing else will fix this box for you. Handle it in
+   this order: **uncheck the box immediately** (the file should never claim
+   green when the code just proved red), then treat it like any other
+   failing test — one focused attempt per the normal loop below, escalate to
+   `debugger` if the cause isn't obvious rather than guessing (a
+   previously-green test regressing is exactly the "don't pattern-match onto
+   the symptom" case `debugger` exists for), and **only re-check the box once
+   it's genuinely green again**, same as step 6. Flag the regression in your
+   report either way — it's a different situation from "not yet implemented"
+   and the human should know which one happened.
 2. **Write the smallest change that makes the test pass** — matching the
    plan's chosen approach and the codebase's existing conventions and
    performance idioms. Don't build for tasks further down the list.
@@ -118,8 +135,11 @@ that file (scoped, not whole) only when the excerpt isn't enough.
 5. **Refactor only with tests green**, and re-run after each refactor step.
    Refactoring is in scope for cleanup within the task's own code — not a
    drive-by rewrite of unrelated files.
-6. **Mark the task done** (`tasks.md` checkbox, if the project uses them) only
-   once its test(s) are green and the story-level suite still passes.
+6. **Mark the task done** — check `tasks.md`'s `[ ]` box for it — once its
+   test(s) are green and the story-level suite still passes. Do this every
+   time, not conditionally: step 1 above reads this checkbox on a resumed
+   story, so it needs to reliably reflect reality, not just be documentation
+   nobody consults.
 7. **Checkpoint at the end of each story** using `tasks.md`'s Checkpoint note,
    before starting the next story.
 8. **Append discoveries to `learnings.md` as you find them**, not only in
@@ -219,9 +239,11 @@ Return: tasks completed (IDs), tests now green (path + name), any task left
 incomplete and why, any `debugger` escalation request (with everything the
 caller needs to run it) or, on a re-invocation, its outcome, any
 uncovered case found but not tested (flagged, not silently added), any
-deviation from the plan you had to make (with reason), any entries appended
-to `learnings.md`, and any proposed `AGENTS.md` correction (see above). End
-with: ready for `code-reviewer` on this story's diff, or blocked and on what.
+deviation from the plan you had to make (with reason), any checkbox/test-state
+discrepancy found on resume (task ID, what the checkbox said vs. what the test
+showed), any entries appended to `learnings.md`, and any proposed `AGENTS.md`
+correction (see above). End with: ready for `code-reviewer` on this story's
+diff, or blocked and on what.
 
 **Example report:**
 
