@@ -97,16 +97,23 @@ stay small and issues surface early).
    into the next story's fresh `implementor`/`debugger` context. This skill
    (never `implementor`/`debugger` themselves) does the offering:
    - Read the current `learnings.md`. If it's short and every entry is still
-     distinct and relevant, say so and skip — compaction isn't mandatory
-     every story, only worth doing once there's real duplication or bloat
-     (repeated variants of the same gotcha, entries about a command that an
-     approved `AGENTS.md` correction already fixed).
+     distinct, accurate, and relevant, say so and skip — compaction isn't
+     mandatory every story, only worth doing once there's real duplication,
+     bloat, or a contradiction (repeated variants of the same gotcha, entries
+     about a command that an approved `AGENTS.md` correction already fixed,
+     or two entries that disagree because one is now stale).
    - Otherwise, draft a compacted version: merge duplicate/near-duplicate
-     entries into one, and drop any entry whose discovery an **applied**
+     entries into one, and resolve any pair where a later entry says it
+     supersedes an earlier one (`implementor`/`debugger` flag this by noting
+     "supersedes the [date] entry about X" when they append — they never edit
+     the old entry themselves, mid-story writes stay append-only-with-no-gate
+     by design; **this compaction pass is where that gets reconciled into one
+     accurate entry**, not a backstop for something they should have caught).
+     Also drop any entry whose discovery an **applied**
      `AGENTS.md` correction (Phase 4 step 2 or this phase's step 2) has
      already fixed — that entry's job (surviving until the fix landed) is
      done. Never drop an entry just because it's old, or one that isn't
-     clearly superseded.
+     clearly superseded or contradicted.
    - Show the human the before/after (or a summary of what's merging into
      what and what's being dropped, for a long file) and wait for approval
      before rewriting the file. On approval, rewrite `learnings.md` with the

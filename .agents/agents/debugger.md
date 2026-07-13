@@ -58,7 +58,11 @@ only the conclusion returns to the caller.
 - **Append discoveries to `learnings.md`** as you find them (if the caller
   passed a path) — the root cause, once confirmed, is exactly the kind of
   thing worth saving: append-only, one entry per discovery, never edit or
-  delete a prior one.
+  delete a prior one, **even one your root cause contradicts or supersedes**
+  — say so in the new entry ("supersedes the [date] entry about X") rather
+  than editing the old one. This is what keeps mid-story writes safe to do
+  without a gate; reconciling a contradiction is `develop-feature`'s
+  human-approved compaction pass at Phase 5, never a mid-story edit by you.
 - **Propose, don't write, an `AGENTS.md` correction.** If a command from
   `AGENTS.md` turned out wrong and you had to find the right one yourself,
   note the fix as a one-line proposed correction in your report — file,

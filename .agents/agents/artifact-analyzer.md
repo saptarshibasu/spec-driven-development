@@ -45,7 +45,12 @@ findings auditable.
 | **A · Trivial — Direct change** | **Skip** | No artifacts to cross-check. |
 | **B · Simple — Patch** | **Optional, quick pass** | No `plan.md`; check spec ↔ tasks coverage only. Light. |
 | **C · Moderate — Feature** | **Default-on (skippable up front)** | Full spec ↔ plan ↔ tasks cross-check. |
-| **D · Complex — Architecture / brownfield** | **Default-on, extended (skippable up front)** | Also reconcile `research.md`, `data-model.md`, `contracts/`, the ADR, and characterization-test tasks. |
+| **D · Complex — Architecture / brownfield** | **Default-on, extended (skippable up front)** | Also reconcile `data-model.md`, `contracts/`, the ADR, and characterization-test tasks. |
+
+`research.md` is reconciled whenever it exists, on any track — it isn't
+Track-D-exclusive like the rest of that row. `planner` may create it on a B
+or C feature too (e.g. the triggering prompt handed it a candidate approach
+to record), and a present `research.md` gets checked regardless.
 
 "Skippable" means the human may decline to run analyze at all before it starts.
 Once it has run, it is not skippable mid-loop on Blocker or Should-fix
@@ -64,10 +69,11 @@ task list, not a blank one. This agent reads only; it makes no changes.
 
 Read `spec.md`, `plan.md` (if present), `tasks.md`, the feature's
 `decision-log.md` (approved track, extension opt-ins, and any logged
-characterization decision), and any `research.md` / `data-model.md` /
-`contracts/` and the feature ADR on Track D. For each opted-in pack ID logged
-in `decision-log.md`, read its rules under `.agents/extensions/` yourself
-(the log records the pack ID, not the rule text). Then evaluate:
+characterization decision), `research.md` if it exists (any track), and any
+`data-model.md` / `contracts/` and the feature ADR on Track D. For each
+opted-in pack ID logged in `decision-log.md`, read its rules under
+`.agents/extensions/` yourself (the log records the pack ID, not the rule
+text). Then evaluate:
 
 1. **Requirement coverage.** For each Functional Requirement, Non-Functional
    Requirement, and Acceptance Scenario in `spec.md`, re-state its ID and
@@ -79,7 +85,18 @@ in `decision-log.md`, read its rules under `.agents/extensions/` yourself
 2. **Cross-artifact consistency.** `plan.md` does not contradict `spec.md`
    (e.g. plan adds scope the spec excludes, or picks an approach the spec rules
    out); `tasks.md` does not contradict `plan.md` (e.g. tasks reference a
-   component, file, or technology the plan never introduced).
+   component, file, or technology the plan never introduced). If `research.md`
+   exists, `plan.md`'s chosen approach doesn't silently contradict it (e.g.
+   `plan.md` adopts an approach `research.md`'s Alternatives Investigated
+   logged as rejected, with no note explaining the reversal). Also check
+   `research.md` against itself: a contradiction between two Open Questions
+   Resolved entries, or between a Still Open item and something now resolved
+   elsewhere in the file, is a **Should-fix** — the file's own
+   revision-discipline note calls for editing the stale entry in place, not
+   leaving both to stand (Alternatives Investigated is the one section where
+   old rejected rows are expected to persist, so don't flag that table alone
+   unless a row there directly contradicts what `plan.md` actually adopted —
+   already covered above).
 3. **Orphan / duplicate / ambiguous tasks.** Flag tasks that trace to no
    requirement (gold-plating), two tasks doing the same thing, or tasks too
    vague to verify ("handle errors" with no file or condition).

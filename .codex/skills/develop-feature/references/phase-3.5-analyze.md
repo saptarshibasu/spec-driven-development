@@ -8,8 +8,11 @@ cheapest place to catch a requirement that never became a task. Invoke the
 - **Track A** — skip (no artifacts to cross-check).
 - **Track B** — optional quick pass: spec ↔ tasks coverage only (no `plan.md`).
 - **Track C** — default-on: full spec ↔ plan ↔ tasks cross-check.
-- **Track D** — default-on, extended: also reconcile `research.md` /
-  `data-model.md` / `contracts/`, the ADR, and characterization-test ordering.
+- **Track D** — default-on, extended: also reconcile `data-model.md` /
+  `contracts/`, the ADR, and characterization-test ordering.
+
+`research.md` is reconciled on any track whenever it exists — not
+Track-D-exclusive like the rest of that list; see `artifact-analyzer.md`.
 
 On C/D analyze runs **by default**, but starting it is a gate the human
 controls, not a hard requirement: the user may **explicitly skip** it —

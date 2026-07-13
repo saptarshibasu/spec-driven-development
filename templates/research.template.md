@@ -8,6 +8,21 @@
 
   Delete this file entirely if the plan had no open questions worth recording —
   don't manufacture content. Once filled in, delete this comment block.
+
+  This file gets revisited, not just written once — a resumed session or a
+  later planner pass may turn up something that contradicts or corrects an
+  entry already here. Unlike decision-log.md, this is NOT an append-only audit
+  trail: it's a scratchpad that gets read wholesale into a fresh context every
+  time a phase consults it, so it needs to reflect current understanding, not
+  preserve history a reader has to sort through. In Open Questions Resolved
+  and Still Open, a correction means editing the existing entry in place —
+  don't leave a stale Finding sitting next to a corrected one. Alternatives
+  Investigated is the one exception: rejected alternatives normally stay
+  listed cumulatively, on purpose, so they aren't re-proposed later — only
+  edit or remove a row there if the rejection itself gets reversed (the plan
+  later adopts what this file said was rejected), since a "rejected because X"
+  row sitting next to a plan that does X anyway is actively misleading, not
+  useful history. If provenance matters, that's what version control is for.
 -->
 
 # Research: [FEATURE NAME]

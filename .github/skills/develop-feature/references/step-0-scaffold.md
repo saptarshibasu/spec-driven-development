@@ -53,3 +53,19 @@ the five templates as `spec.md`, `plan.md`, `tasks.md`, `decision-log.md`,
 - `learnings.md` is scaffolded but ungated — unlike the other three, it never
   gets a `decision-log.md` row or a Status flip. `implementor` and `debugger`
   read and append to it directly once Phase 4 starts; nothing to do here.
+- **If the triggering prompt included content beyond WHAT/WHY** — existing-
+  implementation context ("the current system does X"), a candidate approach,
+  a library/pattern the human wants considered — create `research.md` now
+  from `templates/research.template.md` and seed it: existing-system context
+  and candidate approaches go in **Alternatives Investigated**; anything
+  version-sensitive or still genuinely open goes in **Open Questions
+  Resolved** / **Still Open**. Do this **regardless of track** — `research.md`
+  isn't Track-D-exclusive, it's created whenever the triggering prompt (or a
+  later human message) actually has this kind of content, same as `plan.md`
+  is skipped on Track B when there's no design decision to make. This is what
+  keeps that content from being silently dropped: `specifier` is WHAT/WHY-only
+  and won't put it in `spec.md`, and `planner` receives nothing but file paths
+  when invoked at Phase 2 — `research.md` is the file that carries it forward.
+  The same applies mid-session, not just at kickoff: if the human volunteers
+  this kind of content later (e.g. while giving Phase 1 revision feedback),
+  create or append to `research.md` then, don't wait for Phase 2.
