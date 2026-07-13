@@ -112,9 +112,34 @@ refuses to overwrite by design.
    `planner` for `plan.md`, `task-decomposer` for `tasks.md`) — the same
    "route fixes to the owning phase" guardrail above, applied to a human's new
    instruction instead of an `artifact-analyzer` finding; the source of the
-   finding doesn't change who owns the fix. Get the human's approval on the
-   amended document (flipping its Status and logging the gate like any other
-   approval) before resuming below.
+   finding doesn't change who owns the fix. **If what's new is
+   implementation-specific** — existing-system context, a candidate approach,
+   not a WHAT/WHY change — capture it in `research.md` first (create from
+   `templates/research.template.md` if it doesn't exist, or add to it if it
+   does), the same as Step 0's scaffold-time capture, *before* invoking
+   `planner`. **If it already exists, check for contradiction before adding**:
+   does the new input conflict with or correct an entry already there (a
+   previously-resolved question whose answer just changed, an alternative
+   already logged that this new detail now rules out)? If so, **edit that
+   entry in place** — this file isn't an audit trail like `decision-log.md`,
+   it's read wholesale into a fresh context every time, so a stale entry left
+   sitting next to its correction is a live source of error, not preserved
+   history (see `research.md`'s own revision-discipline note; Alternatives
+   Investigated is the one section where old rejected entries normally stay,
+   on purpose). Don't rely on it surviving only as this turn's conversational
+   feedback: `planner` runs in a fresh context every invocation (see "What to
+   read" in `planner.md`) and already checks `research.md` when its path is
+   passed — a file it can read is a durable input, a remark in this
+   conversation is not. Get the human's approval on the amended document
+   (flipping its Status and logging the gate like any other approval) before
+   resuming below. **If the affected document is currently `Approved`**, use
+   the exact mechanics in "Reopening a completed feature" steps 2-4 below for
+   the flip — literal `Draft` string, flip *before* the owning agent touches
+   it, cascade to affected stories — regardless of whether the rest of the
+   feature happens to be fully done yet. That discipline is the general
+   procedure for amending any `Approved` document, not a special case reserved
+   for fully-finished features; a document doesn't get looser handling just
+   because its sibling stories haven't all cleared Phase 5.
 1. Read each document's **Status** header (`spec.md`, `plan.md`, `tasks.md`):
    `Draft` = drafted but not yet approved; `Approved` = that gate is cleared. A
    document still full of placeholders hasn't been started.
@@ -130,6 +155,19 @@ refuses to overwrite by design.
    no compaction pass has run recently, this is also a good moment to offer
    one (see `references/phase-5-review.md`'s compaction step) before it's
    handed, unread in full, into another fresh sub-agent context.
+5. **If `spec.md`, `plan.md`, and `tasks.md` are all already `Approved`**,
+   steps 1-2 have nothing left to find — the resume point is inside the
+   per-story loop (3.7 → 4 → 5), not at a document gate. Use
+   `decision-log.md`'s row history to find the story: the last story with a
+   **Tests (red)** row but no **Implement** row is mid-implementation; one
+   with an **Implement** row but no **Review** row is awaiting review; a
+   story with no rows at all hasn't started. That narrows it to a story —
+   don't try to derive the exact task from the log too. Invoke `implementor`
+   for that story and let it find the exact task itself, via its own
+   step 1 (run each task's test in order; the first one still red is where
+   real work resumes, anything already green is prior-session work already
+   done) — that check is more reliable than any status field, since it's the
+   actual code state, not a claim about it.
 
 ### Reopening a completed feature
 
@@ -138,13 +176,23 @@ Phase 5 — and still get a new prompt later ("actually we also need X",
 "change Y's behavior"). Steps 1-2 above only find a resume point when *some*
 document is still `Draft`; an all-`Approved` set has no such point, and that
 is not the same as "nothing left to gate." Treat this exactly like step 0's
-diff-check, just triggered by a fresh request instead of an unfinished draft:
+diff-check, just triggered by a fresh request instead of an unfinished draft.
+**The steps below are the general mechanics for reopening any `Approved`
+document, not a special case that only applies once every story has cleared
+Phase 5** — step 0 above points here for exactly this reason: an `Approved`
+`spec.md` gets the same literal-`Draft`-flip discipline whether the feature
+is fully shipped or still three stories deep in Phase 4:
 
 1. **Never hand-apply the change.** Identify which artifact it actually
    touches (`spec.md` → `specifier`, `plan.md` → `planner`, `tasks.md` →
    `task-decomposer`) using the same "route fixes to the owning phase"
    guardrail that applies everywhere else in this skill — a completed
-   feature doesn't change who owns the fix.
+   feature doesn't change who owns the fix. If the change is
+   implementation-specific (existing-system context, a candidate approach)
+   rather than a WHAT/WHY change, capture it in `research.md` first — same as
+   the "Resuming" diff-check above — before invoking `planner`, so it's a
+   durable input `planner` reads, not a remark that only existed in this
+   turn's conversation.
 2. **Flip that document's Status from `Approved — <who>, <date>` back to the
    literal string `Draft`** — nothing appended — before the owning agent
    touches it. An `Approved` document being silently rewritten in place — with
@@ -223,11 +271,18 @@ Propose exactly one track with a one-line rationale and the artifacts you'll pro
   Tasks at standard depth. This is the default when you're unsure between B and C.
 - **Track D · Complex — Architecture / brownfield.** A new service, a cross-cutting change,
   or modifying untested legacy code. Full pipeline at maximum depth: add
-  `research.md` and/or `data-model.md` as needed, use the strongest model
+  `data-model.md` as needed, use the strongest model
   (see `AGENTS.md` Model Routing), offer **characterization tests first** for any
   legacy area (ask-first — the human decides at Phase 3.7, never auto-run),
   and record the cross-cutting decision as an **ADR** under
   `docs/adr/` (the decision log gets a one-line pointer to it).
+
+`research.md` isn't Track-D-exclusive, unlike the rest of this list — it's
+created on **any** track the moment the triggering prompt (or a later human
+message) hands you existing-implementation context or a candidate approach
+worth recording, so that content has somewhere to live besides `spec.md`
+(WHAT/WHY-only) or your own context (gone once the phase ends). See Step 0's
+"Immediately after scaffolding" for what goes in it and when.
 
 In the same turn:
 

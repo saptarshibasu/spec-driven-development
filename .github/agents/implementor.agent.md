@@ -99,7 +99,13 @@ that file (scoped, not whole) only when the excerpt isn't enough.
 
 1. **One task at a time, in task order.** Run the single-test command
    (`AGENTS.md`) for the task's test before touching code, to see the actual
-   red state yourself rather than trusting the report secondhand.
+   red state yourself rather than trusting the report secondhand. **If it's
+   already green** — a resumed session picking back up on a story a prior
+   session partly finished — that task is already done: don't re-implement
+   or "fix" a test that isn't broken. Move on and check the next task's test
+   the same way. Start writing code at the first task whose test actually
+   fails; this check, not a status field, is what tells a resumed session
+   where a story's implementation actually left off.
 2. **Write the smallest change that makes the test pass** — matching the
    plan's chosen approach and the codebase's existing conventions and
    performance idioms. Don't build for tasks further down the list.
@@ -119,10 +125,15 @@ that file (scoped, not whole) only when the excerpt isn't enough.
 8. **Append discoveries to `learnings.md` as you find them**, not only in
    your final report — a gotcha, a wrong-turn command that looked right but
    wasn't, the real location of something the plan assumed was elsewhere.
-   Append-only: add a new entry, never edit or delete a prior one. Skip
-   anything already obvious from `AGENTS.md` or the spec; this file is for
-   what those don't cover yet. If the caller didn't pass a `learnings.md`
-   path, skip this step.
+   Append-only: add a new entry, never edit or delete a prior one, **even one
+   this new discovery contradicts or supersedes** — say so in the new entry
+   ("supersedes the [date] entry about X") rather than editing the old one.
+   This is what keeps mid-story writes safe to do without a gate; reconciling
+   a contradiction is `develop-feature`'s human-approved compaction pass at
+   Phase 5 (`phase-5-review.md`), never a mid-story edit by you. Skip anything
+   already obvious from `AGENTS.md` or the spec; this file is for what those
+   don't cover yet. If the caller didn't pass a `learnings.md` path, skip this
+   step.
 
 ## Hard rules
 

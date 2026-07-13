@@ -70,7 +70,12 @@ The four tracks:
 | **A · Trivial** | Typo, comment, config value, dependency bump — no design choices | No feature folder. Failing test first if behavior changes, then the change; `code-reviewer` on the diff; rationale in the commit message |
 | **B · Simple** | Localized bug fix or small enhancement, no new architecture | Short `spec.md` (problem, acceptance, regression guards) + `tasks.md`; `plan.md` skipped unless a design decision surfaces |
 | **C · Moderate** *(default)* | A normal new capability | Full `spec.md` → `plan.md` → `tasks.md` at standard depth |
-| **D · Complex** | New service, cross-cutting change, untested legacy code | Full pipeline at maximum depth, plus `research.md` / `data-model.md` as needed, an ADR for the cross-cutting decision, and characterization tests offered before touching legacy code |
+| **D · Complex** | New service, cross-cutting change, untested legacy code | Full pipeline at maximum depth, plus `data-model.md` as needed, an ADR for the cross-cutting decision, and characterization tests offered before touching legacy code |
+
+`research.md` isn't Track-D-only — it's created on any track the moment the
+triggering prompt (or a later message) hands the agent existing-implementation
+context or a candidate approach worth recording, so that content lands
+somewhere durable instead of `spec.md` (WHAT/WHY-only) or getting dropped.
 
 ```mermaid
 %%{init: {'theme': 'neutral'}}%%

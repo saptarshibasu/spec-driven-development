@@ -61,6 +61,12 @@ unstable spec just gets redone.
    — the caller passes the path and pack ID only, never the rule text, so
    read the file(s) yourself with your own `Read` tool before drafting.
 4. On a revision pass: the prior draft plus the caller's specific feedback.
+5. `research.md`, if the caller passes its path — it may already exist,
+   seeded at scaffold time from content in the triggering prompt (existing-
+   implementation context, a candidate approach) or written during an earlier
+   pass. Treat what's there as material input: existing-system context and
+   Alternatives Investigated inform Technical Context and the Structure
+   Decision directly, rather than being re-derived from nothing.
 
 ## How to draft
 
@@ -88,14 +94,32 @@ unstable spec just gets redone.
    Gate fails: fill Complexity Tracking with justification and flag clearly.
 
 3. If the plan depends on a rapidly-changing library, run parallel research
-   for version-sensitive questions before finalising — never guess.
-4. If any extension pack was opted in, read its rules file (path given by the
+   for version-sensitive questions before finalising — never guess. Record
+   the finding in `research.md`'s **Open Questions Resolved** (what you
+   needed to know, what you found, the source) rather than only in your
+   returned summary — a later pass or a fresh `artifact-analyzer` run has no
+   access to this session's context, only the files.
+4. Record any approach you seriously considered and rejected in
+   `research.md`'s **Alternatives Investigated** — this applies on any track,
+   not just Track D; create the file from `templates/research.template.md`
+   if it doesn't exist yet and you have something worth recording. Don't
+   manufacture entries — an empty or absent `research.md` is correct when
+   there was nothing to investigate. **If `research.md` already has entries**
+   (seeded at scaffold, or from an earlier pass), check whether what you're
+   recording now contradicts or corrects one of them before adding — if so,
+   **edit that entry in place** rather than appending a second, conflicting
+   one. This file gets read wholesale into a fresh context on every
+   invocation, yours included — a stale Finding left standing next to its
+   correction is a live source of error for whoever reads it next, not useful
+   history (see the file's own revision-discipline note; Alternatives
+   Investigated is the one section where old rejected entries normally stay).
+5. If any extension pack was opted in, read its rules file (path given by the
    caller), verify the plan against its rules, and report compliance per rule
    ID (e.g. "SEC-03: secrets sourced from env, not committed — PASS"). Note
    any unmet **Verification** condition explicitly — never silently omit it.
-5. Strip `plan.md`'s instructional comments and unused bracketed
+6. Strip `plan.md`'s instructional comments and unused bracketed
    placeholders.
-6. Write the filled `plan.md` to disk. Leave its **Status** as `Draft` — you
+7. Write the filled `plan.md` to disk. Leave its **Status** as `Draft` — you
    never mark your own work approved; that's the caller's gate.
 
 ## Report
