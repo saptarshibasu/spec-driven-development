@@ -1,6 +1,6 @@
 ---
 name: develop-feature
-description: "Use when starting spec-driven development on any change, large or trivial — triggers: \"create a spec for X\", \"start a new feature: Z\", \"use SDD for this\", \"write a spec before we code\". Proposes a right-sized workflow track for approval, then orchestrates Specify -> Plan -> Tasks -> Analyze -> (Tests red -> Implement green -> Review) through dedicated agents, gating each phase on human approval."
+description: "Use when starting, resuming, or amending spec-driven development on any change, large or trivial — triggers: \"create a spec for X\", \"start a new feature: Z\", \"resume <feature folder>\", \"continue feature NNN\", \"use SDD for this\", \"write a spec before we code\", or any prompt naming an existing specs/<NNN>-<slug>/ folder. Proposes a right-sized workflow track for approval, then orchestrates Specify -> Plan -> Tasks -> Analyze -> (Tests red -> Implement green -> Review) through dedicated agents, gating each phase on human approval; on resume, diffs the prompt against the approved documents before any code is touched."
 ---
 
 # Spec-Driven Feature
