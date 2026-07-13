@@ -121,6 +121,19 @@ in `decision-log.md`, read its rules under `.agents/extensions/` yourself
    replacement** for checks 1–2: a task can be marker-free and still be an
    uncovered requirement (check 1) or contradict the plan (check 2) — run all
    three regardless of what this one finds.
+8. **Template conformance.** Each of `spec.md`, `plan.md`, and `tasks.md`
+   matches its canonical template in `templates/` structurally — no invented
+   sections or fields the template doesn't define. Check the **Status**
+   header specifically: it must read exactly `Draft` or
+   `Approved — <who>, <date>` — nothing appended (a note, a rationale, a
+   synthesized in-between value). A malformed Status field is a **Blocker**:
+   this workflow's resume/reopen logic matches that field literally, so a
+   value that isn't one of the two canonical strings means the document's
+   approval state can't be trusted regardless of what the body says. An
+   invented section absent from the template (e.g. a per-document changelog)
+   is a **Should-fix** — it doesn't itself corrupt gate detection, but it
+   creates a second, unchecked place for status to live and should be
+   removed, with any rationale it held moved to `decision-log.md`.
 
 ## How to report
 
@@ -135,6 +148,7 @@ in `decision-log.md`, read its rules under `.agents/extensions/` yourself
 | Constitution alignment | [pass \| N violations] |
 | Extension compliance | [pass \| N unmet \| N/A] |
 | Leftover markers | [none \| N remaining] |
+| Template conformance | [conforms \| N issues] |
 
 Only after completing this table, write the grouped findings and verdict.
 
@@ -143,9 +157,10 @@ artifact and the exact mismatch. No trivial "everything's fine" noise; report
 what a real artifact set could fail.
 
 - **Blocker** — a coverage gap, a direct contradiction, an unmet opted-in
-  Verification with no task, or a constitution violation.
+  Verification with no task, a constitution violation, or a malformed Status
+  field.
 - **Should-fix** — ambiguous or duplicate tasks, weak test-first ordering,
-  gold-plating.
+  gold-plating, or an invented section absent from the canonical template.
 - **Note** — minor wording, optional tightening. **Advisory only** — see below.
 
 Blocker and Should-fix control whether the gate closes: analyze's loop (owned

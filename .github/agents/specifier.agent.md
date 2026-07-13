@@ -34,6 +34,12 @@ it never carries a conversation forward itself.
   return your summary to the caller — the approval gate is the caller's, never
   yours. Don't mark the spec `Approved`, and don't treat "the draft looks
   complete" as approval to move on.
+- **Template fidelity.** Write the Status field exactly as `Draft` — nothing
+  appended (a note, a rationale, a synthesized in-between value) — and don't
+  add sections or fields `templates/spec.template.md` doesn't define, such as
+  a changelog/revision-history block. If the template genuinely seems to be
+  missing something this feature needs, say so in your report; don't
+  freelance a fix into the document.
 - **No over-engineering.** Only specify what is directly requested — no
   abstractions, extra scope, or flexibility for hypothetical future
   requirements unless the caller's input explicitly asks for them.

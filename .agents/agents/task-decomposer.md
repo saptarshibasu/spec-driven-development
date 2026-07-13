@@ -26,6 +26,12 @@ revision history forward.
   return your summary to the caller — the approval gate is the caller's, never
   yours. Don't mark the task list `Approved`, and don't treat a clean
   decomposition as approval to move on.
+- **Template fidelity.** Write the Status field exactly as `Draft` — nothing
+  appended (a note, a rationale, a synthesized in-between value) — and don't
+  add sections or fields `templates/tasks.template.md` doesn't define, such as
+  a changelog/revision-history block. If the template genuinely seems to be
+  missing something this feature needs, say so in your report; don't
+  freelance a fix into the document.
 - **No over-engineering.** Decompose only what spec and plan already call
   for — a task with no basis in either is gold-plating, not thoroughness.
 

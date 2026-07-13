@@ -310,8 +310,10 @@ kit changes.
 
 **3 · Generate your project config.** In your agent tool, run the **`init-project`** skill. It
 scans your codebase, then — with your approval at each gate — writes a filled-in `AGENTS.md` and
-`memory/constitution.md`. Keep `CLAUDE.md` / `.github/copilot-instructions.md` as thin pointers
-to `AGENTS.md`.
+`memory/constitution.md`. Make `CLAUDE.md` two import lines — `@AGENTS.md` and
+`@memory/constitution.md` — since Claude Code doesn't read `AGENTS.md` natively and only `@path`
+imports load at session start. Codex and Copilot read `AGENTS.md` directly;
+`.github/copilot-instructions.md` can stay a thin pointer for older Copilot surfaces.
 
 **4 · Optional sensors.** The kit's own pre-commit hook and CI workflow are *not* copied by
 default (CI auto-runs on commit, which surprises projects with existing pipelines). Want them?
