@@ -50,6 +50,15 @@ analysis, and implementation alike.
 - **No over-engineering.** Only specify, plan, and build what is directly
   requested — no abstractions, extra projects, or flexibility for hypothetical
   future requirements unless the user explicitly asks.
+- **Template fidelity.** `spec.md`, `plan.md`, `tasks.md`, and
+  `decision-log.md` follow their canonical templates in `templates/` exactly —
+  no invented sections, fields, or status values beyond what the template
+  defines. This binds the orchestrator's own edits (the Status header,
+  `decision-log.md` rows) just as much as what `specifier`/`planner`/
+  `task-decomposer` draft into the body — a freelanced addition is a template
+  deviation whether it's a paragraph or a single field. If a template
+  genuinely seems to be missing something a feature needs, raise it as a
+  question back to the human rather than freelancing a fix.
 - **Don't reprint drafted documents in chat.** Every drafting phase (1, 2, 3)
   ends the same way: an agent already wrote the document to disk, so tell the
   human the file path and the agent's summary — retyping the content doubles
@@ -127,10 +136,13 @@ diff-check, just triggered by a fresh request instead of an unfinished draft:
    `task-decomposer`) using the same "route fixes to the owning phase"
    guardrail that applies everywhere else in this skill — a completed
    feature doesn't change who owns the fix.
-2. **Flip that document's Status from `Approved — <who>, <date>` back to
-   `Draft`** before the owning agent touches it. An `Approved` document being
-   silently rewritten in place — with no visible state change — is the one
-   outcome this skill must never produce.
+2. **Flip that document's Status from `Approved — <who>, <date>` back to the
+   literal string `Draft`** — nothing appended — before the owning agent
+   touches it. An `Approved` document being silently rewritten in place — with
+   no visible state change — is the one outcome this skill must never produce.
+   Resume detection matches this field exactly (see "Approval status" below);
+   any embellishment — extra wording, a rationale, a synthesized in-between
+   state — can silently fail that match instead of loudly blocking it.
 3. **Re-run that phase's gate**: the agent drafts the amendment, you stop for
    explicit human approval (same as any Phase 1-3 gate), then flip Status
    back to `Approved — <who>, <new date>` and append a *new*
@@ -159,6 +171,23 @@ file.
 - The filled-in body shows what's *drafted*; the Status field shows whether it's
   *approved*; `decision-log.md` is the durable, committed audit trail of those
   approvals. No throwaway scratch file is needed.
+- **The Status field is a rigid two-value enum: `Draft` or
+  `Approved — <who>, <date>` — write it exactly, nothing else appended.**
+  Resume detection (`Resuming an in-progress feature`, step 1 above) matches
+  this field literally; a third state invented in the moment — extra wording,
+  a rationale, a synthesized in-between value — doesn't get recognized as
+  unapproved *or* approved, so it can silently pass through gate detection
+  instead of stopping it. Any rationale for why a document changed belongs in
+  `decision-log.md`, not in the Status field, and — per that file's own
+  template — only as a row logged at the moment a gate is actually approved,
+  never as an in-progress or pending row.
+- **Never add a changelog / revision-history section to `spec.md`, `plan.md`,
+  or `tasks.md`.** The canonical templates carry no such section — the Status
+  header plus `decision-log.md` are the *only* two places this workflow
+  records state, deliberately, so there's exactly one field to check on
+  resume. A per-document changelog invented ad hoc creates a second, unchecked
+  place for status to live, which is exactly how a document can look
+  "handled" to a human skimming it while gate detection never sees it.
 
 ## Step R — Route the work (right-size before you scaffold)
 

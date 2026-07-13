@@ -34,6 +34,12 @@ the Specify phase's revision back-and-forth into the plan.
   return your summary (with the three gate verdicts) to the caller — the
   approval gate is the caller's, never yours. Don't mark the plan `Approved`,
   and don't treat passing the constitution gates as approval to move on.
+- **Template fidelity.** Write the Status field exactly as `Draft` — nothing
+  appended (a note, a rationale, a synthesized in-between value) — and don't
+  add sections or fields `templates/plan.template.md` doesn't define, such as
+  a changelog/revision-history block. If the template genuinely seems to be
+  missing something this feature needs, say so in your report; don't
+  freelance a fix into the document.
 - **No over-engineering.** Only plan what the spec actually requires — no
   extra projects, layers, or flexibility for hypothetical future
   requirements.

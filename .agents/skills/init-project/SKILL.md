@@ -203,12 +203,20 @@ repeat the summary; do not paste the revised draft into chat.
    create `memory/` if needed, then move/rename `constitution.md.draft` there.
 3. Delete any leftover `.draft` file once its final copy is written.
 4. Verify AGENTS.md's Specs section references the correct constitution path.
+5. Write or update the root `CLAUDE.md` so its only content is two import
+   lines: `@AGENTS.md`, then `@memory/constitution.md` (use the confirmed
+   constitution path). Claude Code does not read `AGENTS.md` natively and
+   does not follow markdown links or prose "read this file" instructions at
+   session start — only `@path` imports are inlined at launch. Codex and
+   Copilot read `AGENTS.md` natively, so they need no pointer;
+   `.github/copilot-instructions.md` may remain a thin markdown pointer for
+   older Copilot surfaces. Both pointer files must stay at ≤2 real lines.
 
 Then confirm to the user:
 - Both files written and their paths
 - Constitution version and ratification date
-- Note: `AGENTS.md` needs no mirroring — `CLAUDE.md` and
-  `.github/copilot-instructions.md` are static pointers to it;
+- Note: `AGENTS.md` needs no mirroring — `CLAUDE.md` imports it and
+  `.github/copilot-instructions.md` points to it;
   the mirror scripts propagate agents/skills, not this file.
 
 ## What this skill does not do
