@@ -205,6 +205,11 @@ to use isn't in that glossary, ask rather than guessing at its meaning.
 - To start a new feature, use the `develop-feature` skill rather than
   creating `specs/<NNN>/` by hand — it scaffolds the folder and templates
   for you and enforces the Specify → Plan → Tasks approval gates.
+- To resume or amend an in-progress (or completed) feature, also go through
+  `develop-feature` — never edit code directly from a "resume <feature>" or
+  "change X in feature NNN" prompt. The skill diffs the prompt against the
+  approved `spec.md`/`plan.md`/`tasks.md` first and routes anything new to
+  the owning phase for re-approval before implementation.
 - That skill first proposes a **workflow track** (A direct / B patch / C feature
   / D architecture) to right-size the pipeline — approve or override it; don't
   let it pick the depth silently. It also scans `.agents/extensions/` for opt-in
