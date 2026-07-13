@@ -63,3 +63,19 @@
      [NEEDS CLARIFICATION], not buried here. -->
 
 - [e.g., "Exact cache TTL — start at 60s, tune against real traffic."]
+
+## Pending Amendments
+
+<!-- Transient hand-off slot — normally EMPTY. When a new human instruction
+     reopens an Approved document (see develop-feature's "Reopening a
+     completed feature"), the orchestrator records the requested change here
+     verbatim BEFORE flipping that document's Status to Draft, so an
+     interrupted session can recover the reason for the flip from disk
+     instead of from a conversation that no longer exists. The entry is
+     deleted at the moment the re-run gate is approved. An entry here plus a
+     Draft status = a reopen in flight; a Draft status with a prior approval
+     row in decision-log.md but NO entry here means the context is lost —
+     ask the human what changed. -->
+
+- [YYYY-MM-DD — `spec.md`/`plan.md`/`tasks.md` — the requested change,
+  verbatim enough to act on without the original conversation]

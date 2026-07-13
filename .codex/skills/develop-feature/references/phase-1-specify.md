@@ -1,19 +1,14 @@
 # Phase 1 — Specify
 
-Delegates the drafting to the `specifier` agent, pinned to the strongest
-available model, invoked in its own fresh context so it never carries this
-session's routing/scaffolding chatter into the draft.
+Delegates the drafting to the `specifier` agent, invoked in its own fresh
+context. Its drafting protocol, model tier, and rules live in
+`specifier.md` — pass it inputs; don't re-teach or override them here.
 
 1. Invoke the `specifier` agent. Pass it: the user's feature description, the
    path to the newly-scaffolded `spec.md`, and the pack ID(s) and rule-file
-   path(s) of any opted-in extensions from Step R (e.g. `security/baseline` →
-   `.agents/extensions/security/baseline/security-baseline.md`) — not the rule
-   text itself; `specifier` has its own `Read` tool and loads the rules from
-   that path. It investigates the
-   codebase read-only, fills in `spec.md` per `templates/spec.template.md`,
-   applies the No-guessing guardrail (`[NEEDS CLARIFICATION: ...]` for
-   anything unstated), runs the Spec Completeness Checklist itself, strips
-   instructional comments, and writes the file with Status still `Draft`.
+   path(s) of any opted-in extensions from Step R (paths, not rule text —
+   Step R's rule). It writes `spec.md` per the canonical template, Status
+   still `Draft`.
 2. The agent returns a short summary — not the document text — covering any
    open `[NEEDS CLARIFICATION]` markers, the Completeness Checklist result,
    and extension-compliance notes. Relay all of it — don't summarize away an

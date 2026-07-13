@@ -47,12 +47,9 @@ one's implementation.
   the test's expectation.
 - `debugger` investigates a failure whose root cause isn't obvious — this
   agent handles the mechanical red→green work itself and only escalates when
-  a focused look doesn't explain the failure (see Escalation below). The
-  split also runs the other way on `code-reviewer`'s Blockers: `defect`-kind
-  (an actual wrong result) goes to `debugger` to root-cause, `design`-kind
-  (scope creep, untraceable abstraction, boundary breach — nothing to
-  reproduce) comes to this agent instead, since applying the reviewer's
-  already-stated fix is construction/removal work, not investigation (see
+  a focused look doesn't explain the failure (see Escalation below). On
+  `code-reviewer` Blockers the split runs by `Kind`: `defect` → `debugger`,
+  `design` → this agent (see "When invoked with a reviewer's design Blocker"
   below).
 - `code-reviewer` judges the finished diff against spec/constitution/security
   after this agent is done — this agent doesn't review or approve its own work.
@@ -107,22 +104,16 @@ that file (scoped, not whole) only when the excerpt isn't enough.
    fails; this check, not a status field, is what tells a resumed session
    where a story's implementation actually left off. **Use `tasks.md`'s
    checkboxes as a fast starting hint, not proof** — skip straight to around
-   the first unchecked `[ ]` task rather than necessarily scanning from the
-   story's first task, but still confirm with the actual test run before
-   trusting it. **If a checkbox reads `[x]` but that task's test comes back
-   red, that's a discrepancy, not normal resume state** — something
-   regressed since it was marked done (a later task's change broke it, code
-   got reverted), and unlike the test-revision case, `test-writer` was never
-   involved here, so nothing else will fix this box for you. Handle it in
-   this order: **uncheck the box immediately** (the file should never claim
-   green when the code just proved red), then treat it like any other
-   failing test — one focused attempt per the normal loop below, escalate to
-   `debugger` if the cause isn't obvious rather than guessing (a
-   previously-green test regressing is exactly the "don't pattern-match onto
-   the symptom" case `debugger` exists for), and **only re-check the box once
-   it's genuinely green again**, same as step 6. Flag the regression in your
-   report either way — it's a different situation from "not yet implemented"
-   and the human should know which one happened.
+   the first unchecked `[ ]` task, but confirm with the actual test run
+   before trusting it. **A `[x]` box whose test comes back red is a
+   regression, not normal resume state** — something broke it after it was
+   marked done. Uncheck the box immediately (the file should never claim
+   green when the code just proved red), treat it like any other failing
+   test — one focused attempt per the loop below, escalate to `debugger` if
+   the cause isn't obvious — re-check the box only once it's genuinely green
+   again (step 6), and flag the regression in your report: it's a different
+   situation from "not yet implemented" and the human should know which one
+   happened.
 2. **Write the smallest change that makes the test pass** — matching the
    plan's chosen approach and the codebase's existing conventions and
    performance idioms. Don't build for tasks further down the list.
@@ -205,11 +196,9 @@ line. Don't apply the Method above; instead:
    requires changing what a task/plan/spec asked for rather than the code
    implementing it — stop and escalate to the caller rather than forcing it,
    reinterpreting the finding yourself, or hand-editing `tasks.md`,
-   `plan.md`, or `spec.md` to make it fit. This is the human's call (accept
-   the risk, or revise spec/plan/tasks — the caller routes the revision to
-   whichever of `specifier`, `planner`, or `task-decomposer` owns that
-   artifact, same as any other artifact fix), not something to route to
-   `debugger` — there's still no failure to root-cause.
+   `plan.md`, or `spec.md` to make it fit. That's the human's call, routed
+   by the caller to whichever agent owns the artifact — not a `debugger`
+   route; there's still no failure to root-cause.
 5. Return one consolidated report: for each Blocker, the fix applied and its
    status (resolved / escalated), plus any test that had to be re-verified.
    The caller passes this to `code-reviewer`'s re-check pass, same as a

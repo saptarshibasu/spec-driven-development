@@ -8,31 +8,17 @@ stay small and issues surface early).
 
 1. Invoke `code-reviewer`. Pass it: the diff (or the files `implementor`
    touched), the spec path, and the feature's `decision-log.md` (for opted-in
-   extension packs). It first runs its deterministic gates — clean build,
-   test coverage floor, static analysis / cognitive complexity, each against
-   the commands `AGENTS.md` documents and the floor/thresholds
-   `memory/constitution.md`'s Quality Gates state — then the qualitative
-   review against spec, constitution, conventions, performance idioms,
-   boundaries, and security, and reports findings grouped by severity with a
-   verdict.
+   extension packs). Its gates, checks, and severity/`Kind` definitions live
+   in `code-reviewer.md`; expect findings grouped by severity, every Blocker
+   tagged with a `Kind`, and a verdict.
 2. If the verdict has Blockers, **this skill runs the review↔fix loop** —
    sub-agents can't invoke each other or pause for approval, so the loop
    lives here, not inside `code-reviewer`. First, split the numbered Blocker
-   list by the `Kind` `code-reviewer` tagged each one with:
-   - **`defect`** Blockers (broken/weakened test, behavior diverging from
-     spec, a plausible exploit, a failing build — an actual bad state to
-     reproduce) go to `debugger`.
-   - **`design`** Blockers (scope creep, an untraceable abstraction, a
-     boundary/"Ask first"/"Never" rule crossed, a convention violation, a
-     static-analysis / cognitive-complexity finding — nothing to reproduce,
-     the diff itself is the finding) go to `implementor` instead. Routing
-     these to `debugger` is a role mismatch — its method starts with
-     "Reproduce," and there's nothing to reproduce for a design violation.
-   - **`coverage`** Blockers (overall or per-file coverage below the
-     constitution's floor, on otherwise-correct code) go to `test-writer`
-     instead of either — the fix is a new test targeting the specific
-     uncovered lines/branches `code-reviewer` listed, not a code change, so
-     neither `debugger` nor `implementor` is the right agent.
+   list by `Kind` (definitions in `code-reviewer.md`'s "How to report"):
+   **`defect`** → `debugger`; **`design`** → `implementor` (per its
+   design-Blocker section — nothing to reproduce, so `debugger` is a role
+   mismatch); **`coverage`** → `test-writer` (per its add-coverage mode —
+   the fix is a new test, not a code change).
 
    Then, per round:
    - Relay the complete findings, then ask the human: *"Invoke the debugger
