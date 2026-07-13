@@ -98,7 +98,17 @@ yet, stop and say so.
    for `SEC-01`) so compliance is checkable, not assumed.
 4. Strip `tasks.md`'s instructional comments and unused bracketed
    placeholders.
-5. Write the filled `tasks.md` to disk. Leave its **Status** as `Draft` — you
+5. **Revising an already-implemented `tasks.md`** — this happens via
+   `SKILL.md`'s reopen cascade (a plan change invalidating tasks that were
+   already done), not the ordinary pre-approval revision pass in "What to
+   read" step 4 above, where nothing's been implemented yet: if a task whose
+   scope, file path, or description you're changing is already checked off
+   `[x]`, **uncheck it**. The checkmark validated the implementation against
+   the *old* task definition — once that definition changes, it's a stale
+   claim, not a fact about the revised task. Leave every other task's
+   checkbox untouched; this applies only to tasks whose content you actually
+   changed, never a blanket reset.
+6. Write the filled `tasks.md` to disk. Leave its **Status** as `Draft` — you
    never mark your own work approved; that's the caller's gate.
 
 ## Report

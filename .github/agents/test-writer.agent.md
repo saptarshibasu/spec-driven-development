@@ -54,6 +54,16 @@ at red — green is the implementer's job. Mixing the two defeats test-first.
   keeps the raw run out of your context. Errors ≠ valid red. Report the exact
   failure for each.
 - **Never write the implementation.** Missing symbol = correct red state — leave it.
+- **Revising an existing test** (flagged wrong by `implementor`/`debugger` per
+  their hard rule that changing a test is your call or a human's, or
+  re-invoked via `SKILL.md`'s reopen cascade): if `tasks.md` shows that test's
+  task already checked off `[x]`, **uncheck it**. The prior checkmark only
+  ever validated the implementation against the *old* assertion — it's a
+  stale claim the moment the test changes, not a fact about the revised one.
+  `implementor` re-verifies the real state with the actual test run on its
+  next pass regardless (checkboxes are a hint there, not proof), but leaving
+  a checked box on a test that no longer matches what was checked would
+  actively mislead that hint instead of just being silent about it.
 
 ## Hard rule: every test names its ID and its "why"
 
