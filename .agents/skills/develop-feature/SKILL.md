@@ -65,19 +65,15 @@ analysis, and implementation alike.
   output-token cost for no benefit. If the human asks to see it inline
   ("show me", "print it"), read the file and relay it then; otherwise let them
   review it in the file directly.
-- **Every prompt gets routed, not just the first one.** A message with no
-  matching `specs/<NNN>-<slug>/` folder goes through Step R fresh. A message
-  that arrives mid-session on a feature already in progress goes through the
-  resume diff-check ("Resuming an in-progress feature" below) before anything
-  else happens. A message that arrives on a feature that already finished —
-  every document `Approved`, every story cleared Phase 5 — is **not** exempt
-  from this: it goes through "Reopening a completed feature" below, the same
-  never-hand-apply rule applied to a document that has nothing left in
-  `Draft`. Never skip straight to editing code because the request "sounds
-  small," "sounds urgent," or repeats something said earlier in the
-  conversation, or because every gate already shows `Approved` — routing and
-  the diff-check are what determine that, not your own in-the-moment
-  judgment.
+- **Every prompt gets routed, not just the first one.** No matching
+  `specs/<NNN>-<slug>/` folder → Step R fresh. Mid-session on a feature in
+  progress → the resume diff-check ("Resuming an in-progress feature" below)
+  before anything else. A feature that already finished — every document
+  `Approved`, every story cleared Phase 5 — is not exempt: it goes through
+  "Reopening a completed feature" below. Never skip straight to editing code
+  because the request "sounds small," "sounds urgent," repeats something said
+  earlier, or because every gate already shows `Approved` — routing and the
+  diff-check determine that, not your own in-the-moment judgment.
 
 ## Before starting
 
@@ -99,38 +95,26 @@ refuses to overwrite by design.
    it introducing something new — a requirement, an acceptance criterion, a
    changed scope, a different approach than what was approved? If it's
    already covered, go to step 1. If it's new, don't hand-apply it: route it
-   to whichever phase owns the affected artifact (`specifier` for `spec.md`,
-   `planner` for `plan.md`, `task-decomposer` for `tasks.md`) — the same
-   "route fixes to the owning phase" guardrail above, applied to a human's new
-   instruction instead of an `artifact-analyzer` finding; the source of the
-   finding doesn't change who owns the fix. **If what's new is
-   implementation-specific** — existing-system context, a candidate approach,
-   not a WHAT/WHY change — capture it in `research.md` first (create from
-   `templates/research.template.md` if it doesn't exist, or add to it if it
-   does), the same as Step 0's scaffold-time capture, *before* invoking
-   `planner`. **If it already exists, check for contradiction before adding**:
-   does the new input conflict with or correct an entry already there (a
-   previously-resolved question whose answer just changed, an alternative
-   already logged that this new detail now rules out)? If so, **edit that
-   entry in place** — this file isn't an audit trail like `decision-log.md`,
-   it's read wholesale into a fresh context every time, so a stale entry left
-   sitting next to its correction is a live source of error, not preserved
-   history (see `research.md`'s own revision-discipline note; Alternatives
-   Investigated is the one section where old rejected entries normally stay,
-   on purpose). Don't rely on it surviving only as this turn's conversational
-   feedback: `planner` runs in a fresh context every invocation (see "What to
-   read" in `planner.md`) and already checks `research.md` when its path is
-   passed — a file it can read is a durable input, a remark in this
-   conversation is not. Get the human's approval on the amended document
-   (flipping its Status and logging the gate like any other approval) before
-   resuming below. **If the affected document is currently `Approved`**, use
-   the exact mechanics in "Reopening a completed feature" steps 2-4 below for
-   the flip — literal `Draft` string, flip *before* the owning agent touches
-   it, cascade to affected stories — regardless of whether the rest of the
-   feature happens to be fully done yet. That discipline is the general
-   procedure for amending any `Approved` document, not a special case reserved
-   for fully-finished features; a document doesn't get looser handling just
-   because its sibling stories haven't all cleared Phase 5.
+   to whichever phase owns the affected artifact, per the "route fixes to the
+   owning phase" guardrail above — a human's new instruction is a finding
+   like any other; the source doesn't change who owns the fix. Two capture
+   rules before invoking the owning agent, both for the same reason (agents
+   run in fresh contexts — a file they can read is a durable input, a remark
+   in this conversation is not):
+   - **Implementation-specific input** (existing-system context, a candidate
+     approach — not a WHAT/WHY change) goes into `research.md` first (create
+     from `templates/research.template.md` if it doesn't exist), *before*
+     invoking `planner`. Follow that file's own revision-discipline note:
+     if the new input contradicts or corrects an entry already there, edit
+     that entry in place rather than appending beside it.
+   - **A change to a currently-`Approved` document** follows "Reopening a
+     completed feature" steps 1-4 below for the exact mechanics — record the
+     pending amendment, flip to the literal `Draft` string *before* the
+     owning agent touches it, re-gate, cascade. Those mechanics govern
+     amending *any* `Approved` document, whether or not the rest of the
+     feature is done.
+   Get the human's approval on the amended document (flipping its Status and
+   logging the gate like any other approval) before resuming below.
 1. Read each document's **Status** header (`spec.md`, `plan.md`, `tasks.md`):
    `Draft` = drafted but not yet approved; `Approved` = that gate is cleared. A
    document still full of placeholders hasn't been started.
@@ -138,7 +122,15 @@ refuses to overwrite by design.
    approval gate before moving on. Any `[NEEDS CLARIFICATION]` markers still in
    the documents are the open questions left to settle. **Read that phase's
    reference file (below) before acting** — don't resume from memory of an
-   earlier read.
+   earlier read. One special case: a document at `Draft` that already has an
+   approval row for its gate in `decision-log.md` is a **reopen in flight**,
+   not an unapproved first draft — a prior session flipped it and was
+   interrupted before the amendment landed. Look for its entry under
+   `research.md` → Pending Amendments and hand that to the owning agent as
+   the amendment input. If there's no entry and the triggering prompt carries
+   no detail, the reason for the flip is gone with the old conversation —
+   **ask the human what changed**; never re-present the stale body for
+   approval as if nothing was pending.
 3. Cross-check `decision-log.md` — it carries one committed row per approved gate.
 4. If `learnings.md` has entries, skim it before re-invoking `implementor` or
    `debugger` — it may already record why a prior attempt at this story went
@@ -146,15 +138,12 @@ refuses to overwrite by design.
    no compaction pass has run recently, this is also a good moment to offer
    one (see `references/phase-5-review.md`'s compaction step) before it's
    handed, unread in full, into another fresh sub-agent context.
-5. **Before relying on `decision-log.md` for anything below, re-confirm the
-   precondition by literally reading all three Status headers again** — don't
-   carry the conclusion forward from step 1 or from earlier in this
-   conversation. This step only applies if `spec.md`, `plan.md`, and
-   `tasks.md` each read exactly `Approved — <who>, <date>`; if even one
-   doesn't, this step doesn't apply — go to step 2 instead. Only once that's
-   genuinely confirmed do steps 1-2 have nothing left to find, meaning the
-   resume point is inside the per-story loop (3.7 → 4 → 5), not at a document
-   gate.
+5. **Re-read all three Status headers before relying on `decision-log.md`**
+   — don't carry step 1's conclusion forward. This step applies only if
+   `spec.md`, `plan.md`, and `tasks.md` each read exactly
+   `Approved — <who>, <date>`; if even one doesn't, go to step 2 instead.
+   Only then is the resume point inside the per-story loop (3.7 → 4 → 5),
+   not at a document gate.
 
    With the precondition actually confirmed, use `decision-log.md`'s row
    history to find the story and its state, and act on it:
@@ -186,35 +175,33 @@ A feature can be fully done — every document `Approved`, every story cleared
 Phase 5 — and still get a new prompt later ("actually we also need X",
 "change Y's behavior"). Steps 1-2 above only find a resume point when *some*
 document is still `Draft`; an all-`Approved` set has no such point, and that
-is not the same as "nothing left to gate." Treat this exactly like step 0's
-diff-check, just triggered by a fresh request instead of an unfinished draft.
-**The steps below are the general mechanics for reopening any `Approved`
-document, not a special case that only applies once every story has cleared
-Phase 5** — step 0 above points here for exactly this reason: an `Approved`
-`spec.md` gets the same literal-`Draft`-flip discipline whether the feature
-is fully shipped or still three stories deep in Phase 4:
+is not the same as "nothing left to gate." **The steps below are the general
+mechanics for reopening any `Approved` document** — the resume diff-check
+(step 0 above) points here for exactly this reason, whether the feature is
+fully shipped or still mid-Phase-4:
 
-1. **Never hand-apply the change.** Identify which artifact it actually
-   touches (`spec.md` → `specifier`, `plan.md` → `planner`, `tasks.md` →
-   `task-decomposer`) using the same "route fixes to the owning phase"
-   guardrail that applies everywhere else in this skill — a completed
-   feature doesn't change who owns the fix. If the change is
-   implementation-specific (existing-system context, a candidate approach)
-   rather than a WHAT/WHY change, capture it in `research.md` first — same as
-   the "Resuming" diff-check above — before invoking `planner`, so it's a
-   durable input `planner` reads, not a remark that only existed in this
-   turn's conversation.
-2. **Flip that document's Status from `Approved — <who>, <date>` back to the
-   literal string `Draft`** — nothing appended — before the owning agent
-   touches it. An `Approved` document being silently rewritten in place — with
-   no visible state change — is the one outcome this skill must never produce.
-   Resume detection matches this field exactly (see "Approval status" below);
-   any embellishment — extra wording, a rationale, a synthesized in-between
-   state — can silently fail that match instead of loudly blocking it.
+1. **Never hand-apply the change.** Route it to the artifact's owning agent
+   per the "route fixes to the owning phase" guardrail; if it's
+   implementation-specific rather than a WHAT/WHY change, capture it in
+   `research.md` first, exactly as in the resume diff-check (step 0 above).
+2. **Record, then flip.** First write the requested change under
+   `research.md` → **Pending Amendments** (create the file from
+   `templates/research.template.md` if it doesn't exist) — verbatim enough
+   to act on without this conversation, naming the target document. Then
+   flip that document's Status from `Approved — <who>, <date>` back to the
+   literal string `Draft` — nothing appended (the Status field is a rigid
+   enum; see "Approval status" below) — before the owning agent touches it.
+   An `Approved` document silently rewritten in place is the one outcome
+   this skill must never produce. Recording comes *before* the flip so that
+   an interruption between flip and redraft leaves the reason for the flip
+   on disk — recoverable by a bare "resume" (see step 2 of "Resuming"
+   above) — instead of only in a conversation that no longer exists.
 3. **Re-run that phase's gate**: the agent drafts the amendment, you stop for
    explicit human approval (same as any Phase 1-3 gate), then flip Status
-   back to `Approved — <who>, <new date>` and append a *new*
-   `decision-log.md` row. Don't overwrite the prior row — the earlier
+   back to `Approved — <who>, <new date>`, append a *new* `decision-log.md`
+   row, and delete the Pending Amendments entry — the amendment now lives in
+   the approved document, and a cleared entry is what distinguishes "done"
+   from "in flight." Don't overwrite the prior decision-log row — the earlier
    approval happened and stays in the audit trail; the amendment is a
    separate, later decision.
 4. **Cascade the reopen.** If the change touches `spec.md` or `plan.md`,
@@ -252,10 +239,13 @@ file.
 - **Never add a changelog / revision-history section to `spec.md`, `plan.md`,
   or `tasks.md`.** The canonical templates carry no such section — the Status
   header plus `decision-log.md` are the *only* two places this workflow
-  records state, deliberately, so there's exactly one field to check on
-  resume. A per-document changelog invented ad hoc creates a second, unchecked
-  place for status to live, which is exactly how a document can look
-  "handled" to a human skimming it while gate detection never sees it.
+  records approval state, deliberately, so there's exactly one field to check
+  on resume. (`research.md`'s Pending Amendments slot carries the *content*
+  of an in-flight amendment, not state — "in flight" is still read off
+  Status + decision-log.) A per-document changelog invented ad hoc creates a
+  second, unchecked place for status to live, which is exactly how a document
+  can look "handled" to a human skimming it while gate detection never sees
+  it.
 
 ## Step R — Route the work (right-size before you scaffold)
 

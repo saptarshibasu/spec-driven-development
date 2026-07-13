@@ -23,13 +23,10 @@ decision to make knowingly, exactly as with review. But this decision is only
 available up front: once analyze has been invoked once for a feature, there is
 no mid-loop bailout on Blocker or Should-fix findings — see step 2.
 
-`analyze` **reports, it does not edit.** It checks requirement→task coverage,
-spec/plan/tasks contradictions, orphan/duplicate/ambiguous tasks, test-first
-integrity, constitution alignment, and any opted-in extension's verification
-tasks; each finding is routed to **the phase that owns the fix — Specify, Plan,
-or Tasks** (a missing task is a `tasks.md` fix; a spec/plan contradiction is a
-`spec.md` or `plan.md` fix). It is distinct from `check-spec` (grades the spec
-alone) and the `code-reviewer` agent (reviews the diff later).
+`analyze` **reports, it does not edit** — what it checks lives in
+`artifact-analyzer.md`. Each finding is routed to **the phase that owns the
+fix — Specify, Plan, or Tasks** (a missing task is a `tasks.md` fix; a
+spec/plan contradiction is a `spec.md` or `plan.md` fix).
 
 1. Offer to run analyze at the depth for the track. If the user declines on C/D,
    log the skip (step 4) and proceed — this is the only exit that doesn't

@@ -42,9 +42,9 @@ story's review happen while the work is still fresh.
    touches a brownfield area named in
    `AGENTS.md` or the plan *and* the human accepted the characterization
    offer for that area (never assume — ask now if it hasn't been decided,
-   and log the answer), tell it to write those characterization tests first. It writes each test, runs it, confirms it fails for the right
-   reason (assertion failure or missing implementation — not an import error
-   or typo), and returns a report rather than the test code itself.
+   and log the answer), tell it to write those characterization tests first.
+   It returns a confirmed-red report rather than the test code — right-reason
+   confirmation is its own protocol (`test-writer.md`).
 2. Relay the test-writer's report as-is: each test's tier, path, and
    confirmed-failing output; which acceptance criteria are covered and which
    aren't (with reason for any gap). A confirmed-red report is the pass
