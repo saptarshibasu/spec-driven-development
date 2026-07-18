@@ -16,6 +16,19 @@ in this repo's root `KIT_VERSION` file.
 
 ## [Unreleased]
 
+### Added
+- **New `seed=` manifest namespace, and `.agents/model-map.conf` seeded through it.**
+  `mirror-agents.sh`/`.ps1` require `.agents/model-map.conf` to exist (it's the
+  org-specific model/tool policy data they read), but the manifest never copied
+  it — a first-time adopter hit a hard `throw`/`die` from the mirror step with
+  no file to edit and no indication `update-kit` was supposed to provide one.
+  `seed=` entries are copied once, only if missing in the target, and never
+  overwritten on a later update (unlike `file=`, which always overwrites) —
+  right for org-owned data a project must be free to edit. See
+  `.agents/kit-manifest.conf` for the namespace's full semantics.
+  **Action for adopters:** none — re-running `update-kit` on an existing
+  project will seed the file only if it isn't already there.
+
 ### Changed
 - **`.gitattributes` removed from the kit-owned manifest — now copy-by-hand,
   like `.githooks/pre-commit` and the CI workflow.** It's a repo-wide policy

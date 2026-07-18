@@ -9,6 +9,12 @@
 # checkout at run time, so a data edit can't introduce divergence between
 # the two.
 #
+# Most paths in the manifest (file=/dir=) are overwritten wholesale on every
+# run. seed= paths are the exception: copied once, only if missing from the
+# target, with no prompt - for org-owned data a project needs to run kit
+# scripts but must be free to edit, like .agents/model-map.conf. Never
+# overwritten once present, even if the kit's own copy changes upstream.
+#
 # There is no version tracking: this always copies the kit-owned paths as
 # they stand in this checkout right now, skipping files whose content is
 # already identical in the target. See update-kit.sh for the fuller
@@ -50,6 +56,7 @@ if (-not (Test-Path $kitManifestConf)) { Die "$kitManifestConf not found - is th
 $kitOwnedFiles = @()
 $kitOwnedDirs = @()
 $kitAdrDirs = @()
+$kitSeedFiles = @()
 foreach ($line in (Get-Content $kitManifestConf)) {
   $trimmed = $line.Trim()
   if (-not $trimmed -or $trimmed.StartsWith('#')) { continue }
@@ -62,7 +69,8 @@ foreach ($line in (Get-Content $kitManifestConf)) {
     'file'    { $kitOwnedFiles += $path }
     'dir'     { $kitOwnedDirs += $path }
     'adr_dir' { $kitAdrDirs += $path }
-    default   { Die "${kitManifestConf}: unknown namespace '$ns' (expected file/dir/adr_dir)" }
+    'seed'    { $kitSeedFiles += $path }
+    default   { Die "${kitManifestConf}: unknown namespace '$ns' (expected file/dir/adr_dir/seed)" }
   }
 }
 
@@ -112,6 +120,18 @@ foreach ($adrDir in $kitAdrDirs) {
   Get-ChildItem -Path $srcAdr -Filter '*.md' | ForEach-Object {
     Copy-IfChanged ("$adrDir/" + $_.Name)
   }
+}
+
+Write-Host '-- Seed files (copied only if missing in the target, never overwritten)'
+foreach ($f in $kitSeedFiles) {
+  $src = Join-Path $kitRoot $f
+  if (-not (Test-Path $src -PathType Leaf)) { continue }
+  $dst = Join-Path $Dest $f
+  if (Test-Path $dst) { continue }
+  Info "$f (seeded)"
+  $dstDir = Split-Path $dst -Parent
+  Run { New-Item -ItemType Directory -Force -Path $dstDir | Out-Null } "mkdir $dstDir"
+  Run { Copy-Item -Force $src $dst } "cp $src $dst"
 }
 
 Write-Host ''

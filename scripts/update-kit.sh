@@ -14,6 +14,11 @@
 #     upstream removes a file, KIT-CHANGELOG.md calls it out and you remove
 #     it from the project by hand).
 #   - adr_dir= entries (currently unused) would match kit ADRs by filename.
+#   - seed= entries are copied once, only if missing from the target (no
+#     prompt, no output beyond the one line reporting the seed) — for
+#     org-owned data files a project needs to run kit scripts but must be
+#     free to edit, like .agents/model-map.conf. Never overwritten once
+#     present, even if the kit's own copy changes upstream.
 #   - .claude/, .github/agents/, .github/skills/, .codex/ are regenerated
 #     inside the target project by re-running its own (freshly-copied)
 #     mirror-agents.sh / mirror-skills.sh, not copied directly.
@@ -78,6 +83,7 @@ KIT_MANIFEST_CONF="$KIT_ROOT/.agents/kit-manifest.conf"
 KIT_OWNED_FILES=()
 KIT_OWNED_DIRS=()
 KIT_ADR_DIRS=()
+KIT_SEED_FILES=()
 while IFS='=' read -r ns path; do
   ns="$(printf '%s' "$ns" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
   [ -z "$ns" ] && continue
@@ -88,7 +94,8 @@ while IFS='=' read -r ns path; do
     file)    KIT_OWNED_FILES+=("$path") ;;
     dir)     KIT_OWNED_DIRS+=("$path") ;;
     adr_dir) KIT_ADR_DIRS+=("$path") ;;
-    *) die "$KIT_MANIFEST_CONF: unknown namespace '$ns' (expected file/dir/adr_dir)" ;;
+    seed)    KIT_SEED_FILES+=("$path") ;;
+    *) die "$KIT_MANIFEST_CONF: unknown namespace '$ns' (expected file/dir/adr_dir/seed)" ;;
   esac
 done < "$KIT_MANIFEST_CONF"
 
@@ -151,6 +158,17 @@ if [ "${#KIT_ADR_DIRS[@]}" -gt 0 ]; then
       info "$adr_dir/$base"
       run cp "$f" "$DEST/$adr_dir/$base"
     done
+  done
+fi
+
+echo "── Seed files (copied only if missing in the target, never overwritten)"
+if [ "${#KIT_SEED_FILES[@]}" -gt 0 ]; then
+  for f in "${KIT_SEED_FILES[@]}"; do
+    [ -f "$KIT_ROOT/$f" ] || continue
+    [ -f "$DEST/$f" ] && continue
+    info "$f (seeded)"
+    run mkdir -p "$DEST/$(dirname "$f")"
+    run cp "$KIT_ROOT/$f" "$DEST/$f"
   done
 fi
 
